@@ -5,7 +5,7 @@ import {
 } from 'react-native-safe-area-context';
 import {
 	Button,
-	H1, Paragraph, XStack, YStack
+	H1, Paragraph, YStack
 } from "tamagui";
 import { MyStack } from "../../components/MyStack";
 
@@ -30,10 +30,9 @@ export const HomeScreen: FC<
 
 			<YStack space="$5">
 
-				<XStack justifyContent="space-between" marginHorizontal="$2">
-					<Button>Kreiraj račun</Button>
-					<Button themeInverse>Ulogriaj se</Button>
-				</XStack>
+				{/* <XStack justifyContent="space-between" marginHorizontal="$2"> */}
+					<Button  marginBottom="$10" onPress={() => navigation.navigate("login")} themeInverse>Logiraj se</Button>
+				{/* </XStack> */}
 			</YStack>
 
 		</MyStack>

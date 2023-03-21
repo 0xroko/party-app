@@ -3,9 +3,7 @@
     "name": "party-app",
     "slug": "party-app",
     "version": "2.2.4",
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "jsEngine": "hermes",
@@ -28,8 +26,6 @@
       "backgroundColor": "#ddffe2",
       "barStyle": "dark-content"
     },
-    "plugins": [
-      "expo-dev-client"
-    ]
+    "plugins": ["expo-dev-client"]
   }
 }

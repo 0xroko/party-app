@@ -1,5 +1,6 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { FC } from "react";
+import { LoginScreen } from "../features/auth/login-screen";
 
 import { HomeScreen } from "../features/home/screen";
 import { UserDetailScreen } from "../features/user/detail-screen";
@@ -24,6 +25,14 @@ export const NativeNavigation: FC = () => {
 				}}
 				name="user-detail"
 				component={UserDetailScreen}
+			/>
+			<Stack.Screen
+				options={{
+					title: "",
+					headerShown: false
+				}}
+				name="login"
+				component={LoginScreen}
 			/>
 		</Stack.Navigator>
 	);
