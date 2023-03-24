@@ -4,4 +4,5 @@ type StackNavigatorParams = {
     id: string;
   };
   login: undefined;
+  "login-login": undefined;
 };
