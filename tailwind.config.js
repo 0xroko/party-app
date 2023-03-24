@@ -1,5 +1,4 @@
 const nativewind = require("nativewind/tailwind");
-const colors = require("./colors");
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
@@ -15,7 +14,7 @@ module.exports = {
         "figtree-black": ["figtreeBlack", "sans-serif"],
       },
       colors: {
-        ccents: {
+        accents: {
           1: "#050505",
           2: "#151515",
           3: "#191919",
