@@ -284,8 +284,38 @@ export const InfoSection = () => {
   const loginState = useLoginState();
 
   const onSubmit = async (values: InfoSectionForm) => {
-    const user = await supabase.auth.getUser();
-    console.log(user);
+    const { data, error } = await supabase.auth.getUser();
+
+    if (error) {
+      return;
+    }
+
+    const updated = await supabase
+      .from("Users")
+      .update({
+        name: values.name,
+        surname: values.surname,
+        display_name: values.displayName,
+      })
+      .match({ id: data.user.id });
+
+    if (!updated.error) {
+      // goto home
+      console.log(updated.statusText);
+    }
+  };
+
+  const checkIfUsernameExists = async (username: string) => {
+    const { data, error } = await supabase
+      .from("Users")
+      .select("count")
+      .filter("username", "eq", username);
+    console.log(data[0].count, error);
+
+    if (data[0].count === 0) {
+      return false;
+    }
+    return true;
   };
 
   const back = () => {
@@ -305,48 +335,77 @@ export const InfoSection = () => {
             <Div className={`flex flex-row mb-4 grow`}>
               <Field
                 name="displayName"
-                onBlurValidate={z.string().superRefine((v, _ctx) => {
-                  if (v.includes("@")) {
-                    _ctx.addIssue({
-                      code: "custom",
-                      message: "Korisničko ime ne može početi sa @",
-                    });
-                    return z.NEVER;
-                  }
-                  // do this on server
-                  // but also if it contains unallowed characters
-                  if (v === "melon") {
-                    _ctx.addIssue({
-                      code: "custom",
-                      message: "Korisničko ime već postoji, izaberi neko treće",
-                    });
-                    return z.NEVER;
-                  }
+                onChangeValidate={z
+                  .string()
+                  .nonempty("Obavezno!")
+                  .superRefine(async (v, _ctx) => {
+                    if (v.includes("@")) {
+                      _ctx.addIssue({
+                        code: "custom",
+                        message: "Korisničko ime ne može početi sa @",
+                      });
+                      return z.NEVER;
+                    }
 
-                  return v;
-                })}
+                    const exists = await checkIfUsernameExists(v);
+                    console.log(exists);
+
+                    // do this on server
+                    // but also if it contains unallowed characters
+                    if (exists) {
+                      _ctx.addIssue({
+                        code: "custom",
+                        message:
+                          "Korisničko ime već postoji, izaberi neko treće",
+                      });
+                      return z.NEVER;
+                    }
+
+                    return v;
+                  })}
               >
-                {({ value, setValue, onBlur, errors }) => {
+                {({
+                  value,
+                  setValue,
+                  onBlur,
+                  errors,
+                  isValid,
+                  isValidating,
+                  isDirty,
+                }) => {
                   return (
-                    <Input
-                      leading={
-                        <Text
-                          className={`font-figtree-bold ${
-                            errors.length > 0
-                              ? "text-error-primary"
-                              : "text-accents-12"
-                          }`}
-                        >
-                          @
+                    <Div className={`w-full`}>
+                      <Input
+                        leading={
+                          <Text
+                            className={`font-figtree-bold ${
+                              errors.length > 0
+                                ? "text-error-primary"
+                                : "text-accents-12"
+                            }`}
+                          >
+                            @
+                          </Text>
+                        }
+                        value={value}
+                        label={"Korisničko ime"}
+                        onBlur={onBlur}
+                        error={errors.join("\n")}
+                        onChangeText={(text) => setValue(text)}
+                        placeholder={"mirkom23"}
+                      />
+                      {isValid && !isValidating && isDirty ? (
+                        <Text className={`text-success-primary mt-2`}>
+                          Ime{" "}
+                          <Text className={`font-figtree-bold`}>{value}</Text>{" "}
+                          je slobodno!
                         </Text>
-                      }
-                      value={value}
-                      label={"Korisničko ime"}
-                      onBlur={onBlur}
-                      error={errors.join("\n")}
-                      onChangeText={(text) => setValue(text)}
-                      placeholder={"mirkom23"}
-                    />
+                      ) : errors.length > 0 ? (
+                        <></>
+                      ) : (
+                        <Text className={`text-error-primary mt-2`}> </Text>
+                      )}
+                    </Div>
                   );
                 }}
               </Field>
@@ -358,7 +417,7 @@ export const InfoSection = () => {
                   name="name"
                   onBlurValidate={z
                     .string()
-                    .nonempty("Ime nesmije biti prazno")
+                    .nonempty("Obavezno!")
                     .superRefine((v, _ctx) => {
                       return v;
                     })}
@@ -380,9 +439,12 @@ export const InfoSection = () => {
               <Div className={`flex grow`}>
                 <Field
                   name="surname"
-                  onBlurValidate={z.string().superRefine((v, _ctx) => {
-                    return v;
-                  })}
+                  onBlurValidate={z
+                    .string()
+                    .nonempty("Obavezno!")
+                    .superRefine((v, _ctx) => {
+                      return v;
+                    })}
                 >
                   {({ value, setValue, onBlur, errors }) => {
                     return (

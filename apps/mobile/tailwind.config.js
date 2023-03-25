@@ -32,6 +32,9 @@ module.exports = {
           primary: "#F0545D",
           third: "#822025",
         },
+        success: {
+          primary: "#10B3A3",
+        },
       },
     },
   },
