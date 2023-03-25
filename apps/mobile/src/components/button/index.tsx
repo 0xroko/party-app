@@ -9,6 +9,7 @@ const buttonStyles = cva(
       intent: {
         primary: "bg-accents-12 text-accents-1 hover:bg-accents-11",
         secondary: "bg-accents-1 text-accents-12 border border-accents-12",
+        disabled: "bg-accents-2 text-accents-6",
       },
       size: {
         medium: "text-base h-10",
@@ -24,8 +25,9 @@ const buttonStyles = cva(
 const buttonTextStyles = cva("", {
   variants: {
     intent: {
-      primary: "text-accents-1 ",
-      secondary: "text-accents-12 ",
+      primary: "text-accents-1",
+      secondary: "text-accents-12",
+      disabled: "text-accents-6",
     },
   },
 });
@@ -36,6 +38,7 @@ interface ButtonProps
   extends Omit<MyButtonProps, "leadingIcon" | "trailingIcon">,
     TouchableOpacityProps {
   children?: React.ReactNode | React.ReactNode[];
+  disabled?: boolean;
   leadingIcon?: React.ReactNode | React.ReactNode[];
   trailingIcon?: React.ReactNode | React.ReactNode[];
 }
@@ -46,18 +49,34 @@ export const Button = ({
   intent,
   leadingIcon,
   trailingIcon,
+  disabled,
   ...o
 }: ButtonProps) => {
+  let intentI = intent;
+
+  if (disabled) intentI = "disabled";
+
   const style = buttonStyles({
-    intent,
+    intent: intentI,
     size,
   });
+
+  if (disabled) {
+    o.onPress = () => {};
+    o.onPressIn = () => {};
+    o.onPressOut = () => {};
+    o.onLongPress = () => {};
+  }
 
   return (
     <TouchableOpacity activeOpacity={0.9} {...o}>
       <Div className={style}>
         {leadingIcon && <Div className={`mr-2`}>{leadingIcon}</Div>}
-        <Text className={`${buttonTextStyles({ intent })} font-[figtreeBold]`}>
+        <Text
+          className={`${buttonTextStyles({
+            intent: intentI,
+          })} font-figtree-bold`}
+        >
           {children}
         </Text>
         {trailingIcon && <Div className={`ml-2`}>{trailingIcon}</Div>}
