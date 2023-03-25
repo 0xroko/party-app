@@ -6,97 +6,123 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  schemas  = ["public"]
 }
 
 model Users {
-  id              String  @id @default(uuid())
-  name            String
-  surname         String
-  username        String  @unique
-  bio             String?
-  profile_pic_url String?
-
-  hostedParties       Party[]      @relation("HostedParties")
-  attendedParties     Party[]      @relation("Attendees")
-  Message             Message[]
-  Images              Images?      @relation("ImageAuthor")
+  id                  String       @id @default(dbgenerated("uuid_generate_v4()"))
+  name                String
+  surname             String
+  username            String       @unique
+  bio                 String?
+  profile_pic_url     String?
+  push_token          String?
   imagesId            String?
-  UsersTaggedInImages Images?      @relation("TaggedUsers", fields: [imagesId], references: [id])
-  Comment             Comment[]
   friendshipId        String?
+  supabaseId          String       @unique @db.Uuid
+  Attending           Attending[]
+  Comment             Comment[]
   FriendshipA         Friendship[] @relation("UserA")
   FriendshipB         Friendship[] @relation("UserB")
+  Images              Images?      @relation("ImageAuthor")
+  Message             Message[]
+  hostedParties       Party[]      @relation("HostedParties")
+  UsersTaggedInImages Images?      @relation("TaggedUsers", fields: [imagesId], references: [id])
+  expoPushToken       String?
+
+  @@schema("public")
 }
 
 model Friendship {
-  id        String   @id @default(uuid())
-  userA     Users    @relation("UserA", fields: [userAId], references: [id])
+  id        String   @id @default(dbgenerated("uuid_generate_v4()"))
   userAId   String
-  userB     Users    @relation("UserB", fields: [userBId], references: [id])
   userBId   String
   accepted  Boolean  @default(false)
   createdAt DateTime @default(now())
+  userA     Users    @relation("UserA", fields: [userAId], references: [id])
+  userB     Users    @relation("UserB", fields: [userBId], references: [id])
 
-  //make sure that the userAId and userBId are unique
   @@unique([userAId, userBId])
+  @@schema("public")
 }
 
 model Party {
-  id            String   @id @default(uuid())
+  id            String      @id @default(dbgenerated("uuid_generate_v4()"))
   name          String
   location      String
-  host          Users    @relation("HostedParties", fields: [hostId], references: [id])
   hostId        String
-  attendees     Users[]  @relation("Attendees")
   time_starting DateTime
-  PartyChat     Chat?    @relation
-  chatId        String   @unique
+  chatId        String      @unique
   tags          String[]
-  ended         Boolean  @default(false)
+  ended         Boolean     @default(false)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  Attending     Attending[]
+  PartyChat     Chat?
   Images        Images[]
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  host          Users       @relation("HostedParties", fields: [hostId], references: [id])
+
+  @@schema("public")
+}
+
+model Attending {
+  id        String   @id @default(dbgenerated("uuid_generate_v4()"))
+  partyId   String
+  userId    String
+  createdAt DateTime @default(now())
+  party     Party    @relation(fields: [partyId], references: [id])
+  user      Users    @relation(fields: [userId], references: [id])
+
+  @@schema("public")
 }
 
 model Chat {
-  id        String    @id @default(uuid())
-  messages  Message[]
-  Party     Party     @relation(fields: [partyId], references: [id])
+  id        String    @id @default(dbgenerated("uuid_generate_v4()"))
   partyId   String    @unique
   createdAt DateTime  @default(now())
+  Party     Party     @relation(fields: [partyId], references: [id])
+  messages  Message[]
+
+  @@schema("public")
 }
 
 model Message {
-  id        String   @id @default(uuid())
-  chat      Chat     @relation(fields: [chatId], references: [id])
+  id        String   @id @default(dbgenerated("uuid_generate_v4()"))
   chatId    String
-  sender    Users    @relation(fields: [senderId], references: [id])
   senderId  String
   content   String
   createdAt DateTime @default(now())
+  chat      Chat     @relation(fields: [chatId], references: [id])
+  sender    Users    @relation(fields: [senderId], references: [id])
+
+  @@schema("public")
 }
 
 model Images {
-  id          String    @id @default(uuid())
+  id          String    @id @default(dbgenerated("uuid_generate_v4()"))
   pic_url     String
-  party       Party     @relation(fields: [partyId], references: [id])
   partyId     String
   description String
-  tagged_user Users[]   @relation("TaggedUsers")
-  author      Users     @relation("ImageAuthor", fields: [authorId], references: [id])
   authorId    String    @unique
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   Comment     Comment[]
+  author      Users     @relation("ImageAuthor", fields: [authorId], references: [id])
+  party       Party     @relation(fields: [partyId], references: [id])
+  tagged_user Users[]   @relation("TaggedUsers")
+
+  @@schema("public")
 }
 
 model Comment {
-  id        String   @id @default(uuid())
+  id        String   @id @default(dbgenerated("uuid_generate_v4()"))
   content   String
-  author    Users    @relation(fields: [authorId], references: [id])
   authorId  String
-  image     Images   @relation(fields: [imageId], references: [id])
   imageId   String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  author    Users    @relation(fields: [authorId], references: [id])
+  image     Images   @relation(fields: [imageId], references: [id])
+
+  @@schema("public")
 }
