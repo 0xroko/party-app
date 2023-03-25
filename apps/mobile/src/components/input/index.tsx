@@ -8,6 +8,7 @@ interface InputProps extends TextInputProps {
   leading?: React.ReactNode | React.ReactNode[];
   error?: string | undefined | null;
   disabled?: boolean;
+  label?: string;
   trailing?: React.ReactNode | React.ReactNode[];
 }
 
@@ -60,8 +61,14 @@ export const Input = forwardRef(
 
     return (
       <Div className={`w-full`}>
+        {p.label && (
+          <Text className={`text-accents-10 font-figtree-medium`}>
+            {p.label}
+          </Text>
+        )}
+
         <Div
-          className={`w-full flex flex-row h-10 text-accents-1 rounded-full mt-9`}
+          className={`w-full flex flex-row h-10 text-accents-1 rounded-full mt-3`}
         >
           {leading && <Div className={leadingStyles({ state })}>{leading}</Div>}
           <StyledInput
