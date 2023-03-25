@@ -9,38 +9,6 @@ export type Json =
 export interface Database {
   public: {
     Tables: {
-      _prisma_migrations: {
-        Row: {
-          applied_steps_count: number
-          checksum: string
-          finished_at: string | null
-          id: string
-          logs: string | null
-          migration_name: string
-          rolled_back_at: string | null
-          started_at: string
-        }
-        Insert: {
-          applied_steps_count?: number
-          checksum: string
-          finished_at?: string | null
-          id: string
-          logs?: string | null
-          migration_name: string
-          rolled_back_at?: string | null
-          started_at?: string
-        }
-        Update: {
-          applied_steps_count?: number
-          checksum?: string
-          finished_at?: string | null
-          id?: string
-          logs?: string | null
-          migration_name?: string
-          rolled_back_at?: string | null
-          started_at?: string
-        }
-      }
       Attending: {
         Row: {
           createdAt: string
@@ -220,42 +188,36 @@ export interface Database {
       Users: {
         Row: {
           bio: string | null
-          expoPushToken: string | null
+          created_at: string | null
+          displayname: string
           friendshipId: string | null
           id: string
           imagesId: string | null
           name: string
-          profile_pic_url: string | null
-          push_token: string | null
-          supabaseId: string
+          pushtoken: string | null
           surname: string
-          username: string
         }
         Insert: {
           bio?: string | null
-          expoPushToken?: string | null
+          created_at?: string | null
+          displayname: string
           friendshipId?: string | null
-          id?: string
+          id: string
           imagesId?: string | null
           name: string
-          profile_pic_url?: string | null
-          push_token?: string | null
-          supabaseId: string
+          pushtoken?: string | null
           surname: string
-          username: string
         }
         Update: {
           bio?: string | null
-          expoPushToken?: string | null
+          created_at?: string | null
+          displayname?: string
           friendshipId?: string | null
           id?: string
           imagesId?: string | null
           name?: string
-          profile_pic_url?: string | null
-          push_token?: string | null
-          supabaseId?: string
+          pushtoken?: string | null
           surname?: string
-          username?: string
         }
       }
     }

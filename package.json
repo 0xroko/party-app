@@ -5,7 +5,8 @@
 	"license": "MIT",
 	"private": true,
 	"scripts": {
-		"dev": "yarn workspace @party-app/mobile start"
+		"dev": "yarn workspace @party-app/mobile start",
+		"gen": "yarn workspace @party-app/database sg"
 	},
 	"workspaces": [
 		"apps/*",
