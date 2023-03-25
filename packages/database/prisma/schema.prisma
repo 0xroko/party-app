@@ -1,0 +1,102 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["multiSchema"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Users {
+  id              String  @id @default(uuid())
+  name            String
+  surname         String
+  username        String  @unique
+  bio             String?
+  profile_pic_url String?
+
+  hostedParties       Party[]      @relation("HostedParties")
+  attendedParties     Party[]      @relation("Attendees")
+  Message             Message[]
+  Images              Images?      @relation("ImageAuthor")
+  imagesId            String?
+  UsersTaggedInImages Images?      @relation("TaggedUsers", fields: [imagesId], references: [id])
+  Comment             Comment[]
+  friendshipId        String?
+  FriendshipA         Friendship[] @relation("UserA")
+  FriendshipB         Friendship[] @relation("UserB")
+}
+
+model Friendship {
+  id        String   @id @default(uuid())
+  userA     Users    @relation("UserA", fields: [userAId], references: [id])
+  userAId   String
+  userB     Users    @relation("UserB", fields: [userBId], references: [id])
+  userBId   String
+  accepted  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  //make sure that the userAId and userBId are unique
+  @@unique([userAId, userBId])
+}
+
+model Party {
+  id            String   @id @default(uuid())
+  name          String
+  location      String
+  host          Users    @relation("HostedParties", fields: [hostId], references: [id])
+  hostId        String
+  attendees     Users[]  @relation("Attendees")
+  time_starting DateTime
+  PartyChat     Chat?    @relation
+  chatId        String   @unique
+  tags          String[]
+  ended         Boolean  @default(false)
+  Images        Images[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Chat {
+  id        String    @id @default(uuid())
+  messages  Message[]
+  Party     Party     @relation(fields: [partyId], references: [id])
+  partyId   String    @unique
+  createdAt DateTime  @default(now())
+}
+
+model Message {
+  id        String   @id @default(uuid())
+  chat      Chat     @relation(fields: [chatId], references: [id])
+  chatId    String
+  sender    Users    @relation(fields: [senderId], references: [id])
+  senderId  String
+  content   String
+  createdAt DateTime @default(now())
+}
+
+model Images {
+  id          String    @id @default(uuid())
+  pic_url     String
+  party       Party     @relation(fields: [partyId], references: [id])
+  partyId     String
+  description String
+  tagged_user Users[]   @relation("TaggedUsers")
+  author      Users     @relation("ImageAuthor", fields: [authorId], references: [id])
+  authorId    String    @unique
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  Comment     Comment[]
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  content   String
+  author    Users    @relation(fields: [authorId], references: [id])
+  authorId  String
+  image     Images   @relation(fields: [imageId], references: [id])
+  imageId   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
