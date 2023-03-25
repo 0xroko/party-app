@@ -1,22 +1,16 @@
 import { z } from "zod";
 
-import { test } from "@party-app/themes/colors";
+import { Button } from "@components/button";
+import { Div, Text } from "@components/index";
+import { Input } from "@components/input";
+import { SafeArea } from "@components/safe-area";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Field, Form } from "houseform";
-import { styled } from "nativewind";
 import { FC } from "react";
-import { Text, TextInput, View } from "react-native";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { supabase } from "../../lib/supabase";
-import { Button, Input, SafeArea } from "./signup-screen";
-
-test;
-
-const StyledView = styled(View);
-const StyledText = styled(Text);
-const StyledInput = styled(TextInput);
 
 const phoneShema = z
   .string()
@@ -64,20 +58,18 @@ export const LoginInfoScreen: FC<
 
   return (
     <SafeArea gradient>
-      <StyledView className={`mx-[22px] flex h-full justify-evenly`}>
-        <StyledView className={``}>
-          <StyledText
-            className={`font-figtree-bold text-accents-12 text-[36px]`}
-          >
+      <Div className={`mx-[22px] flex h-full justify-evenly`}>
+        <Div className={``}>
+          <Text className={`font-figtree-bold text-accents-12 text-[36px]`}>
             Kreiraj račun
-          </StyledText>
-          <StyledText
+          </Text>
+          <Text
             className={`font-figtree-medium text-accents-10 text-[18px] leading-7 mt-4`}
           >
             Koristimo brojeve kako bi lakše te spojili s prijataljima, uvijek ga
             možeš promjeniti
-          </StyledText>
-        </StyledView>
+          </Text>
+        </Div>
         <Form<{ phone: string }>
           onSubmit={async (values, _form) => {
             let res = await supabase.auth.signInWithOtp({
@@ -92,8 +84,8 @@ export const LoginInfoScreen: FC<
           }}
         >
           {({ isValid, submit }) => (
-            <StyledView className={`flex`}>
-              <StyledView className={`flex flex-row mb-4 grow`}>
+            <Div className={`flex`}>
+              <Div className={`flex flex-row mb-4 grow`}>
                 <Field name="phone" onBlurValidate={phoneShema}>
                   {({ value, setValue, onBlur, errors }) => {
                     return (
@@ -105,7 +97,7 @@ export const LoginInfoScreen: FC<
                         onChangeText={(text) => setValue(text)}
                         // todo toast onclick da je hr only il tak nes
                         leading={
-                          <StyledText
+                          <Text
                             className={`font-figtree-bold ${
                               errors.length > 0
                                 ? "text-error-primary"
@@ -113,22 +105,22 @@ export const LoginInfoScreen: FC<
                             }`}
                           >
                             +385
-                          </StyledText>
+                          </Text>
                         }
                         placeholder={"Broj telefona"}
                       />
                     );
                   }}
                 </Field>
-              </StyledView>
+              </Div>
 
-              <StyledView className={`flex gap-3 flex-row`}>
-                {/* <StyledView className={`flex basis-[33%] grow-0`}>
+              <Div className={`flex gap-3 flex-row`}>
+                {/* <Div className={`flex basis-[33%] grow-0`}>
                   <Button size={"medium"} intent={"secondary"}>
                     Natrag
                   </Button>
-                </StyledView> */}
-                <StyledView className={`flex grow`}>
+                </Div> */}
+                <Div className={`flex grow`}>
                   <Button
                     size={"medium"}
                     onPress={() => {
@@ -138,12 +130,12 @@ export const LoginInfoScreen: FC<
                   >
                     Dalje
                   </Button>
-                </StyledView>
-              </StyledView>
-            </StyledView>
+                </Div>
+              </Div>
+            </Div>
           )}
         </Form>
-      </StyledView>
+      </Div>
     </SafeArea>
   );
 };
