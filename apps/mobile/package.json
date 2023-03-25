@@ -22,7 +22,7 @@
     "expo-status-bar": "~1.4.4",
     "expo-updates": "^0.16.3",
     "houseform": "^1.8.0",
-    "nativewind": "2.0.11",
+    "nativewind": "^3.0.0-next.34",
     "react": "18.2.0",
     "react-native": "0.71.4",
     "react-native-elements": "^3.4.3",
