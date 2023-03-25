@@ -283,7 +283,10 @@ interface InfoSectionForm {
 export const InfoSection = () => {
   const loginState = useLoginState();
 
-  const onSubmit = async (values: InfoSectionForm) => {};
+  const onSubmit = async (values: InfoSectionForm) => {
+    const user = await supabase.auth.getUser();
+    console.log(user);
+  };
 
   const back = () => {
     loginState.setLoginState("PHONE");
