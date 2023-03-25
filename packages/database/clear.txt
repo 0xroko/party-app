@@ -1,0 +1,8 @@
+
+DROP table public."Attending";
+DROP table public."Comment";
+DROP table public."Friendship";
+DROP table public."Message";
+DROP table public."Party";
+DROP table public."Chat";
+DROP table public."Images";
