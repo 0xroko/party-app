@@ -18,14 +18,14 @@ const phoneShema = z
 
 interface LoginState {
   phone: string;
-  waitingForOtp: boolean;
+  state: "PHONE" | "OTP" | "INFO";
   name?: string;
   surname?: string;
   displayName?: string;
 
   setPhone: (phone: string) => void;
-  setWaitingForOtp: (waitingForOtp: boolean) => void;
   setName: (name: string) => void;
+  setLoginState: (state: "PHONE" | "OTP" | "INFO") => void;
   setSurname: (surname: string) => void;
   setDisplayName: (displayName: string) => void;
 }
@@ -34,12 +34,12 @@ export const useLoginState = create<LoginState>()(
   persist(
     (set) => ({
       phone: "",
-      waitingForOtp: false,
+      state: "PHONE",
       name: "",
       surname: "",
       displayName: "",
       setPhone: (phone: string) => set({ phone }),
-      setWaitingForOtp: (waitingForOtp: boolean) => set({ waitingForOtp }),
+      setLoginState: (state: "PHONE" | "OTP" | "INFO") => set({ state }),
       setName: (name: string) => set({ name }),
       setSurname: (surname: string) => set({ surname }),
       setDisplayName: (displayName: string) => set({ displayName }),
@@ -83,7 +83,7 @@ export const LoginInfoScreen: FC<
             }
           }}
         >
-          {({ isValid, submit }) => (
+          {({ isValid, submit, errors }) => (
             <Div className={`flex`}>
               <Div className={`flex flex-row mb-4 grow`}>
                 <Field name="phone" onBlurValidate={phoneShema}>
