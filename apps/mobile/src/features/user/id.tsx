@@ -5,6 +5,7 @@ import { SafeArea } from "@components/safe-area";
 
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { FC } from "react";
+import { Text } from "react-native";
 
 const phoneShema = z
   .string()
@@ -21,6 +22,7 @@ export const UserInfoScreen: FC<
     <SafeArea gradient>
       <Div className={`mx-[22px] flex h-full justify-evenly`}>
         <Div className={`flex flex-col`}></Div>
+        <Text>epic</Text>
       </Div>
     </SafeArea>
   );
