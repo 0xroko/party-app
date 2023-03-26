@@ -39,6 +39,7 @@ model Friendship {
   createdAt DateTime @default(now())
   userA     Users    @relation("UserA", fields: [userAId], references: [id])
   userB     Users    @relation("UserB", fields: [userBId], references: [id])
+  blocked   Boolean  @default(false)
 
   @@unique([userAId, userBId])
   @@schema("public")
