@@ -18,7 +18,6 @@ model Users {
   bio                 String?      @db.VarChar
   pushtoken           String?      @db.VarChar
   imagesId            String?      @db.Uuid
-  friendshipId        String?      @db.Uuid
   users               users        @relation(fields: [id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   Attending           Attending[]
   Comment             Comment[]
