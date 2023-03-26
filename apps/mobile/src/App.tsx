@@ -8,6 +8,10 @@ import { Keyboard, KeyboardAvoidingView } from "react-native";
 import { NativeNavigation } from "./navigation";
 import { Provider } from "./provider";
 
+import * as SplashScreen from "expo-splash-screen";
+
+SplashScreen.preventAutoHideAsync();
+
 const App: FC = () => {
   const [loaded] = useFonts({
     figtree: require("./assets/fonts/Figtree-Regular.ttf"),

@@ -1,9 +1,11 @@
 const nativewind = require("nativewind/tailwind");
+const plugin = require("tailwindcss/plugin");
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: ["./src/**/*.{js,jsx,ts,tsx}"],
   theme: {
+    g: ({ theme }) => theme("spacing"),
     extend: {
       fontFamily: {
         "figtree-bold": ["figtreeBold", "sans-serif"],
@@ -38,5 +40,17 @@ module.exports = {
       },
     },
   },
+  plugins: [
+    plugin(function ({ matchUtilities, theme }) {
+      matchUtilities(
+        {
+          g: (value) => ({
+            gap: value,
+          }),
+        },
+        { values: theme("g") }
+      );
+    }),
+  ],
   presets: [nativewind],
 };
