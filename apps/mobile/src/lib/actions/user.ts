@@ -1,5 +1,8 @@
 import { onSupabaseError, User } from "@lib/actions";
 import { supabase } from "@lib/supabase";
+import * as Notifications from "expo-notifications";
+import * as Device from "expo-device";
+import { Platform } from "react-native";
 
 export const checkIfUserHasData = async () => {
   const authUser = await supabase.auth.getUser();
@@ -38,6 +41,48 @@ export const checkIfDisplayNameExists = async (displayName: string) => {
   }
   return true;
 };
+
+export async function registerForPushNotificationsAsync() {
+  let token;
+
+  if (Platform.OS === "android") {
+    await Notifications.setNotificationChannelAsync("default", {
+      name: "default",
+      importance: Notifications.AndroidImportance.MAX,
+      vibrationPattern: [0, 250, 250, 250],
+      lightColor: "#FF231F7C",
+    });
+  }
+
+  if (Device.isDevice) {
+    const { status: existingStatus } =
+      await Notifications.getPermissionsAsync();
+    let finalStatus = existingStatus;
+    if (existingStatus !== "granted") {
+      const { status } = await Notifications.requestPermissionsAsync();
+      finalStatus = status;
+    }
+    if (finalStatus !== "granted") {
+      alert("Failed to get push token for push notification!");
+      return;
+    }
+    token = (await Notifications.getExpoPushTokenAsync()).data;
+    console.log("Dobiven token", token);
+    const authUser = await supabase.auth.getUser();
+    const { data, error } = await supabase
+      .from("Users")
+      .update({
+        pushtoken: token,
+      })
+      .eq("id", authUser.data.user.id)
+      .select();
+    if (error) onSupabaseError(error);
+  } else {
+    alert("Must use physical device for Push Notifications");
+  }
+
+  return token;
+}
 
 export const createUser = async (
   d: Pick<User, "displayname" | "surname" | "name">
