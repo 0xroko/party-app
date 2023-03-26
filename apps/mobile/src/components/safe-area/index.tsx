@@ -1,5 +1,6 @@
-import { Div } from "@components/index";
-import { StatusBar, useWindowDimensions } from "react-native";
+import { Div, Text } from "@components/index";
+import { logOut } from "@lib/actions/auth";
+import { Pressable, StatusBar, useWindowDimensions } from "react-native";
 import Svg, { Defs, RadialGradient, Rect, Stop } from "react-native-svg";
 
 interface SafeAreaProps {
@@ -8,18 +9,32 @@ interface SafeAreaProps {
   gradient?: boolean;
 }
 
+const debug = __DEV__;
+
 export const SafeArea = ({ children, className, gradient }: SafeAreaProps) => {
   const d = useWindowDimensions();
 
   return (
     <Div
-      className={`flex flex-col justify-between  h-full bg-accents-1 text-accents-12`}
+      className={`flex flex-col justify-between relative h-full bg-accents-1 text-accents-12`}
     >
       <StatusBar
         barStyle="light-content"
         backgroundColor={"transparent"}
         translucent
       />
+      {debug && (
+        <Div className={`absolute z-50 top-10 right-5`}>
+          <Pressable
+            onPress={async () => {
+              console.log("logout");
+              await logOut();
+            }}
+          >
+            <Text className={`text-yellow-300`}>LogOut</Text>
+          </Pressable>
+        </Div>
+      )}
       {gradient && (
         <Svg
           style={{
