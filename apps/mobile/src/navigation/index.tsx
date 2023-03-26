@@ -6,7 +6,7 @@ import { supabase } from "@lib/supabase";
 import { useAuthStore } from "@navigation/authStore";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import * as SplashScreen from "expo-splash-screen";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 
 const Stack = createNativeStackNavigator<StackNavigatorParams>();
 
@@ -19,12 +19,7 @@ export const NativeNavigation = () => {
   const onFirstSet = useAuthStore((s) => s.onFirstSet);
   const setAuthState = useAuthStore((s) => s.setAuthState);
 
-  const firstRender = useRef(true);
-
   useEffect(() => {
-    if (firstRender.current) {
-      firstRender.current = false;
-    }
     // NOT sure if this is even needed since onAuthStateChange is called on app start
     // const checkIfLoggedIn = async () => {
     //   const user = await supabase.auth.getUser();
@@ -59,6 +54,7 @@ export const NativeNavigation = () => {
       }
       await onFirstSet(async () => {
         console.log("hide splash");
+        // maknut ako home screen radi ok s animation: "none" il settimeout(disableAnimation = false, 300)
         setTimeout(async () => {
           await SplashScreen.hideAsync();
         }, 100);
@@ -71,6 +67,7 @@ export const NativeNavigation = () => {
   return (
     <Stack.Navigator>
       {authState === "SIGNED_IN" && (
+        // TU idu svi screenovi, home prvi
         <Stack.Screen
           options={{
             title: "",
