@@ -8,12 +8,18 @@
       "@screens/*": [
         "screens/*"
       ],
+      "@features/*": [
+        "features/*"
+      ],
       "@utils/*": [
         "utils/*"
       ],
       "@lib/*": [
         "lib/*"
-      ]
+      ],
+      "@navigation/*": [
+        "navigation/*"
+      ],
     }
   },
   "extends": "expo/tsconfig.base"

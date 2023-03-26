@@ -1,10 +1,13 @@
 type StackNavigatorParams = {
   home: undefined;
+  splash: undefined;
   "user-detail": {
     id: string;
   };
   login: undefined;
   "login-login": undefined;
   "login-info": undefined;
-  "login-otp": undefined;
+  user: {
+    id: string;
+  };
 };
