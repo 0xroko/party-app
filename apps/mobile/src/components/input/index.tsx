@@ -60,7 +60,7 @@ export const Input = forwardRef(
     const state = disabled ? "disabled" : error ? "error" : "default";
 
     return (
-      <Div className={`w-full`}>
+      <Div className={`w-full max-w-full`}>
         {p.label && (
           <Text className={`text-accents-10 font-figtree-medium`}>
             {p.label}
