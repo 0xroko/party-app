@@ -2,25 +2,22 @@ import { Div, Text } from "@components/index";
 import { cva, type VariantProps } from "class-variance-authority";
 import { TouchableOpacity, TouchableOpacityProps } from "react-native";
 
-const buttonStyles = cva(
-  "w-full justify-center items-center rounded-full flex-row",
-  {
-    variants: {
-      intent: {
-        primary: "bg-accents-12 text-accents-1 hover:bg-accents-11",
-        secondary: "bg-accents-1 text-accents-12 border border-accents-12",
-        disabled: "bg-accents-2 text-accents-6",
-      },
-      size: {
-        medium: "text-base h-10",
-      },
+const buttonStyles = cva("justify-center items-center rounded-full flex-row", {
+  variants: {
+    intent: {
+      primary: "bg-accents-12 text-accents-1 hover:bg-accents-11",
+      secondary: "bg-accents-1 text-accents-12 border border-accents-12",
+      disabled: "bg-accents-2 text-accents-6",
     },
-    defaultVariants: {
-      intent: "primary",
-      size: "medium",
+    size: {
+      medium: "text-base h-10",
     },
-  }
-);
+  },
+  defaultVariants: {
+    intent: "primary",
+    size: "medium",
+  },
+});
 
 const buttonTextStyles = cva("", {
   variants: {
@@ -38,6 +35,7 @@ interface ButtonProps
   extends Omit<MyButtonProps, "leadingIcon" | "trailingIcon">,
     TouchableOpacityProps {
   children?: React.ReactNode | React.ReactNode[];
+  className?: string;
   disabled?: boolean;
   leadingIcon?: React.ReactNode | React.ReactNode[];
   trailingIcon?: React.ReactNode | React.ReactNode[];
@@ -46,6 +44,7 @@ interface ButtonProps
 export const Button = ({
   children,
   size,
+  className,
   intent,
   leadingIcon,
   trailingIcon,
@@ -75,7 +74,7 @@ export const Button = ({
         <Text
           className={`${buttonTextStyles({
             intent: intentI,
-          })} font-figtree-bold`}
+          })} ${className} font-figtree-bold`}
         >
           {children}
         </Text>

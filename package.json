@@ -5,8 +5,9 @@
 	"license": "MIT",
 	"private": true,
 	"scripts": {
-		"dev": "yarn workspace @party-app/mobile start",
-		"gen": "yarn workspace @party-app/database sg"
+		"dev": "yarn workspace @party-app/mobile start --tunnel",
+		"gen": "yarn workspace @party-app/database sg",
+		"p": "git pull && yarn"
 	},
 	"workspaces": [
 		"apps/*",

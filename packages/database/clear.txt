@@ -1,4 +1,3 @@
-
 DROP table public."Attending";
 DROP table public."Comment";
 DROP table public."Friendship";

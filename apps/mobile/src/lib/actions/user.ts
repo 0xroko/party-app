@@ -1,7 +1,7 @@
 import { onSupabaseError, User } from "@lib/actions";
 import { supabase } from "@lib/supabase";
-import * as Notifications from "expo-notifications";
 import * as Device from "expo-device";
+import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
 
 export const checkIfUserHasData = async () => {
@@ -43,7 +43,7 @@ export const checkIfDisplayNameExists = async (displayName: string) => {
 };
 
 export async function registerForPushNotificationsAsync() {
-  let token;
+  let token: string;
 
   if (Platform.OS === "android") {
     await Notifications.setNotificationChannelAsync("default", {
@@ -116,7 +116,29 @@ export const getUserById = async (id: User["id"]) => {
 
   if (error) {
     onSupabaseError(error);
+    return undefined;
   }
 
   return data;
+};
+
+export const getRandomUserButNotMe = async () => {
+  const authUser = await supabase.auth.getUser();
+  if (!authUser) {
+    onSupabaseError("No user logged in");
+    return;
+  }
+
+  const { data, error } = await supabase
+    .from("Users")
+    .select("*")
+    .not("id", "eq", authUser?.data?.user?.id)
+    .limit(1);
+
+  if (error) {
+    onSupabaseError(error);
+    return;
+  }
+
+  return data[0] as User;
 };

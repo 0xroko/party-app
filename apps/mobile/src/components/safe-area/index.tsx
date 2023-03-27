@@ -9,7 +9,7 @@ interface SafeAreaProps {
   gradient?: boolean;
 }
 
-const debug = __DEV__;
+const debug = false; // __DEV__;
 
 export const SafeArea = ({ children, className, gradient }: SafeAreaProps) => {
   const d = useWindowDimensions();
