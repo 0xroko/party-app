@@ -1,10 +1,31 @@
 import { NavigationContainer } from "@react-navigation/native";
-import { Suspense } from "react";
+import { Suspense, useEffect } from "react";
+import { focusManager, QueryClient, QueryClientProvider } from "react-query";
+
+const queryClient = new QueryClient();
+
+import type { AppStateStatus } from "react-native";
+import { AppState, Platform } from "react-native";
+
+// iako je ovo cool nezz dal revalidate sve query ili samo one koje su u component tree
+// (iako je to cudno jel neznas kj react-navigation stavi u tree)
+function onAppStateChange(status: AppStateStatus) {
+  if (Platform.OS !== "web") {
+    focusManager.setFocused(status === "active");
+  }
+}
 
 export const Provider: FCC = ({ children }) => {
+  useEffect(() => {
+    const subscription = AppState.addEventListener("change", onAppStateChange);
+
+    return () => subscription.remove();
+  }, []);
   return (
     <Suspense>
-      <NavigationContainer>{children}</NavigationContainer>
+      <QueryClientProvider client={queryClient}>
+        <NavigationContainer>{children}</NavigationContainer>
+      </QueryClientProvider>
     </Suspense>
   );
 };

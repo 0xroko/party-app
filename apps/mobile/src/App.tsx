@@ -8,10 +8,10 @@ import { Keyboard, KeyboardAvoidingView } from "react-native";
 import { NativeNavigation } from "./navigation";
 import { Provider } from "./provider";
 
-import * as SplashScreen from "expo-splash-screen";
-import * as Notifications from 'expo-notifications';
 import { registerForPushNotificationsAsync } from "@lib/actions/user";
 import { useAuthStore } from "@navigation/authStore";
+import * as Notifications from "expo-notifications";
+import * as SplashScreen from "expo-splash-screen";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -32,27 +32,33 @@ const App: FC = () => {
     figtreeSemiBold: require("./assets/fonts/Figtree-SemiBold.ttf"),
     figtreeBlack: require("./assets/fonts/Figtree-Black.ttf"),
   });
-  const [expoPushToken, setExpoPushToken] = useState('');
-  const [notification, setNotification] = useState(false);
-  const notificationListener = useRef();
-  const responseListener = useRef();
+  const [expoPushToken, setExpoPushToken] = useState("");
+  const [notification, setNotification] =
+    useState<Notifications.Notification>();
+  const notificationListener = useRef<Notifications.Subscription>();
+  const responseListener = useRef<Notifications.Subscription>();
   const authState = useAuthStore((s) => s.authState);
-
 
   useEffect(() => {
     if (authState !== "SIGNED_IN") return;
-    registerForPushNotificationsAsync().then(token => setExpoPushToken(token));
+    registerForPushNotificationsAsync().then((token) =>
+      setExpoPushToken(token)
+    );
 
-    notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
-      setNotification(notification);
-    });
+    notificationListener.current =
+      Notifications.addNotificationReceivedListener((notification) => {
+        setNotification(notification);
+      });
 
-    responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
-      console.log(response);
-    });
+    responseListener.current =
+      Notifications.addNotificationResponseReceivedListener((response) => {
+        console.log(response);
+      });
 
     return () => {
-      Notifications.removeNotificationSubscription(notificationListener.current);
+      Notifications.removeNotificationSubscription(
+        notificationListener.current
+      );
       Notifications.removeNotificationSubscription(responseListener.current);
     };
   }, [authState]);

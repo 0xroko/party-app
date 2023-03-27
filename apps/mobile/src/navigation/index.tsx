@@ -1,5 +1,6 @@
 import { UserLoginInfoScreen } from "@features/auth/info-screen";
 import { LoginLoginScreen } from "@features/auth/signup";
+import { HomeScreen } from "@features/home";
 import { UserInfoScreen } from "@features/user/id";
 import { checkIfUserHasData } from "@lib/actions/user";
 import { supabase } from "@lib/supabase";
@@ -42,8 +43,6 @@ export const NativeNavigation = () => {
 
       if (c === "SIGNED_IN" || s !== null) {
         const userHasData = await checkIfUserHasData();
-        console.log("userHasData", userHasData);
-
         if (!userHasData) {
           setAuthState("INFO_SCREEN");
         } else {
@@ -65,17 +64,35 @@ export const NativeNavigation = () => {
   }, []);
 
   return (
-    <Stack.Navigator>
+    <Stack.Navigator
+      screenOptions={{
+        // bilo bi cool ne animirat gradient na home screenu
+        // -> move gradient up to parent component???
+        // -> (imat Screen.gradient = true/false prop ili nesto)
+        animation: "fade",
+        animationDuration: 200,
+      }}
+    >
       {authState === "SIGNED_IN" && (
         // TU idu svi screenovi, home prvi
-        <Stack.Screen
-          options={{
-            title: "",
-            headerShown: false,
-          }}
-          name="user"
-          component={UserInfoScreen}
-        />
+        <>
+          <Stack.Screen
+            options={{
+              title: "",
+              headerShown: false,
+            }}
+            name="home"
+            component={HomeScreen}
+          />
+          <Stack.Screen
+            options={{
+              title: "",
+              headerShown: false,
+            }}
+            name="user"
+            component={UserInfoScreen}
+          />
+        </>
       )}
       {authState === "SIGNED_OUT" && (
         <Stack.Screen

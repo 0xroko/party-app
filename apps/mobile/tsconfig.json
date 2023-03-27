@@ -20,6 +20,9 @@
       "@navigation/*": [
         "navigation/*"
       ],
+      "@hooks/*": [
+        "hooks/*"
+      ],
     }
   },
   "extends": "expo/tsconfig.base"
