@@ -3,13 +3,14 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { createClient } from "@supabase/supabase-js";
 import { Expo } from "expo-server-sdk";
 // import { supabase } from "@party-app/mobile/src/lib/supabase";
+import { Database } from "@party-app/database/supabase";
 
 type Data = {
   name: string;
 };
 // https://nfdwiivovdwuobzxompi.supabase.co
 
-const supabase = createClient(
+const supabase = createClient<Database>(
   "https://nfdwiivovdwuobzxompi.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5mZHdpaXZvdmR3dW9ienhvbXBpIiwicm9sZSI6ImFub24iLCJpYXQiOjE2Nzg3MDYwODIsImV4cCI6MTk5NDI4MjA4Mn0.R-7PyVaxNmKbvNd9brbOtQULxNXU9sJUqxG_v-stneY"
 );
@@ -31,9 +32,15 @@ export default async function handler(
       .eq("userBId", record.userAId);
 
     const {
+      //@ts-ignore
       data: { pushtoken },
-    } = await supabase.from("Users").select("pushtoken").eq("id", userId).single();
+    } = await supabase
+      .from("Users")
+      .select("pushtoken")
+      .eq("id", userId)
+      .single();
     const {
+      //@ts-ignore
       data: { name, surname },
     } = await supabase
       .from("Users")
@@ -99,6 +106,7 @@ const sendPush = async (
   // recommend you batch your notifications to reduce the number of requests
   // and to compress them (notifications with similar content will get
   // compressed).
+  //@ts-ignore
   let chunks = expo.chunkPushNotifications(messages);
   let tickets = [];
   (async () => {
