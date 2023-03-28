@@ -2,16 +2,17 @@
   "name": "@party-app/mobile",
   "version": "1.0.0",
   "scripts": {
-    "start": "expo start",
+    "start": "expo start --dev-client --tunnel",
     "start-t": "expo start --tunnel",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
     "web": "expo start --web"
   },
   "dependencies": {
     "@expo-google-fonts/figtree": "^0.2.3",
     "@party-app/themes": "*",
     "@react-native-async-storage/async-storage": "1.17.11",
+    "@react-native-menu/menu": "^0.7.3",
     "@react-navigation/native": "^6.1.6",
     "@react-navigation/native-stack": "^6.9.12",
     "@supabase/supabase-js": "^2.12.1",
@@ -34,6 +35,8 @@
     "react-native-elements": "^3.4.3",
     "react-native-gesture-handler": "^2.9.0",
     "react-native-heroicons": "^3.2.0",
+    "react-native-ios-context-menu": "^1.15.3",
+    "react-native-mmkv": "^2.6.3",
     "react-native-reanimated": "~2.14.4",
     "react-native-safe-area-context": "^4.5.0",
     "react-native-screens": "^3.20.0",
@@ -42,6 +45,7 @@
     "react-query": "^3.39.3",
     "tailwindcss": "^3.2.7",
     "typescript": "^4.9.4",
+    "zeego": "^1.4.2",
     "zod": "^3.21.4",
     "zustand": "^4.3.6"
   },

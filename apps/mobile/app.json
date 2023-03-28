@@ -13,16 +13,27 @@
       "backgroundColor": "#050505"
     },
     "assetBundlePatterns": ["**/*"],
-    "ios": {},
+    "ios": {
+      "bundleIdentifier": "com.alfe.party.app"
+    },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#050505"
-      }
+      },
+      "package": "com.alfe.party.app"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "scheme": "myapp"
+    "scheme": "party-app",
+    "extra": {
+      "eas": {
+        "projectId": "e8abc87f-2c9d-4040-80d6-526856a623fd"
+      }
+    },
+    "owner": "gatherer4017",
+    "originalFullName": "@gatherer4017/mobile",
+    "currentFullName": "@gatherer4017/mobile"
   }
 }
