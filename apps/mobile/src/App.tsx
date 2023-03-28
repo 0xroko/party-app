@@ -1,5 +1,3 @@
-import "expo-dev-client";
-
 import { useFonts } from "expo-font";
 
 import { FC, useEffect, useRef, useState } from "react";
