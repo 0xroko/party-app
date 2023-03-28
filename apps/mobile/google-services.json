@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "741543672209",
+    "project_id": "party-app-test-caecc",
+    "storage_bucket": "party-app-test-caecc.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:741543672209:android:87f443dd78e5c07c1fc230",
+        "android_client_info": {
+          "package_name": "com.alfe.party.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "741543672209-bak9k7kd91jhhuq95vk4tkhtk2vpdjp2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCYLGMMGtWEC0yQ70X60lRvg3ViFE3iKPc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "741543672209-bak9k7kd91jhhuq95vk4tkhtk2vpdjp2.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

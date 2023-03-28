@@ -21,6 +21,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#050505"
       },
+      "googleServicesFile": "./google-services.json",
       "package": "com.alfe.party.app"
     },
     "web": {
