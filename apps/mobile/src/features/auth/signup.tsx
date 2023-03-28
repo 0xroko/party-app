@@ -65,13 +65,21 @@ interface PhoneSectionProps {
   children?: React.ReactNode | React.ReactNode[];
 }
 
+const _DEV_USE_MAIL_LOGIN = true;
+
 export const PhoneSection = ({ children }: PhoneSectionProps) => {
   const loginState = useLoginStore();
 
   const onLoginSubmit = async (values: { phone: string }) => {
-    let res = await supabase.auth.signInWithOtp({
-      phone: "+385" + values.phone,
-    });
+    let res;
+    if (_DEV_USE_MAIL_LOGIN) {
+      res = await supabase.auth.signInWithOtp({
+        email: values.phone,
+      });
+    } else
+      res = await supabase.auth.signInWithOtp({
+        phone: "+385" + values.phone,
+      });
 
     console.log(res);
 
@@ -100,13 +108,12 @@ export const PhoneSection = ({ children }: PhoneSectionProps) => {
               <Field
                 name="phone"
                 initialValue={loginState.phone}
-                onBlurValidate={phoneShema}
+                onBlurValidate={_DEV_USE_MAIL_LOGIN ? z.string() : phoneShema}
               >
                 {({ value, setValue, onBlur, errors }) => {
                   return (
                     <Input
                       value={value}
-                      keyboardType={"phone-pad"}
                       onBlur={onBlur}
                       error={errors.join("\n")}
                       onChangeText={(text) => setValue(text)}
@@ -119,10 +126,12 @@ export const PhoneSection = ({ children }: PhoneSectionProps) => {
                               : "text-accents-12"
                           }`}
                         >
-                          +385
+                          {_DEV_USE_MAIL_LOGIN ? "Gmail" : "Broj telefona"}
                         </Text>
                       }
-                      placeholder={"Broj telefona"}
+                      placeholder={
+                        _DEV_USE_MAIL_LOGIN ? "Email" : "Broj telefona"
+                      }
                     />
                   );
                 }}
@@ -131,20 +140,22 @@ export const PhoneSection = ({ children }: PhoneSectionProps) => {
 
             <Div className={`flex gap-3 flex-row`}>
               {__DEV__ && (
-                <Div className={`flex basis-[33%] grow-0`}>
-                  <Button
-                    onPress={async () => {
-                      // const auth = await supabase.auth.signInWithOAuth({
-                      //   provider: "google",
-                      // });
-                      const auth = await googleSignIn();
-                    }}
-                    size={"medium"}
-                    intent={"secondary"}
-                  >
-                    Google
-                  </Button>
-                </Div>
+                <>
+                  <Div className={`flex basis-[15%] grow-0`}>
+                    <Button
+                      onPress={async () => {
+                        // const auth = await supabase.auth.signInWithOAuth({
+                        //   provider: "google",
+                        // });
+                        const auth = await googleSignIn();
+                      }}
+                      size={"medium"}
+                      intent={"secondary"}
+                    >
+                      Gggl
+                    </Button>
+                  </Div>
+                </>
               )}
               <Div className={`flex grow`}>
                 <Button
@@ -170,15 +181,26 @@ export const OtpSection = () => {
   const setAuthState = useAuthStore((s) => s.setAuthState);
 
   const onVerify = async (values: { otp: string }) => {
-    const userHasData = await checkIfUserHasData();
+    try {
+      // verify otp
+      if (_DEV_USE_MAIL_LOGIN) {
+        const { error, data } = await supabase.auth.verifyOtp({
+          type: "magiclink",
+          email: loginState.phone,
+          token: values.otp,
+        });
+      } else {
+        // sms otp
+      }
 
-    if (userHasData) {
-      // also should be set by onAuthStateChange
-      setAuthState("SIGNED_IN");
-    } else {
-      setAuthState("INFO_SCREEN");
-    }
-    // or navigator.navigate("home")
+      const userHasData = await checkIfUserHasData();
+      if (userHasData) {
+        // also should be set by onAuthStateChange
+        setAuthState("SIGNED_IN");
+      } else {
+        setAuthState("INFO_SCREEN");
+      }
+    } catch (error) {}
   };
 
   const back = () => {
