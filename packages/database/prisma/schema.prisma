@@ -41,7 +41,6 @@ model Friendship {
   userB     Users    @relation("UserB", fields: [userBId], references: [id])
   blocked   Boolean  @default(false)
 
-  @@unique([userAId, userBId])
   @@schema("public")
 }
 

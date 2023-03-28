@@ -75,6 +75,7 @@ export interface Database {
       Friendship: {
         Row: {
           accepted: boolean
+          blocked: boolean
           createdAt: string
           id: string
           userAId: string
@@ -82,6 +83,7 @@ export interface Database {
         }
         Insert: {
           accepted?: boolean
+          blocked?: boolean
           createdAt?: string
           id?: string
           userAId: string
@@ -89,6 +91,7 @@ export interface Database {
         }
         Update: {
           accepted?: boolean
+          blocked?: boolean
           createdAt?: string
           id?: string
           userAId?: string
@@ -190,7 +193,6 @@ export interface Database {
           bio: string | null
           created_at: string | null
           displayname: string
-          friendshipId: string | null
           id: string
           imagesId: string | null
           name: string
@@ -201,7 +203,6 @@ export interface Database {
           bio?: string | null
           created_at?: string | null
           displayname: string
-          friendshipId?: string | null
           id: string
           imagesId?: string | null
           name: string
@@ -212,7 +213,6 @@ export interface Database {
           bio?: string | null
           created_at?: string | null
           displayname?: string
-          friendshipId?: string | null
           id?: string
           imagesId?: string | null
           name?: string
