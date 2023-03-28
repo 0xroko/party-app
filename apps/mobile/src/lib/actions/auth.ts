@@ -2,8 +2,8 @@ import { makeRedirectUri, startAsync } from "expo-auth-session";
 
 import { InfoSectionForm } from "@features/auth/signup";
 import { onSupabaseError } from "@lib/actions";
+import { mmkv } from "@lib/mmkv";
 import { supabase, supabaseUrl } from "@lib/supabase";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
@@ -12,9 +12,13 @@ export const googleSignIn = async () => {
   // This should be the URL you added to "Redirect URLs" in Supabase URL Configuration
   // If they are different add the value of redirectUrl to your Supabase Redirect URLs
   const redirectUrl = makeRedirectUri({
-    path: "/auth/callback",
+    path: "auth/callback",
   });
-  console.log(redirectUrl);
+
+  console.log(
+    redirectUrl,
+    `${supabaseUrl}/auth/v1/authorize?provider=google&redirect_to=${redirectUrl}`
+  );
 
   // authUrl: https://{YOUR_PROJECT_REFERENCE_ID}.supabase.co
   // returnURL: the redirectUrl you created above.
@@ -68,7 +72,20 @@ export const useLoginStore = create<LoginStore>()(
     }),
     {
       name: "login-state",
-      storage: createJSONStorage(() => AsyncStorage),
+      // storage: createJSONStorage(() => AsyncStorage),
+      storage: createJSONStorage(() => {
+        return {
+          getItem: (key: string) => {
+            return mmkv.getString(key);
+          },
+          setItem: (key: string, value: string) => {
+            mmkv.set(key, value);
+          },
+          removeItem: (key: string) => {
+            mmkv.delete(key);
+          },
+        };
+      }),
     }
   )
 );

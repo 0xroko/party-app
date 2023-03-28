@@ -1,5 +1,5 @@
+import { mmkv } from "@lib/mmkv";
 import { Database } from "@party-app/database/supabase";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createClient } from "@supabase/supabase-js";
 import "react-native-url-polyfill/auto";
 
@@ -9,7 +9,17 @@ const supabaseAnonKey =
 
 export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   auth: {
-    storage: AsyncStorage as any,
+    storage: {
+      getItem: (key: string) => {
+        return mmkv.getString(key);
+      },
+      setItem: (key: string, value: string) => {
+        mmkv.set(key, value);
+      },
+      removeItem: (key: string) => {
+        mmkv.delete(key);
+      },
+    },
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: false,
