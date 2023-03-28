@@ -8,9 +8,15 @@ import { ArrowLeftIcon, Cog6ToothIcon } from "react-native-heroicons/outline";
 import { useAuthUser } from "@hooks/useAuthUser";
 import { User } from "@lib/actions";
 import { getUserById } from "@lib/actions/user";
+import {
+  accept_friend_request,
+  checkIfFriend,
+  remove_friend,
+  send_friend_request,
+} from "@lib/frendship/add_friend";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { FC } from "react";
+import { FC, useMemo } from "react";
 import { Pressable } from "react-native";
 import { useQuery } from "react-query";
 
@@ -26,11 +32,24 @@ export const useUser = (id: User["id"]) => {
 export const useFriendship = (id: User["id"]) => {
   const authUser = useAuthUser();
 
-  const q = useQuery(["friendship", id], async () => {}, {
-    enabled: !!authUser,
-  });
+  const q = useQuery(
+    ["friendship", id],
+    async () => {
+      return await checkIfFriend(id, authUser.data.user);
+    },
+    {
+      enabled: !!authUser.data,
+    }
+  );
 
-  return q;
+  return {
+    ...q,
+    actions: {
+      sendFriendRequest: send_friend_request,
+      acceptFriendRequest: accept_friend_request,
+      removeFriend: remove_friend,
+    },
+  };
 };
 
 interface NavBarProps {
@@ -88,7 +107,51 @@ export const UserInfoScreen: FC<
   const { data: user, isLoading } = useUser(userId);
   const { data: authUser, isFetched, refetch } = useAuthUser();
 
+  const {
+    data: friendShipStatus,
+    actions,
+    refetch: refetchStatus,
+  } = useFriendship(userId);
+
   const isMe = authUser?.user.id === userId;
+
+  const handleUserAction = () => {
+    console.log("friendShipStatus", friendShipStatus);
+
+    if (!isMe) {
+      if (friendShipStatus === "friend") {
+        return {
+          actionFn: async () => actions.removeFriend(userId, authUser.user),
+          text: "Remove friend",
+        };
+      } else if (friendShipStatus === "accept") {
+        return {
+          actionFn: async () =>
+            actions.acceptFriendRequest(userId, authUser.user),
+          text: "Accept request",
+        };
+      } else if (friendShipStatus === "none") {
+        return {
+          actionFn: async () =>
+            actions.sendFriendRequest(userId, authUser.user),
+          text: "Send friend request",
+        };
+      } else if (friendShipStatus === "requested") {
+        return {
+          actionFn: async () => actions.removeFriend(userId, authUser.user),
+          text: "Cancel request",
+        };
+      }
+    }
+    return {
+      actionFn: async () => navigation.navigate("home"),
+      text: "Edit profile",
+    };
+  };
+
+  const { actionFn, text } = useMemo(() => {
+    return handleUserAction();
+  }, [friendShipStatus, actions]);
 
   return (
     <SafeArea gradient>
@@ -136,7 +199,14 @@ export const UserInfoScreen: FC<
             </Div>
             <Div className={`mt-16 flex g-4 flex-row w-full`}>
               <Div className={`flex grow`}>
-                <Button>{isMe ? "Edit Profile" : "Follow"}</Button>
+                <Button
+                  onPress={async () => {
+                    await actionFn();
+                    refetchStatus();
+                  }}
+                >
+                  {text}
+                </Button>
               </Div>
               <Div className={`flex grow-0 shrink`}>
                 <Button className={`w-10`}>

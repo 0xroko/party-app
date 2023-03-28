@@ -4495,7 +4495,7 @@ expo-server-sdk@^3.7.0:
     promise-limit "^2.7.0"
     promise-retry "^2.0.1"
 
-expo-splash-screen@^0.18.1:
+expo-splash-screen@~0.18.1:
   version "0.18.1"
   resolved "https://registry.yarnpkg.com/expo-splash-screen/-/expo-splash-screen-0.18.1.tgz#e090b045a7f8c5d9597b7a96910caa4eae1fcf3b"
   integrity sha512-1di1kuh14likGUs3fyVZWAqEMxhmdAjpmf9T8Qk5OzUa5oPEMEDYB2e2VprddWnJNBVVe/ojBDSCY8w56/LS0Q==
