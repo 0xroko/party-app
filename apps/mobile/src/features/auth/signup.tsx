@@ -9,7 +9,7 @@ import { checkIfUserHasData } from "@lib/actions/user";
 import { supabase } from "@lib/supabase";
 import { useAuthStore } from "@navigation/authStore";
 import { Field, Form } from "houseform";
-import { FC } from "react";
+import { FC, useState } from "react";
 export interface InfoSectionForm {
   name: string;
   surname: string;
@@ -180,7 +180,10 @@ export const OtpSection = () => {
   const loginState = useLoginStore();
   const setAuthState = useAuthStore((s) => s.setAuthState);
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const onVerify = async (values: { otp: string }) => {
+    setIsSubmitting(true);
     try {
       // verify otp
       if (_DEV_USE_MAIL_LOGIN) {
@@ -200,7 +203,10 @@ export const OtpSection = () => {
       } else {
         setAuthState("INFO_SCREEN");
       }
-    } catch (error) {}
+    } catch (error) {
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const back = () => {
@@ -248,7 +254,7 @@ export const OtpSection = () => {
               <Div className={`flex grow`}>
                 <Button
                   size={"medium"}
-                  disabled={!isValid}
+                  disabled={!isValid || isSubmitting}
                   onPress={() => {
                     submit();
                   }}

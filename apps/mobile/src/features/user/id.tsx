@@ -16,7 +16,7 @@ import {
 } from "@lib/frendship/add_friend";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { FC, useMemo } from "react";
+import { FC, useMemo, useState } from "react";
 import { Pressable } from "react-native";
 import { useQuery } from "react-query";
 
@@ -52,6 +52,9 @@ export const useFriendship = (id: User["id"]) => {
   };
 };
 
+import { logOut } from "@lib/actions/auth";
+import * as DropdownMenu from "zeego/dropdown-menu";
+
 interface NavBarProps {
   children?: React.ReactNode | React.ReactNode[];
   trailing?: React.ReactNode | React.ReactNode[];
@@ -78,7 +81,26 @@ export const NavBar = ({ children, trailing }: NavBarProps) => {
       </Pressable>
       <Div className={`flex g-4 flex-row`}>
         {trailing}
-        <Cog6ToothIcon size={24} strokeWidth={2} color={"#fff"} />
+        <DropdownMenu.Root>
+          <DropdownMenu.Trigger>
+            <Cog6ToothIcon size={24} strokeWidth={2} color={"#fff"} />
+          </DropdownMenu.Trigger>
+          <DropdownMenu.Content>
+            <DropdownMenu.Label>Test</DropdownMenu.Label>
+            <DropdownMenu.Item
+              onSelect={() => {
+                logOut();
+              }}
+              style={{
+                backgroundColor: "#232323",
+                padding: 10,
+              }}
+              key="2"
+            >
+              <DropdownMenu.ItemTitle>Log out</DropdownMenu.ItemTitle>
+            </DropdownMenu.Item>
+          </DropdownMenu.Content>
+        </DropdownMenu.Root>
       </Div>
     </Div>
   );
@@ -106,6 +128,8 @@ export const UserInfoScreen: FC<
 
   const { data: user, isLoading } = useUser(userId);
   const { data: authUser, isFetched, refetch } = useAuthUser();
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
     data: friendShipStatus,
@@ -200,9 +224,12 @@ export const UserInfoScreen: FC<
             <Div className={`mt-16 flex g-4 flex-row w-full`}>
               <Div className={`flex grow`}>
                 <Button
+                  disabled={isSubmitting}
                   onPress={async () => {
+                    setIsSubmitting(true);
                     await actionFn();
                     refetchStatus();
+                    setIsSubmitting(false);
                   }}
                 >
                   {text}

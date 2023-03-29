@@ -61,8 +61,6 @@ export const checkIfFriend: (
     return "none";
   }
 
-  console.log("r1", r1.data, "r2", r2.data);
-
   if (r1.data.length > 0 && r2.data.length > 0) {
     return "friend";
   } else if (r1.data.length > 0) {
@@ -84,8 +82,17 @@ export const accept_friend_request = async (
     {
       userAId: friend_id,
       userBId: authUser?.id,
+      accepted: true,
     },
   ]);
+
+  const r2 = await supabase
+    .from("Friendship")
+    .update({
+      accepted: true,
+    })
+    .eq("userAId", authUser?.id)
+    .eq("userBId", friend_id);
 
   if (r.error) {
     onSupabaseError(r.error);
