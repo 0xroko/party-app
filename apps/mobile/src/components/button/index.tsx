@@ -1,6 +1,7 @@
 import { Div, Text } from "@components/index";
 import { cva, type VariantProps } from "class-variance-authority";
-import { TouchableOpacity, TouchableOpacityProps } from "react-native";
+import { styled } from "nativewind";
+import { Pressable, TouchableOpacityProps } from "react-native";
 
 const buttonStyles = cva("justify-center items-center rounded-full flex-row", {
   variants: {
@@ -41,6 +42,14 @@ interface ButtonProps
   trailingIcon?: React.ReactNode | React.ReactNode[];
 }
 
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
+
+export const AnimatedView = styled(Animated.View);
 export const Button = ({
   children,
   size,
@@ -67,9 +76,45 @@ export const Button = ({
     o.onLongPress = () => {};
   }
 
+  const scale = useSharedValue(1);
+  const opacity = useSharedValue(1);
+
+  const customSpringStyles = useAnimatedStyle(() => {
+    return {
+      opacity: withTiming(opacity.value, {
+        duration: 77,
+        easing: Easing.exp,
+      }),
+      transform: [
+        {
+          scale: withTiming(scale.value, {
+            duration: 77,
+            easing: Easing.exp,
+          }),
+        },
+      ],
+    };
+  });
+
   return (
-    <TouchableOpacity activeOpacity={0.9} {...o}>
-      <Div className={style}>
+    <Pressable
+      {...o}
+      onPressIn={() => {
+        if (!disabled) {
+          scale.value = 0.98;
+          opacity.value = 0.8;
+        }
+      }}
+      onPressOut={() => {
+        if (!disabled) {
+          setTimeout(() => {
+            scale.value = 1;
+            opacity.value = 1;
+          }, 100);
+        }
+      }}
+    >
+      <AnimatedView className={style} style={[customSpringStyles]}>
         {leadingIcon && <Div className={`mr-2`}>{leadingIcon}</Div>}
         <Text
           className={`${buttonTextStyles({
@@ -79,7 +124,7 @@ export const Button = ({
           {children}
         </Text>
         {trailingIcon && <Div className={`ml-2`}>{trailingIcon}</Div>}
-      </Div>
-    </TouchableOpacity>
+      </AnimatedView>
+    </Pressable>
   );
 };
