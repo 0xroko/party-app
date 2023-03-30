@@ -11,18 +11,8 @@ import { Field, Form } from "houseform";
 import { FC } from "react";
 import { z } from "zod";
 
-export const InfoSection = () => {
-  const loginState = useLoginStore();
-
-  const onSubmit = async (values: InfoSectionForm) => {
-    const user = await createUser(values);
-  };
-
-  const back = () => {
-    loginState.setLoginState("PHONE");
-  };
-
-  const displayNameValidation = z.string().superRefine(async (v, _ctx) => {
+export const displayNameSchema = (ignoreId?: string) =>
+  z.string().superRefine(async (v, _ctx) => {
     if (!v || v.length === 0) {
       _ctx.addIssue({
         code: "custom",
@@ -39,7 +29,7 @@ export const InfoSection = () => {
       return z.NEVER;
     }
 
-    const exists = await checkIfDisplayNameExists(v);
+    const exists = await checkIfDisplayNameExists(v, ignoreId);
 
     // do this on server
     // but also if it contains unallowed characters
@@ -53,6 +43,17 @@ export const InfoSection = () => {
 
     return v;
   });
+
+export const InfoSection = () => {
+  const loginState = useLoginStore();
+
+  const onSubmit = async (values: InfoSectionForm) => {
+    const user = await createUser(values);
+  };
+
+  const back = () => {
+    loginState.setLoginState("PHONE");
+  };
 
   return (
     <Section>
@@ -68,10 +69,10 @@ export const InfoSection = () => {
               <Field
                 initialValue={loginState.infoSectionFormData?.displayname}
                 name="displayname"
-                onChangeValidate={displayNameValidation}
+                onChangeValidate={displayNameSchema()}
                 onMountValidate={
                   loginState.infoSectionFormData?.displayname
-                    ? displayNameValidation
+                    ? displayNameSchema()
                     : undefined
                 }
               >

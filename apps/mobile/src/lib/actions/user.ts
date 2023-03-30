@@ -1,4 +1,6 @@
 import { onSupabaseError, User } from "@lib/actions";
+import { User as AuthUser } from "@supabase/supabase-js";
+
 import { supabase } from "@lib/supabase";
 import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
@@ -25,11 +27,15 @@ export const checkIfUserHasData = async () => {
   return r.data.length > 0;
 };
 
-export const checkIfDisplayNameExists = async (displayName: string) => {
+export const checkIfDisplayNameExists = async (
+  displayName: string,
+  ignoreId?: string
+) => {
   const { data, error } = await supabase
     .from("Users")
     .select("count")
-    .filter("displayname", "eq", displayName);
+    .filter("displayname", "eq", displayName)
+    .filter("id", "neq", ignoreId ?? "");
 
   if (error) {
     onSupabaseError(error);
@@ -83,6 +89,25 @@ export async function registerForPushNotificationsAsync() {
 
   return token;
 }
+
+export const updateUser = async (d: Partial<User>, authUser: AuthUser) => {
+  if (!authUser) {
+    onSupabaseError("No user logged in");
+    return;
+  }
+
+  const { data, error } = await supabase
+    .from("Users")
+    .update(d)
+    .eq("id", authUser.id)
+    .select();
+
+  if (error) {
+    onSupabaseError(error);
+  }
+
+  return data;
+};
 
 export const createUser = async (
   d: Pick<User, "displayname" | "surname" | "name">

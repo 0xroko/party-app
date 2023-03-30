@@ -37,6 +37,9 @@ module.exports = {
         success: {
           primary: "#10B3A3",
         },
+        glass: {
+          1: "#05050566",
+        },
       },
     },
   },

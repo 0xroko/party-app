@@ -27,12 +27,15 @@ export const HomeScreen: FC<
 
   return (
     <SafeArea gradient>
-      <Div className={`mx-[22px] flex h-full justify-evenly`}>
+      <Div className={`justify-evenly mx-[22px] flex h-full`}>
         <Div className={`flex flex-col g-2`}>
           <Button
             disabled={!isFetched}
             onPress={() => {
-              navigation.navigate("user", { id: data?.user.id });
+              navigation.navigate("user", {
+                id: data?.user.id,
+                previousScreenName: "Home",
+              });
             }}
           >
             My Profile
@@ -40,7 +43,10 @@ export const HomeScreen: FC<
           <Button
             disabled={!isFetched}
             onPress={() => {
-              navigation.navigate("user", { id: randomUserData?.id });
+              navigation.navigate("user", {
+                id: randomUserData?.id,
+                previousScreenName: "Home",
+              });
             }}
           >
             {randomUserData?.displayname}

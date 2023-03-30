@@ -2,7 +2,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import { Suspense, useEffect } from "react";
 import { focusManager, QueryClient, QueryClientProvider } from "react-query";
 
-const queryClient = new QueryClient();
+export const queryClient = new QueryClient();
 
 import type { AppStateStatus } from "react-native";
 import { AppState, Platform } from "react-native";
