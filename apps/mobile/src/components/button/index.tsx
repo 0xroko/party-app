@@ -38,6 +38,7 @@ interface ButtonProps
   children?: React.ReactNode | React.ReactNode[];
   className?: string;
   disabled?: boolean;
+  loading?: boolean;
   leadingIcon?: React.ReactNode | React.ReactNode[];
   trailingIcon?: React.ReactNode | React.ReactNode[];
 }
@@ -50,6 +51,10 @@ import Animated, {
 } from "react-native-reanimated";
 
 export const AnimatedView = styled(Animated.View);
+
+/**
+ * Loading state je trenutno samo disabled
+ */
 export const Button = ({
   children,
   size,
@@ -58,9 +63,12 @@ export const Button = ({
   leadingIcon,
   trailingIcon,
   disabled,
+  loading,
   ...o
 }: ButtonProps) => {
   let intentI = intent;
+
+  if (loading) disabled = true;
 
   if (disabled) intentI = "disabled";
 
