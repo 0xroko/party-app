@@ -8,21 +8,39 @@ interface InputProps extends TextInputProps {
   leading?: React.ReactNode | React.ReactNode[];
   error?: string | undefined | null;
   disabled?: boolean;
+  large?: boolean;
   label?: string;
   trailing?: React.ReactNode | React.ReactNode[];
 }
 
 export const Input = forwardRef(
   (
-    { children, leading, error, disabled, trailing, ...p }: InputProps,
+    {
+      children,
+      leading,
+      error,
+      disabled,
+      trailing,
+      numberOfLines,
+      large,
+      ...p
+    }: InputProps,
     ref: any
   ) => {
+    if (large === true) {
+      leading = undefined;
+    }
+
     const inputStyles = cva(
-      "h-10 bg-accents-1 border flex flex-grow font-figtree-medium px-4 rounded-r-full flex-row",
+      `h-full flex-1 blur-md filter bg-glass-1 border flex flex-grow font-figtree-medium px-4 flex-row`,
       {
         variants: {
           leading: {
-            false: "border-l rounded-l-full",
+            false: "",
+          },
+          large: {
+            true: "rounded-md",
+            false: "rounded-r-full",
           },
           state: {
             error: "border-error-primary text-error-primary",
@@ -30,11 +48,23 @@ export const Input = forwardRef(
             default: "border-accents-12 text-accents-12",
           },
         },
+        compoundVariants: [
+          {
+            leading: false,
+            large: true,
+            className: "rounded-2xl",
+          },
+          {
+            leading: false,
+            large: false,
+            className: "border-l rounded-l-full",
+          },
+        ],
       }
     );
 
     const leadingStyles = cva(
-      "border-y border-l rounded-l-full flex justify-center px-4 ",
+      "border-y border-l blur-md filter bg-glass-1 rounded-l-full flex justify-center px-4",
       {
         variants: {
           state: {
@@ -52,7 +82,7 @@ export const Input = forwardRef(
         state: {
           error: "#822025",
           disabled: "#232323",
-          default: "#323232",
+          default: "#444444",
         },
       },
     });
@@ -68,7 +98,9 @@ export const Input = forwardRef(
         )}
 
         <Div
-          className={`w-full flex flex-row h-10 text-accents-1 rounded-full mt-3`}
+          className={`w-full flex flex-row ${
+            large ? "h-40" : "h-10 rounded-full"
+          } text-accents-1  mt-3`}
         >
           {leading && <Div className={leadingStyles({ state })}>{leading}</Div>}
           <StyledInput
@@ -77,8 +109,14 @@ export const Input = forwardRef(
             {...p}
             cursorColor={placeHolderStyles({ state })}
             editable={disabled ? false : p.editable}
+            multiline={large ? true : p.multiline}
             selectTextOnFocus={disabled ? false : p.selectTextOnFocus}
-            className={inputStyles({ leading: !!leading, state })}
+            numberOfLines={large ? 4 : 1}
+            className={inputStyles({
+              leading: !!leading,
+              state,
+              large: !!large,
+            })}
           ></StyledInput>
         </Div>
         {error && !disabled && (
