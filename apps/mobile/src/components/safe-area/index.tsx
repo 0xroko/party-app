@@ -63,7 +63,18 @@ export const SafeArea = ({ children, className, gradient }: SafeAreaProps) => {
         </Svg>
       )}
 
-      <Div className={`${className} pt-[30]`}>{children}</Div>
+      <Div className={`${className} h-full pt-[30]`}>{children}</Div>
     </Div>
   );
 };
+
+interface ContentProps {
+  children?: React.ReactNode | React.ReactNode[];
+  className?: string;
+}
+
+export const Content = ({ children, className }: ContentProps) => {
+  return <Div className={`mx-[22px] flex h-full`}>{children}</Div>;
+};
+
+SafeArea.Content = Content;
