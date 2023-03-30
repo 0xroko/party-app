@@ -14,10 +14,11 @@ import {
   remove_friend,
   send_friend_request,
 } from "@lib/frendship/add_friend";
-import { formatBio, formatUserDisplayName } from "@lib/misc";
+import { formatBio, formatName, formatUserDisplayName } from "@lib/misc";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { styled } from "nativewind";
 import { FC, useMemo, useState } from "react";
-import { Pressable } from "react-native";
+import { Pressable, ScrollView } from "react-native";
 import { useQuery } from "react-query";
 
 export const useFriendship = (id: User["id"]) => {
@@ -43,6 +44,52 @@ export const useFriendship = (id: User["id"]) => {
   };
 };
 
+interface UserListProps {
+  children?: React.ReactNode | React.ReactNode[];
+  users: User[];
+}
+
+export const StyledScrollDiv = styled(ScrollView);
+
+export const UserList = ({ users }: UserListProps) => {
+  return (
+    <Div className={`flex flex-col g-7 px-4 bg-accents-9 rounded-3xl py-6`}>
+      <Text className={`font-figtree-bold text-accents-12 text-xl`}>
+        Prijatelji
+      </Text>
+      <ScrollView
+        horizontal
+        contentContainerStyle={{
+          alignItems: "center",
+          flexDirection: "row",
+          gap: 22,
+        }}
+      >
+        {users.map((user) => (
+          <Div className={`flex flex-col items-center justify-between g-4`}>
+            <Img
+              className={`w-28 h-28 rounded-full`}
+              source={{
+                uri: "https://images.unsplash.com/photo-1657320815727-2512f49f61d5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=100&h=100&q=60",
+              }}
+            />
+            <Div className={`flex flex-col items-center  justify-center`}>
+              <Text
+                className={`font-figtree-bold text-center text-lg text-accents-12`}
+              >
+                {formatName(user.name, user.surname)}
+              </Text>
+              <Text className={`font-figtree text-accents-11 text-center`}>
+                {formatUserDisplayName(user.displayname)}
+              </Text>
+            </Div>
+          </Div>
+        ))}
+      </ScrollView>
+    </Div>
+  );
+};
+
 export const UserInfoScreen: FC<
   NativeStackScreenProps<StackNavigatorParams, "user">
 > = ({ navigation, route }) => {
@@ -52,6 +99,18 @@ export const UserInfoScreen: FC<
   const { data: authUser, isFetched, refetch } = useAuthUser();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const testUsers = [
+    { name: "John", age: 20, surname: "Smith", displayname: "jjjjjooon" },
+    { name: "John", age: 20, surname: "Smith", displayname: "jjjjjooon" },
+    { name: "John", age: 20, surname: "Smith", displayname: "jjjjjooon" },
+    { name: "John", age: 20, surname: "Smith", displayname: "jjjjjooon" },
+    { name: "John", age: 20, surname: "Smith", displayname: "jjjjjooon" },
+    { name: "John", age: 20, surname: "Smith", displayname: "jjjjjooon" },
+    { name: "John", age: 20, surname: "Smith", displayname: "jjjjjooon" },
+    { name: "John", age: 20, surname: "Smith", displayname: "jjjjjooon" },
+    { name: "John", age: 20, surname: "Smith", displayname: "jjjjjooon" },
+  ] as User[];
 
   const {
     data: friendShipStatus,
@@ -108,14 +167,16 @@ export const UserInfoScreen: FC<
 
   const hasBio = user?.bio?.length > 0;
 
+  if (isLoading) return null;
+
   return (
     <SafeArea gradient>
       <NavBar />
       {isFetched && (
-        <Div className={`mx-[22px] flex h-full`}>
+        <Div className={`mx-[20px] flex h-full `}>
           <Div className={`flex flex-col items-center`}>
             <Img
-              className={`rounded-full w-[124px] h-[124px] mt-12`}
+              className={`rounded-full w-[124px] h-[124px] mt-4`}
               source={{
                 uri: "https://images.unsplash.com/photo-1657320815727-2512f49f61d5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=100&h=100&q=60",
                 width: 100,
@@ -129,7 +190,7 @@ export const UserInfoScreen: FC<
                   {user?.name} {user?.surname}
                 </Text>
               </Div>
-              <Div className={``}>
+              <Div className={`mt-1`}>
                 <Text
                   className={`text-2xl text-center font-figtree-medium tracking-tight text-accents-10`}
                 >
@@ -139,7 +200,7 @@ export const UserInfoScreen: FC<
             </Pressable>
             <Pressable onPress={handleDataPress}>
               <Div
-                className={`mt-12 g-3 flex flex-row items-center justify-center`}
+                className={`mt-6 g-3 flex flex-row items-center justify-center`}
               >
                 {user?.location ? (
                   <Badge intent="primary">{user?.location}</Badge>
@@ -153,7 +214,7 @@ export const UserInfoScreen: FC<
                 )}
               </Div>
             </Pressable>
-            <Div className={`mt-7 max-h-[56px] h-full`}>
+            <Div className={`mt-12 max-h-[56px] h-full`}>
               <Pressable onPress={handleDataPress}>
                 <Text
                   className={`font-figtree-medium text-base text-center ${
@@ -187,6 +248,9 @@ export const UserInfoScreen: FC<
                   />
                 </Button>
               </Div>
+            </Div>
+            <Div className={`mt-12 flex flex-col w-full`}>
+              <UserList users={testUsers} />
             </Div>
           </Div>
         </Div>

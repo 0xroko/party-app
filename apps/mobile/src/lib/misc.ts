@@ -11,3 +11,10 @@ export const formatBio = (bio?: string) => {
   }
   return bio.replaceAll(/\n/g, " ");
 };
+
+export const formatName = (name?: string, surname?: string) => {
+  if (!name || !surname) {
+    return `Anonimni korisnik`;
+  }
+  return `${name} ${surname}`;
+};
