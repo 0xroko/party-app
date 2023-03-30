@@ -39,7 +39,7 @@ export const Input = forwardRef(
             false: "",
           },
           large: {
-            true: "rounded-md",
+            true: "rounded-md py-3",
             false: "rounded-r-full",
           },
           state: {

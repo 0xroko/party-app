@@ -9,6 +9,8 @@ datasource db {
   schemas  = ["auth", "public"]
 }
 
+// baza nije u syncu s schemom!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// prisma migrate dev oce resetat sve
 model Users {
   id                  String       @id @db.Uuid
   created_at          DateTime?    @default(now()) @db.Timestamptz(6)

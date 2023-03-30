@@ -14,9 +14,10 @@ import {
   remove_friend,
   send_friend_request,
 } from "@lib/frendship/add_friend";
-import { formatUserDisplayName } from "@lib/misc";
+import { formatBio, formatUserDisplayName } from "@lib/misc";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { FC, useMemo, useState } from "react";
+import { Pressable } from "react-native";
 import { useQuery } from "react-query";
 
 export const useFriendship = (id: User["id"]) => {
@@ -60,6 +61,13 @@ export const UserInfoScreen: FC<
 
   const isMe = authUser?.user.id === userId;
 
+  const handleDataPress = () => {
+    if (!isMe) return;
+    navigation.navigate("user-edit", {
+      previousScreenName: formatUserDisplayName(user.displayname),
+    });
+  };
+
   const handleUserAction = () => {
     if (!isMe) {
       if (friendShipStatus === "friend") {
@@ -88,9 +96,7 @@ export const UserInfoScreen: FC<
     }
     return {
       actionFn: async () => {
-        navigation.navigate("user-edit", {
-          previousScreenName: formatUserDisplayName(user.displayname),
-        });
+        handleDataPress();
       },
       text: "Edit profile",
     };
@@ -115,36 +121,48 @@ export const UserInfoScreen: FC<
                 width: 100,
               }}
             />
-            <Div className={`mt-6`}>
-              <Text
-                className={`text-4xl text-center font-figtree-bold text-accents-12`}
+            <Pressable onPress={handleDataPress}>
+              <Div className={`mt-6`}>
+                <Text
+                  className={`text-4xl text-center font-figtree-bold text-accents-12`}
+                >
+                  {user?.name} {user?.surname}
+                </Text>
+              </Div>
+              <Div className={``}>
+                <Text
+                  className={`text-2xl text-center font-figtree-medium tracking-tight text-accents-10`}
+                >
+                  @{user?.displayname}
+                </Text>
+              </Div>
+            </Pressable>
+            <Pressable onPress={handleDataPress}>
+              <Div
+                className={`mt-12 g-3 flex flex-row items-center justify-center`}
               >
-                {user?.name} {user?.surname}
-              </Text>
-            </Div>
-            <Div className={``}>
-              <Text
-                className={`text-2xl text-center font-figtree-medium tracking-tight text-accents-10`}
-              >
-                @{user?.displayname}
-              </Text>
-            </Div>
-            <Div
-              className={`mt-12 g-3 flex flex-row items-center justify-center`}
-            >
-              <Badge>Zagreb (fake)</Badge>
-              <Badge>TODO</Badge>
-              <Badge>TODO</Badge>
-            </Div>
-
-            <Div className={`mt-7`}>
-              <Text
-                className={`font-figtree-medium text-base text-center ${
-                  !hasBio ? "text-accents-10" : "text-accents-12"
-                } tracking-wide leading-7`}
-              >
-                {hasBio ? user?.bio : "Korisnik se nije još predstavio. :<"}
-              </Text>
+                {user?.location ? (
+                  <Badge intent="primary">{user?.location}</Badge>
+                ) : (
+                  <Badge intent="disabled">???? grad</Badge>
+                )}
+                {user?.age ? (
+                  <Badge intent="primary">{user?.age} god.</Badge>
+                ) : (
+                  <Badge intent="disabled">?? god.</Badge>
+                )}
+              </Div>
+            </Pressable>
+            <Div className={`mt-7 max-h-[56px] h-full`}>
+              <Pressable onPress={handleDataPress}>
+                <Text
+                  className={`font-figtree-medium text-base text-center ${
+                    !hasBio ? "text-accents-10" : "text-accents-12"
+                  } tracking-wide leading-7`}
+                >
+                  {formatBio(user?.bio)}
+                </Text>
+              </Pressable>
             </Div>
             <Div className={`mt-16 flex g-4 flex-row w-full`}>
               <Div className={`flex grow`}>

@@ -16,7 +16,10 @@ import { useMutation } from "react-query";
 import { z } from "zod";
 import { queryClient } from "../../provider";
 
-type UserEditForm = Pick<User, "bio" | "displayname" | "name" | "surname">;
+type UserEditForm = Pick<
+  User,
+  "bio" | "displayname" | "name" | "surname" | "age" | "location"
+>;
 
 export const UserEditScreen: FC<
   NativeStackScreenProps<StackNavigatorParams, "user-edit">
@@ -54,6 +57,7 @@ export const UserEditScreen: FC<
 
   useEffect(() => {
     if (user && !isSetRef.current) {
+      // da..... houseform je jos nov dost
       // @ts-ignore
       formRef.current?.getFieldValue("displayname").setValue(user.displayname);
       // @ts-ignore
@@ -62,6 +66,10 @@ export const UserEditScreen: FC<
       formRef.current?.getFieldValue("surname").setValue(user.surname);
       // @ts-ignore
       formRef.current?.getFieldValue("bio").setValue(user.bio);
+      // @ts-ignore
+      formRef.current?.getFieldValue("age").setValue(user.age.toString());
+      // @ts-ignore
+      formRef.current?.getFieldValue("location").setValue(user.location);
 
       isSetRef.current = true;
     }
@@ -208,7 +216,9 @@ export const UserEditScreen: FC<
                   <Field
                     name="bio"
                     onBlurValidate={z.string()}
-                    onChangeValidate={z.string().max(500)}
+                    onChangeValidate={z
+                      .string()
+                      .max(100, "Maksimalno 100 karaktera")}
                   >
                     {({ value, setValue, onBlur, errors, validate }) => {
                       return (
@@ -228,6 +238,57 @@ export const UserEditScreen: FC<
                     }}
                   </Field>
                 </Div>
+
+                <Div className={`flex flex-row mt-4`}>
+                  <Div className={`flex basis-[40%] grow`}>
+                    <Field
+                      name="age"
+                      onBlurValidate={z.coerce
+                        .number()
+                        .min(16, "Moraš biti stariji od 16!")
+                        .max(100, "Moraš biti mlađi od 100!")}
+                    >
+                      {({ value, setValue, onBlur, errors }) => {
+                        return (
+                          <Input
+                            value={value}
+                            keyboardType={"number-pad"}
+                            label={"Godine"}
+                            onBlur={onBlur}
+                            error={errors.join("\n")}
+                            onChangeText={(text) => {
+                              setValue(text);
+                            }}
+                            placeholder={"23"}
+                          />
+                        );
+                      }}
+                    </Field>
+                  </Div>
+                  <Div className={`h-1 flex basis-[20px] grow-0`} />
+                  <Div className={`flex basis-[40%] grow`}>
+                    <Field
+                      name="location"
+                      onBlurValidate={z.string().max(30, "Max 30 znakova!")}
+                    >
+                      {({ value, setValue, onBlur, errors }) => {
+                        return (
+                          <Input
+                            value={value}
+                            label={"Grad/Lokacija"}
+                            onBlur={onBlur}
+                            error={errors.join("\n")}
+                            onChangeText={(text) => {
+                              setValue(text);
+                            }}
+                            placeholder={"Zagreb"}
+                          />
+                        );
+                      }}
+                    </Field>
+                  </Div>
+                </Div>
+
                 <Div className={`flex gap-3 flex-row mt-8`}>
                   <Div className={`flex grow`}>
                     <Button

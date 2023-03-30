@@ -190,31 +190,37 @@ export interface Database {
       }
       Users: {
         Row: {
+          age: number | null
           bio: string | null
           created_at: string | null
           displayname: string
           id: string
           imagesId: string | null
+          location: string | null
           name: string
           pushtoken: string | null
           surname: string
         }
         Insert: {
+          age?: number | null
           bio?: string | null
           created_at?: string | null
           displayname: string
           id: string
           imagesId?: string | null
+          location?: string | null
           name: string
           pushtoken?: string | null
           surname: string
         }
         Update: {
+          age?: number | null
           bio?: string | null
           created_at?: string | null
           displayname?: string
           id?: string
           imagesId?: string | null
+          location?: string | null
           name?: string
           pushtoken?: string | null
           surname?: string

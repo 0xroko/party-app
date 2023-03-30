@@ -4,7 +4,8 @@
 	"private": true,
 	"scripts": {
 		"sl": "supabase login",
-		"sg": "supabase gen types typescript --project-id nfdwiivovdwuobzxompi --schema public > supabase.ts"
+		"sg": "supabase gen types typescript --project-id nfdwiivovdwuobzxompi --schema public > supabase.ts",
+		"db": "prisma migrate dev"
 	},
 	"dependencies": {
 		"@prisma/client": "^4.11.0",
