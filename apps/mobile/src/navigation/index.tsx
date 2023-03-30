@@ -1,6 +1,7 @@
 import { UserLoginInfoScreen } from "@features/auth/info-screen";
 import { LoginLoginScreen } from "@features/auth/signup";
 import { HomeScreen } from "@features/home";
+import { UserEditScreen } from "@features/user/edit";
 import { UserInfoScreen } from "@features/user/id";
 import { supabase } from "@lib/supabase";
 import { useAuthStore } from "@navigation/authStore";
@@ -64,6 +65,14 @@ export const NativeNavigation = () => {
             }}
             name="user"
             component={UserInfoScreen}
+          />
+          <Stack.Screen
+            options={{
+              title: "",
+              headerShown: false,
+            }}
+            name="user-edit"
+            component={UserEditScreen}
           />
         </>
       )}

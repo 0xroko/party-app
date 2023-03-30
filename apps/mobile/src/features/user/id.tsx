@@ -3,31 +3,21 @@ import { Div, Img, Text } from "@components/index";
 import { SafeArea } from "@components/safe-area";
 import { EllipsisVerticalIcon } from "react-native-heroicons/solid";
 
-import { ArrowLeftIcon, Cog6ToothIcon } from "react-native-heroicons/outline";
-
+import { Badge } from "@components/badge";
+import { NavBar } from "@components/navbar";
 import { useAuthUser } from "@hooks/useAuthUser";
+import { useUser } from "@hooks/useUser";
 import { User } from "@lib/actions";
-import { getUserById } from "@lib/actions/user";
 import {
   accept_friend_request,
   checkIfFriend,
   remove_friend,
   send_friend_request,
 } from "@lib/frendship/add_friend";
-import { useNavigation } from "@react-navigation/native";
+import { formatUserDisplayName } from "@lib/misc";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { FC, useMemo, useState } from "react";
-import { Pressable } from "react-native";
 import { useQuery } from "react-query";
-
-export const useUser = (id: User["id"]) => {
-  const q = useQuery(["user", id], async () => {
-    const u = await getUserById(id);
-    return u[0];
-  });
-
-  return q;
-};
 
 export const useFriendship = (id: User["id"]) => {
   const authUser = useAuthUser();
@@ -52,78 +42,9 @@ export const useFriendship = (id: User["id"]) => {
   };
 };
 
-import { logOut } from "@lib/actions/auth";
-import * as DropdownMenu from "zeego/dropdown-menu";
-
-interface NavBarProps {
-  children?: React.ReactNode | React.ReactNode[];
-  trailing?: React.ReactNode | React.ReactNode[];
-}
-
-export const NavBar = ({ children, trailing }: NavBarProps) => {
-  const navigation = useNavigation();
-
-  const lastRouteName = navigation.getState().routes.slice(-2)[0];
-
-  return (
-    <Div
-      className={`flex mx-[22px] flex-row items-center justify-between my-6`}
-    >
-      <Pressable onPress={() => navigation.goBack()}>
-        <Div className={`flex g-4 flex-row items-center`}>
-          <ArrowLeftIcon color={"#fff"} size={20} strokeWidth={2} />
-          <Text
-            className={`text-accents-12 font-figtree-bold capitalize leading-5`}
-          >
-            {lastRouteName.name}
-          </Text>
-        </Div>
-      </Pressable>
-      <Div className={`flex g-4 flex-row`}>
-        {trailing}
-        <DropdownMenu.Root>
-          <DropdownMenu.Trigger>
-            <Cog6ToothIcon size={24} strokeWidth={2} color={"#fff"} />
-          </DropdownMenu.Trigger>
-          <DropdownMenu.Content>
-            <DropdownMenu.Label>Test</DropdownMenu.Label>
-            <DropdownMenu.Item
-              onSelect={() => {
-                logOut();
-              }}
-              style={{
-                backgroundColor: "#232323",
-                padding: 10,
-              }}
-              key="2"
-            >
-              <DropdownMenu.ItemTitle>Log out</DropdownMenu.ItemTitle>
-            </DropdownMenu.Item>
-          </DropdownMenu.Content>
-        </DropdownMenu.Root>
-      </Div>
-    </Div>
-  );
-};
-
-interface BadgeProps {
-  children?: React.ReactNode | React.ReactNode[];
-}
-
-export const Badge = ({ children }: BadgeProps) => {
-  return (
-    <Div
-      className={`flex flex-row items-center justify-center bg-accents-1 rounded-full px-3 py-1.5 border-accents-12 border`}
-    >
-      <Text className={`text-accents-12 font-figtree-bold`}>{children}</Text>
-    </Div>
-  );
-};
-
 export const UserInfoScreen: FC<
   NativeStackScreenProps<StackNavigatorParams, "user">
 > = ({ navigation, route }) => {
-  // screen width and height
   const userId = route.params?.id;
 
   const { data: user, isLoading } = useUser(userId);
@@ -140,8 +61,6 @@ export const UserInfoScreen: FC<
   const isMe = authUser?.user.id === userId;
 
   const handleUserAction = () => {
-    console.log("friendShipStatus", friendShipStatus);
-
     if (!isMe) {
       if (friendShipStatus === "friend") {
         return {
@@ -168,14 +87,20 @@ export const UserInfoScreen: FC<
       }
     }
     return {
-      actionFn: async () => navigation.navigate("home"),
+      actionFn: async () => {
+        navigation.navigate("user-edit", {
+          previousScreenName: formatUserDisplayName(user.displayname),
+        });
+      },
       text: "Edit profile",
     };
   };
 
   const { actionFn, text } = useMemo(() => {
     return handleUserAction();
-  }, [friendShipStatus, actions]);
+  }, [friendShipStatus, actions, user]);
+
+  const hasBio = user?.bio?.length > 0;
 
   return (
     <SafeArea gradient>
@@ -214,11 +139,11 @@ export const UserInfoScreen: FC<
 
             <Div className={`mt-7`}>
               <Text
-                className={`font-figtree-medium text-base text-center text-accents-12 tracking-wide leading-7`}
+                className={`font-figtree-medium text-base text-center ${
+                  !hasBio ? "text-accents-10" : "text-accents-12"
+                } tracking-wide leading-7`}
               >
-                Je*enti, samo Split, samo Mediteran, nebriga, šporkica i leđero.
-                Ovo je čudo, znači ovo ja u životu nisan vidia da ja mogu
-                četrspet minuta stajat na mistu
+                {hasBio ? user?.bio : "Korisnik se nije još predstavio. :<"}
               </Text>
             </Div>
             <Div className={`mt-16 flex g-4 flex-row w-full`}>
