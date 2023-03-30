@@ -15,4 +15,5 @@ type StackNavigatorParams = {
     id: string;
   } & DefaultNavigationOptions;
   "user-edit": {} & DefaultNavigationOptions;
+  "party-add": undefined;
 };
