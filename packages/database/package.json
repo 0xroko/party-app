@@ -10,6 +10,6 @@
 	"dependencies": {
 		"@prisma/client": "^4.11.0",
 		"prisma": "^4.11.0",
-		"supabase": "^1.45.2"
+		"supabase": "^1.46.4"
 	}
 }

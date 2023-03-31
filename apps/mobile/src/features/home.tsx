@@ -40,6 +40,7 @@ export const HomeScreen: FC<
           >
             My Profile
           </Button>
+
           <Button
             disabled={!isFetched}
             onPress={() => {
@@ -50,6 +51,14 @@ export const HomeScreen: FC<
             }}
           >
             {randomUserData?.displayname}
+          </Button>
+          <Button
+            // disabled={!isFetched}
+            onPress={() => {
+              navigation.navigate("party-add");
+            }}
+          >
+            add party
           </Button>
         </Div>
       </Div>

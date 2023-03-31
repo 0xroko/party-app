@@ -1,6 +1,7 @@
 import { UserLoginInfoScreen } from "@features/auth/info-screen";
 import { LoginLoginScreen } from "@features/auth/signup";
 import { HomeScreen } from "@features/home";
+import { PartyAdd } from "@features/party/add";
 import { UserEditScreen } from "@features/user/edit";
 import { UserInfoScreen } from "@features/user/id";
 import { supabase } from "@lib/supabase";
@@ -34,7 +35,7 @@ export const NativeNavigation = () => {
       }, 100);
     });
 
-    return () => {};
+    return () => { };
   }, []);
 
   return (
@@ -73,6 +74,14 @@ export const NativeNavigation = () => {
             }}
             name="user-edit"
             component={UserEditScreen}
+          />
+          <Stack.Screen
+            options={{
+              title: "",
+              headerShown: false,
+            }}
+            name="party-add"
+            component={PartyAdd}
           />
         </>
       )}
