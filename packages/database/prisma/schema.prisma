@@ -61,6 +61,7 @@ model Party {
   PartyChat     Chat?
   Images        Images[]
   host          Users       @relation("HostedParties", fields: [hostId], references: [id])
+  description   String
 
   @@schema("public")
 }
