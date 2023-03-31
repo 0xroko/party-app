@@ -152,7 +152,7 @@ export interface Database {
       }
       Party: {
         Row: {
-          chatId: string
+          chatId: string | null
           createdAt: string
           description: string
           ended: boolean
@@ -165,7 +165,7 @@ export interface Database {
           updatedAt: string
         }
         Insert: {
-          chatId: string
+          chatId?: string | null
           createdAt?: string
           description: string
           ended?: boolean
@@ -175,10 +175,10 @@ export interface Database {
           name: string
           tags?: string[] | null
           time_starting: string
-          updatedAt: string
+          updatedAt?: string
         }
         Update: {
-          chatId?: string
+          chatId?: string | null
           createdAt?: string
           description?: string
           ended?: boolean
