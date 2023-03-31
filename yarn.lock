@@ -9425,10 +9425,10 @@ sudo-prompt@^9.0.0:
   resolved "https://registry.yarnpkg.com/sudo-prompt/-/sudo-prompt-9.2.1.tgz#77efb84309c9ca489527a4e749f287e6bdd52afd"
   integrity sha512-Mu7R0g4ig9TUuGSxJavny5Rv0egCEtpZRNMrZaYS1vxkiIxGiGUwoezU3LazIQ+KE04hTrTfNPgxU5gzi7F5Pw==
 
-supabase@^1.45.2:
-  version "1.45.2"
-  resolved "https://registry.yarnpkg.com/supabase/-/supabase-1.45.2.tgz#1e69196d3d38881a17957317a20588f036448897"
-  integrity sha512-M9Mk8+pj6F5sTGS8m0lDlOQ5WUgI6TWQBL8wnSobq834ZwImUgn6731NDoetsUd2GFsG7DFffPU+HzgLWbnqkQ==
+supabase@^1.46.4:
+  version "1.46.4"
+  resolved "https://registry.yarnpkg.com/supabase/-/supabase-1.46.4.tgz#e6572009a6a13089bf7e04fdd305517fec315ead"
+  integrity sha512-MG+lsu8MrCyqAyArMKtHuzYDxO1JLeKX7myKpONHHv4lgIJBuO5C8OsjBF0HknrRHHCF9u7KveSxLMLfYoYy8w==
   dependencies:
     bin-links "^4.0.1"
     node-fetch "^3.2.10"

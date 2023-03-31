@@ -154,6 +154,7 @@ export interface Database {
         Row: {
           chatId: string
           createdAt: string
+          description: string
           ended: boolean
           hostId: string
           id: string
@@ -166,6 +167,7 @@ export interface Database {
         Insert: {
           chatId: string
           createdAt?: string
+          description: string
           ended?: boolean
           hostId: string
           id?: string
@@ -178,6 +180,7 @@ export interface Database {
         Update: {
           chatId?: string
           createdAt?: string
+          description?: string
           ended?: boolean
           hostId?: string
           id?: string
