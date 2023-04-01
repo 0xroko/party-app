@@ -20,12 +20,16 @@ const buttonStyles = cva("justify-center items-center rounded-full flex-row", {
   },
 });
 
-const buttonTextStyles = cva("", {
+const buttonTextStyles = cva("font-figtree-bold", {
   variants: {
     intent: {
       primary: "text-accents-1",
       secondary: "text-accents-12",
       disabled: "text-accents-6",
+    },
+    iconOnly: {
+      true: "",
+      false: "px-3",
     },
   },
 });
@@ -37,6 +41,8 @@ interface ButtonProps
     TouchableOpacityProps {
   children?: React.ReactNode | React.ReactNode[];
   className?: string;
+  iconOnly?: boolean;
+
   disabled?: boolean;
   loading?: boolean;
   leadingIcon?: React.ReactNode | React.ReactNode[];
@@ -60,6 +66,7 @@ export const Button = ({
   size,
   className,
   intent,
+  iconOnly = false,
   leadingIcon,
   trailingIcon,
   disabled,
@@ -104,6 +111,11 @@ export const Button = ({
     };
   });
 
+  const btnText = buttonTextStyles({
+    intent: intentI,
+    iconOnly,
+  });
+
   return (
     <Pressable
       {...o}
@@ -118,19 +130,16 @@ export const Button = ({
           setTimeout(() => {
             scale.value = 1;
             opacity.value = 1;
-          }, 100);
+          }, 50);
         }
       }}
     >
-      <AnimatedView className={style} style={[customSpringStyles]}>
+      <AnimatedView
+        className={`${style} ${className}`}
+        style={[customSpringStyles]}
+      >
         {leadingIcon && <Div className={`mr-2`}>{leadingIcon}</Div>}
-        <Text
-          className={`${buttonTextStyles({
-            intent: intentI,
-          })} ${className} font-figtree-bold`}
-        >
-          {children}
-        </Text>
+        <Text className={btnText}>{children}</Text>
         {trailingIcon && <Div className={`ml-2`}>{trailingIcon}</Div>}
       </AnimatedView>
     </Pressable>

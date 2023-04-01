@@ -33,6 +33,47 @@ export const send_friend_request = async (
   return true;
 };
 
+export const unsend_friend_request = async (
+  friend_id: string,
+  authUser: User
+) => {
+  if (!authUser?.id) {
+    onSupabaseError("No user logged in");
+    return false;
+  }
+  const r = await supabase
+    .from("Friendship")
+    .delete()
+    .eq("userAId", authUser?.id)
+    .eq("userBId", friend_id)
+    .eq("accepted", false);
+
+  if (r.error) {
+    onSupabaseError(r.error);
+    return false;
+  }
+  return true;
+};
+
+export const decline_friend_request = async () => {
+  const authUser = await supabase.auth.getUser();
+  if (!authUser.data?.user?.id) {
+    onSupabaseError("No user logged in");
+    return false;
+  }
+  const r = await supabase
+    .from("Friendship")
+    .delete()
+    .eq("userBId", authUser.data.user.id)
+    .eq("accepted", false);
+
+  if (r.error) {
+    onSupabaseError(r.error);
+    return false;
+  }
+  return true;
+};
+
 export const checkIfFriend: (
   friend_id: string,
   authUser: User

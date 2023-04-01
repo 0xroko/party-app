@@ -1,10 +1,15 @@
 import { Button } from "@components/button";
 import { Div, Img, Text } from "@components/index";
 import { SafeArea } from "@components/safe-area";
-import { EllipsisVerticalIcon } from "react-native-heroicons/solid";
+import {
+  EllipsisVerticalIcon,
+  UserPlusIcon,
+} from "react-native-heroicons/outline";
+
+import { MapPinIcon } from "react-native-heroicons/mini";
 
 import { Badge } from "@components/badge";
-import { NavBar } from "@components/navbar";
+import { NavBar, NavBarItem } from "@components/navbar";
 import { useAuthUser } from "@hooks/useAuthUser";
 import { useUser } from "@hooks/useUser";
 import { User } from "@lib/actions";
@@ -13,13 +18,17 @@ import {
   checkIfFriend,
   remove_friend,
   send_friend_request,
+  unsend_friend_request,
 } from "@lib/frendship/add_friend";
 import { formatBio, formatName, formatUserDisplayName } from "@lib/misc";
+import { supabase } from "@lib/supabase";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { AuthUser } from "@supabase/supabase-js";
 import { styled } from "nativewind";
 import { FC, useMemo, useState } from "react";
 import { Pressable, ScrollView } from "react-native";
 import { useQuery } from "react-query";
+import colors from "../../../colors";
 
 export const useFriendship = (id: User["id"]) => {
   const authUser = useAuthUser();
@@ -40,6 +49,7 @@ export const useFriendship = (id: User["id"]) => {
       sendFriendRequest: send_friend_request,
       acceptFriendRequest: accept_friend_request,
       removeFriend: remove_friend,
+      unsendFriendRequest: unsend_friend_request,
     },
   };
 };
@@ -65,8 +75,11 @@ export const UserList = ({ users }: UserListProps) => {
           gap: 22,
         }}
       >
-        {users.map((user) => (
-          <Div className={`flex flex-col items-center justify-between g-4`}>
+        {users.map((user, i) => (
+          <Div
+            key={i.toString()}
+            className={`flex flex-col items-center justify-between g-4`}
+          >
             <Img
               className={`w-28 h-28 rounded-full`}
               source={{
@@ -88,6 +101,24 @@ export const UserList = ({ users }: UserListProps) => {
       </ScrollView>
     </Div>
   );
+};
+
+export const useFriendReqestCount = (user: User, isMe: boolean) => {
+  const req = useQuery(
+    ["friend-requests", user?.id],
+    async () => {
+      return await supabase
+        .from("Friendship")
+        .select("*", { count: "exact", head: true })
+        .eq("userBId", user?.id)
+        .eq("accepted", false);
+    },
+    {
+      enabled: isMe,
+    }
+  );
+
+  return req;
 };
 
 export const UserInfoScreen: FC<
@@ -127,28 +158,26 @@ export const UserInfoScreen: FC<
     });
   };
 
-  const handleUserAction = () => {
+  const handleUserAction = (userId: string, authUser: AuthUser) => {
     if (!isMe) {
       if (friendShipStatus === "friend") {
         return {
-          actionFn: async () => actions.removeFriend(userId, authUser.user),
+          actionFn: async () => actions.removeFriend(userId, authUser),
           text: "Remove friend",
         };
       } else if (friendShipStatus === "accept") {
         return {
-          actionFn: async () =>
-            actions.acceptFriendRequest(userId, authUser.user),
+          actionFn: async () => actions.acceptFriendRequest(userId, authUser),
           text: "Accept request",
         };
       } else if (friendShipStatus === "none") {
         return {
-          actionFn: async () =>
-            actions.sendFriendRequest(userId, authUser.user),
+          actionFn: async () => actions.sendFriendRequest(userId, authUser),
           text: "Send friend request",
         };
       } else if (friendShipStatus === "requested") {
         return {
-          actionFn: async () => actions.removeFriend(userId, authUser.user),
+          actionFn: async () => actions.unsendFriendRequest(userId, authUser),
           text: "Cancel request",
         };
       }
@@ -162,8 +191,10 @@ export const UserInfoScreen: FC<
   };
 
   const { actionFn, text } = useMemo(() => {
-    return handleUserAction();
-  }, [friendShipStatus, actions, user]);
+    return handleUserAction(user?.id, authUser.user);
+  }, [friendShipStatus, actions, user, authUser]);
+
+  const { data: friendRequestCount } = useFriendReqestCount(user, isMe);
 
   const hasBio = user?.bio?.length > 0;
 
@@ -171,7 +202,30 @@ export const UserInfoScreen: FC<
 
   return (
     <SafeArea gradient>
-      <NavBar />
+      <NavBar includeDefaultTrailing={isMe}>
+        {isMe && (
+          <NavBarItem
+            onPress={() => {
+              navigation.navigate("user-friend-request", {
+                previousScreenName: formatUserDisplayName(user.displayname),
+              });
+            }}
+          >
+            {friendRequestCount?.count > 0 && (
+              <Div
+                className={`bg-error-primary  rounded-full p-1 absolute min-w-[16px] text-center flex justify-center items-center -right-1 -top-1 z-30 shadow-lg`}
+              >
+                <Text
+                  className={`text-[8px] text-accents-12 font-figtree-bold`}
+                >
+                  {friendRequestCount.count}
+                </Text>
+              </Div>
+            )}
+            <UserPlusIcon strokeWidth={2} size={24} color="#fff" />
+          </NavBarItem>
+        )}
+      </NavBar>
       {isFetched && (
         <Div className={`mx-[20px] flex h-full `}>
           <Div className={`flex flex-col items-center`}>
@@ -203,9 +257,19 @@ export const UserInfoScreen: FC<
                 className={`mt-6 g-3 flex flex-row items-center justify-center`}
               >
                 {user?.location ? (
-                  <Badge intent="primary">{user?.location}</Badge>
+                  <Badge
+                    icon={<MapPinIcon color={"#fff"} size={16} />}
+                    intent="primary"
+                  >
+                    {user?.location}
+                  </Badge>
                 ) : (
-                  <Badge intent="disabled">???? grad</Badge>
+                  <Badge
+                    icon={<MapPinIcon color={colors.accents[9]} size={16} />}
+                    intent="disabled"
+                  >
+                    ???? grad
+                  </Badge>
                 )}
                 {user?.age ? (
                   <Badge intent="primary">{user?.age} god.</Badge>

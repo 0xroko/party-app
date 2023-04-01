@@ -1,26 +1,14 @@
-import { z } from "zod";
-
 import { Button } from "@components/button";
 import { Div, Text } from "@components/index";
 import { Input } from "@components/input";
 import { SafeArea } from "@components/safe-area";
-import { googleSignIn, useLoginStore } from "@lib/actions/auth";
-import { checkIfUserHasData } from "@lib/actions/user";
 import { supabase } from "@lib/supabase";
-import { useAuthStore } from "@navigation/authStore";
 import { Field, Form, FormInstance } from "houseform";
 import { FC, useState } from "react";
-import { TouchableOpacity, View } from "react-native";
-import Mapbox from '@rnmapbox/maps';
 // import { AddressAutofill } from '@mapbox/search-js-react';
-import React from "react";
-import MapView, { Marker } from 'react-native-maps';
-import RNDateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
-import { useAuthUser } from "@hooks/useAuthUser";
+import RNDateTimePicker from "@react-native-community/datetimepicker";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-
-
-
+import React from "react";
 
 interface SectionProps {
   children?: React.ReactNode | React.ReactNode[];
@@ -52,16 +40,18 @@ export const SectionTitle = ({ description, title }: SectionTitleProps) => {
   );
 };
 
+interface PartyAddForm {
+  description: string;
+  location: string;
+  name: string;
+  start_date: number;
+  start_time: number;
+}
 
 export const PartyAdd: FC<
   NativeStackScreenProps<StackNavigatorParams, "home">
 > = ({ navigation, route }) => {
-  const loginState = useLoginStore();
-  const setAuthState = useAuthStore((s) => s.setAuthState);
-
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-
 
   function mergeDates(date1, date2): Date {
     const d1 = new Date(date1);
@@ -77,41 +67,39 @@ export const PartyAdd: FC<
     const timezoneOffset = d2.getTimezoneOffset();
     hours -= timezoneOffset / 60;
 
-    const mergedDate = new Date(Date.UTC(year, month, day, hours, minutes, seconds));
+    const mergedDate = new Date(
+      Date.UTC(year, month, day, hours, minutes, seconds)
+    );
 
     return mergedDate;
   }
 
-  async function onVerify(values: {
-    description: string,
-    location: string,
-    name: string,
-    start_date: number,
-    start_time: number
-  }, form: FormInstance<any>): void {
+  async function onVerify(values: PartyAddForm, form: FormInstance<any>) {
     console.log("Function not implemented.", values);
 
     // merge date and time into one
     // const date = ;
     // const time = new Date(values.start_time);
-    const merged = mergeDates(values.start_time, values.start_time)
+    const merged = mergeDates(values.start_time, values.start_time);
     const { data, error } = await supabase.auth.getUser();
-    const res = await supabase.from("Party").insert([
-      {
-        name: values.name,
-        description: values.description, location: values.location,
-        time_starting: merged.toISOString(),
-        hostId: data.user.id,
-      }
-    ]).select("*");
+    const res = await supabase
+      .from("Party")
+      .insert([
+        {
+          name: values.name,
+          description: values.description,
+          location: values.location,
+          time_starting: merged.toISOString(),
+          hostId: data.user.id,
+        },
+      ])
+      .select("*");
     console.log(res);
-
   }
 
   const [coordinate, setCoordinate] = React.useState();
   const [startDate, setStartDate] = React.useState(new Date());
   const [date, setDate] = React.useState<"none" | "date" | "time">("none");
-
 
   return (
     <SafeArea gradient>
@@ -121,13 +109,13 @@ export const PartyAdd: FC<
           description={"Kreiraj party i skupi ekipu!"}
         />
 
-        <Form<{ otp: string }> onSubmit={onVerify}>
+        <Form<PartyAddForm> onSubmit={onVerify}>
           {({ isValid, submit }) => (
             <Div className={`flex`}>
-              <Div className={`flex flex-col mb-4 grow`}>
+              <Div className={`flex flex-col mb-4 grow g-3`}>
                 <Field
                   name="name"
-                // onBlurValidate={z.string().min(6, "Minimalno 6 znakova")}
+                  // onBlurValidate={z.string().min(6, "Minimalno 6 znakova")}
                 >
                   {({ value, setValue, onBlur, errors }) => {
                     return (
@@ -138,21 +126,22 @@ export const PartyAdd: FC<
                         error={errors.join("\n")}
                         onChangeText={(text) => setValue(text)}
                         // todo toast onclick da je hr only il tak nes
-
-                        placeholder={"Naziv partyja"}
+                        label={"Naziv partyja"}
+                        placeholder={"Party kod doma"}
                       />
                     );
                   }}
                 </Field>
                 <Field
                   name="description"
-                // onBlurValidate={z.string().min(6, "Minimalno 6 znakova")}
+                  // onBlurValidate={z.string().min(6, "Minimalno 6 znakova")}
                 >
                   {({ value, setValue, onBlur, errors }) => {
                     return (
                       <Input
                         value={value}
                         large
+                        label="Opis partyja"
                         // keyboardType={"phone-pad"}
                         onBlur={onBlur}
                         error={errors.join("\n")}
@@ -166,7 +155,7 @@ export const PartyAdd: FC<
                 </Field>
                 <Field
                   name="location"
-                // onBlurValidate={z.string().min(6, "Minimalno 6 znakova")}
+                  // onBlurValidate={z.string().min(6, "Minimalno 6 znakova")}
                 >
                   {({ value, setValue, onBlur, errors }) => {
                     return (
@@ -177,102 +166,107 @@ export const PartyAdd: FC<
                         error={errors.join("\n")}
                         onChangeText={(text) => setValue(text)}
                         // todo toast onclick da je hr only il tak nes
-
+                        label={"Lokacija"}
                         placeholder={"Gdje je party?"}
                       />
                     );
                   }}
                 </Field>
-                <Div className="mt-10">
-                  <Field
-                    name="start_date"
-                  >
-                    {({ value, setValue, onBlur, errors }) => {
-
-                      // console.log("open", date)
-                      return (
-                        <>
-                          <Input
-                            value={value && new Date(value).toLocaleDateString()}
-
-                            onBlur={() => {
-                              console.log("blur")
-                            }}
-                            error={errors.join("\n")}
-                            onFocus={(e) => {
-                              console.log("focus")
-                              setDate("date")
-                              e.preventDefault()
-                            }}
-
-
-                            placeholder={"Datum party-a"}
-                          />
-                          {date == "date" && <RNDateTimePicker
-                            // display="default"
-                            mode="date"
-                            onChange={(e) => {
-                              console.log("e.nativeEvent.timestamp", e)
-                              // set value to date with format DD.MM.YYYY
-                              setDate("none")
-                              setValue(e.nativeEvent.timestamp)
-                            }}
-
-                            value={new Date()} />}
-                        </>
-                      );
-                    }}
-                  </Field>
-                  <Field
-                    name="start_time"
-                  >
-                    {({ value, setValue, onBlur, errors }) => {
-
-                      // console.log("open", open)
-                      return (
-                        <>
-                          <Input
-                            value={value && new Date(value).toLocaleTimeString()}
-
-                            onBlur={() => {
-                              console.log("blur")
-                            }}
-                            error={errors.join("\n")}
-                            onFocus={(e) => {
-                              console.log("focus")
-                              setDate("time")
-                              e.preventDefault()
-                            }}
-
-
-                            placeholder={"Vrijeme party-a"}
-                          />
-                          {date == "time" && <RNDateTimePicker
-                            // display="inline"
-                            mode="time"
-                            onChange={(e) => {
-                              console.log("e.nativeEvent.timestamp", value)
-                              setDate("none")
-                              setValue(e.nativeEvent.timestamp)
-                            }}
-                            value={new Date()} />}
-                        </>
-                      );
-                    }}
-                  </Field>
+                <Div className="">
+                  <Div className={`flex flex-row g-3`}>
+                    <Div className={`flex-1`}>
+                      <Field name="start_date">
+                        {({ value, setValue, onBlur, errors }) => {
+                          // console.log("open", date)
+                          return (
+                            <>
+                              <Input
+                                value={
+                                  value && new Date(value).toLocaleDateString()
+                                }
+                                onBlur={() => {
+                                  console.log("blur");
+                                }}
+                                label={"Datum"}
+                                error={errors.join("\n")}
+                                onFocus={(e) => {
+                                  console.log("focus");
+                                  setDate("date");
+                                  e.preventDefault();
+                                }}
+                                placeholder={"Datum party-a"}
+                              />
+                              {date == "date" && (
+                                <RNDateTimePicker
+                                  // display="default"
+                                  mode="date"
+                                  onChange={(e) => {
+                                    console.log("e.nativeEvent.timestamp", e);
+                                    // set value to date with format DD.MM.YYYY
+                                    setDate("none");
+                                    setValue(e.nativeEvent.timestamp);
+                                  }}
+                                  value={new Date()}
+                                />
+                              )}
+                            </>
+                          );
+                        }}
+                      </Field>
+                    </Div>
+                    <Div className={`flex-1`}>
+                      <Field name="start_time">
+                        {({ value, setValue, onBlur, errors }) => {
+                          // console.log("open", open)
+                          return (
+                            <>
+                              <Input
+                                value={
+                                  value && new Date(value).toLocaleTimeString()
+                                }
+                                onBlur={() => {
+                                  console.log("blur");
+                                }}
+                                error={errors.join("\n")}
+                                label={"Vrijeme"}
+                                onFocus={(e) => {
+                                  console.log("focus");
+                                  setDate("time");
+                                  e.preventDefault();
+                                }}
+                                placeholder={"Vrijeme party-a"}
+                              />
+                              {date == "time" && (
+                                <RNDateTimePicker
+                                  // display="inline"
+                                  mode="time"
+                                  onChange={(e) => {
+                                    console.log(
+                                      "e.nativeEvent.timestamp",
+                                      value
+                                    );
+                                    setDate("none");
+                                    setValue(e.nativeEvent.timestamp);
+                                  }}
+                                  value={new Date()}
+                                />
+                              )}
+                            </>
+                          );
+                        }}
+                      </Field>
+                    </Div>
+                  </Div>
                 </Div>
-                <Div className=" w-full h-10">
-                  <Text></Text>
-
-
-
-                </Div>
-
               </Div>
 
-              <Div className={`flex gap-3 flex-row`}>
+              <Div className={`flex gap-3 flex-row mt-6`}>
                 <Div className={`flex basis-[33%] grow-0`}>
-                  <Button onPress={() => navigation.navigate("home")} size={"medium"} intent={"secondary"}>
+                  <Button
+                    onPress={() => navigation.navigate("home")}
+                    size={"medium"}
+                    intent={"secondary"}
+                  >
                     Natrag
                   </Button>
                 </Div>
@@ -291,10 +285,9 @@ export const PartyAdd: FC<
                 </Div>
               </Div>
             </Div>
-          )
-          }
-        </Form >
-      </Section >
+          )}
+        </Form>
+      </Section>
     </SafeArea>
   );
 };

@@ -108,6 +108,7 @@ export const Input = forwardRef(
             ref={ref}
             {...p}
             cursorColor={placeHolderStyles({ state })}
+            textAlignVertical={large ? "top" : "center"}
             editable={disabled ? false : p.editable}
             multiline={large ? true : p.multiline}
             selectTextOnFocus={disabled ? false : p.selectTextOnFocus}

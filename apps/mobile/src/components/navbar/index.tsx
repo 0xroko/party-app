@@ -13,7 +13,9 @@ export const DefaultNavBarTrailing = ({ children }: DefaultNavBarProps) => {
   return (
     <DropdownMenu.Root>
       <DropdownMenu.Trigger>
-        <Cog6ToothIcon size={24} strokeWidth={2} color={"#fff"} />
+        <Div className={` p-2`}>
+          <Cog6ToothIcon size={24} strokeWidth={2} color={"#fff"} />
+        </Div>
       </DropdownMenu.Trigger>
       <DropdownMenu.Content>
         <DropdownMenu.Label>Log out</DropdownMenu.Label>
@@ -30,12 +32,29 @@ export const DefaultNavBarTrailing = ({ children }: DefaultNavBarProps) => {
   );
 };
 
-interface NavBarProps {
+import { PressableProps } from "react-native";
+
+interface NavBarItemProps extends PressableProps {
   children?: React.ReactNode | React.ReactNode[];
-  trailing?: React.ReactNode | React.ReactNode[];
 }
 
-export const NavBar = ({ children, trailing }: NavBarProps) => {
+export const NavBarItem = ({ children, ...props }: NavBarItemProps) => {
+  return (
+    <Pressable {...props}>
+      <Div className={`flex flex-row items-center  p-2`}>{children}</Div>
+    </Pressable>
+  );
+};
+
+interface NavBarProps {
+  children?: React.ReactNode | React.ReactNode[];
+  includeDefaultTrailing?: boolean;
+}
+
+export const NavBar = ({
+  children,
+  includeDefaultTrailing = true,
+}: NavBarProps) => {
   const navigationState = useNavigationState((state) => state.routes);
   const navigation = useNavigation();
 
@@ -45,19 +64,18 @@ export const NavBar = ({ children, trailing }: NavBarProps) => {
     ?.previousScreenName;
 
   return (
-    <Div
-      className={`flex mx-[22px] flex-row items-center justify-between my-6`}
-    >
+    <Div className={`flex px-3 flex-row items-center justify-between py-3 `}>
       <Pressable onPress={() => navigation.goBack()}>
-        <Div className={`flex g-4 flex-row items-center`}>
+        <Div className={`flex   p-3 g-4 flex-row items-center`}>
           <ArrowLeftIcon color={"#fff"} size={20} strokeWidth={2.4} />
           <Text className={`text-accents-12 font-figtree-bold leading-[20]`}>
             {explicitTitle ? explicitTitle : lastRouteName.name}
           </Text>
         </Div>
       </Pressable>
-      <Div className={`flex g-4 flex-row`}>
-        {trailing ? trailing : <DefaultNavBarTrailing />}
+      <Div className={`flex g-3 flex-row`}>
+        {children && children}
+        {includeDefaultTrailing && <DefaultNavBarTrailing />}
       </Div>
     </Div>
   );

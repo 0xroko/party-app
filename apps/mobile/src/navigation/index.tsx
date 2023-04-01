@@ -3,6 +3,7 @@ import { LoginLoginScreen } from "@features/auth/signup";
 import { HomeScreen } from "@features/home";
 import { PartyAdd } from "@features/party/add";
 import { UserEditScreen } from "@features/user/edit";
+import { UserFriendReqests } from "@features/user/friend-requests";
 import { UserInfoScreen } from "@features/user/id";
 import { supabase } from "@lib/supabase";
 import { useAuthStore } from "@navigation/authStore";
@@ -11,6 +12,11 @@ import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useRef } from "react";
 
 const Stack = createNativeStackNavigator<StackNavigatorParams>();
+
+const defaultScreenOptions = {
+  title: "",
+  headerShown: false,
+};
 
 export const Splash = () => {
   return <></>;
@@ -35,7 +41,7 @@ export const NativeNavigation = () => {
       }, 100);
     });
 
-    return () => { };
+    return () => {};
   }, []);
 
   return (
@@ -52,44 +58,36 @@ export const NativeNavigation = () => {
         // TU idu svi screenovi, home prvi
         <>
           <Stack.Screen
-            options={{
-              title: "",
-              headerShown: false,
-            }}
+            options={defaultScreenOptions}
             name="home"
             component={HomeScreen}
           />
           <Stack.Screen
-            options={{
-              title: "",
-              headerShown: false,
-            }}
+            options={defaultScreenOptions}
             name="user"
             component={UserInfoScreen}
           />
           <Stack.Screen
-            options={{
-              title: "",
-              headerShown: false,
-            }}
+            options={defaultScreenOptions}
             name="user-edit"
             component={UserEditScreen}
           />
           <Stack.Screen
-            options={{
-              title: "",
-              headerShown: false,
-            }}
+            options={defaultScreenOptions}
             name="party-add"
             component={PartyAdd}
+          />
+          <Stack.Screen
+            name="user-friend-request"
+            options={defaultScreenOptions}
+            component={UserFriendReqests}
           />
         </>
       )}
       {authState === "SIGNED_OUT" && (
         <Stack.Screen
           options={{
-            title: "",
-            animation: "none",
+            ...defaultScreenOptions,
             headerShown: false,
           }}
           name="login-login"
@@ -99,8 +97,7 @@ export const NativeNavigation = () => {
       {authState === "INFO_SCREEN" && (
         <Stack.Screen
           options={{
-            title: "",
-            headerShown: false,
+            ...defaultScreenOptions,
             animation: "none",
           }}
           name="login-info"
@@ -111,9 +108,8 @@ export const NativeNavigation = () => {
         <Stack.Screen
           component={Splash}
           options={{
-            title: "",
+            ...defaultScreenOptions,
             animation: "none",
-            headerShown: false,
           }}
           name="splash"
         />
