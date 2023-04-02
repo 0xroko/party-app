@@ -7,6 +7,7 @@
 
 ## Todo
 
+- [ ] migrate from react-native-svg to react-native-skia (najvaznije)
 - [ ] block user functionality
 - [ ] party search
 - [ ] party filter

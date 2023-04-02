@@ -11,21 +11,21 @@ export interface Database {
     Tables: {
       Attending: {
         Row: {
-          accepted: boolean
+          accepted: boolean | null
           createdAt: string
           id: string
           partyId: string
           userId: string
         }
         Insert: {
-          accepted?: boolean
+          accepted?: boolean | null
           createdAt?: string
           id?: string
           partyId: string
           userId: string
         }
         Update: {
-          accepted?: boolean
+          accepted?: boolean | null
           createdAt?: string
           id?: string
           partyId?: string
@@ -237,7 +237,17 @@ export interface Database {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_chats_last_message: {
+        Args: {
+          user_id: string
+        }
+        Returns: {
+          chat_id: string
+          party_id: string
+          last_message_content: string
+          last_message_created_at: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

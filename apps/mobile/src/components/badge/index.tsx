@@ -6,7 +6,7 @@ const style = cva(
   {
     variants: {
       intent: {
-        primary: "bg-accents-1 text-accents-12 border-accents-12 ",
+        primary: "bg-glass-1 text-accents-12 border-accents-12 ",
         disabled: "bg-accents-4 text-accents-9 border-accents-7",
       },
     },

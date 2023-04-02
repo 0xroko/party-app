@@ -6,6 +6,7 @@ import { NavBar } from "@components/navbar";
 import { useAuthUser } from "@hooks/useAuthUser";
 import { useUser } from "@hooks/useUser";
 import { User } from "@lib/actions";
+import { queryKeys } from "@lib/const";
 import {
   accept_friend_request,
   decline_friend_request,
@@ -18,18 +19,19 @@ import { User as AuthUser } from "@supabase/supabase-js";
 import { FC } from "react";
 import { ScrollView, TouchableOpacity } from "react-native";
 import { useMutation, useQuery } from "react-query";
+import { queryClient } from "../../provider/index";
 
-const useFriendRequest = (authUser: AuthUser) => {
+const useFriendRequests = (authUser: AuthUser) => {
   return useQuery(
-    ["friend-request", authUser?.id],
+    queryKeys.friendReqest(authUser?.id),
     async () => {
       // create query from Friendship table where authUser is userAId
       const { data, error } = await supabase
         .from("Friendship")
         .select(
           `*,
-        userA: userAId (name, surname, imagesId, displayname),
-        userB: userBId (name, surname, imagesId, displayname)
+        userA: userAId (id,name, surname, imagesId, displayname),
+        userB: userBId (id,name, surname, imagesId, displayname)
         `
         )
         .or(`userAId.eq.${authUser?.id},userBId.eq.${authUser?.id}`)
@@ -52,7 +54,7 @@ export const UserFriendReqests: FC<
   const { data: user, isLoading } = useUser(authUser?.user?.id);
 
   const { data: friendRequests, isLoading: isFriendRequestsLoading } =
-    useFriendRequest(authUser?.user);
+    useFriendRequests(authUser?.user);
 
   const useFriendAction = useMutation({
     mutationFn: async ({
@@ -72,10 +74,14 @@ export const UserFriendReqests: FC<
     },
 
     onSuccess: () => {
-      // queryClient.invalidateQueries({ queryKey: ["user", authUser.user.id] });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.friendReqest(authUser?.user.id),
+      });
     },
     onError: (err) => {},
   });
+
+  if (isFriendRequestsLoading) return null;
 
   return (
     <SafeArea gradient>
@@ -86,60 +92,72 @@ export const UserFriendReqests: FC<
         >
           Zahtjevi
         </Text>
-        <ScrollView>
-          {friendRequests?.map((friendRequest) => {
-            const user = (friendRequest.userAId === authUser?.user?.id
-              ? friendRequest.userB
-              : friendRequest.userA) as unknown as Pick<
-              User,
-              "id" | "name" | "surname" | "displayname"
-            >;
+        {friendRequests?.length === 0 ? (
+          <Text
+            className={`text-2xl font-figtree-medium text-accents-10 mb-8 mt-2`}
+          >
+            Trenutno nemaš zahtjeva
+          </Text>
+        ) : (
+          <ScrollView>
+            {friendRequests?.map((friendRequest) => {
+              const user = (friendRequest.userAId === authUser?.user?.id
+                ? friendRequest.userB
+                : friendRequest.userA) as unknown as Pick<
+                User,
+                "id" | "name" | "surname" | "displayname"
+              >;
 
-            const friendStatus =
-              friendRequest.userAId === authUser?.user?.id
-                ? "pending"
-                : "accept";
+              const friendStatus =
+                friendRequest.userAId === authUser?.user?.id
+                  ? "pending"
+                  : "accept";
 
-            const negativeFriendStatus =
-              friendStatus === "accept" ? "decline" : "cancel";
+              const negativeFriendStatus =
+                friendStatus === "accept" ? "decline" : "cancel";
 
-            if (!user) return null;
-            return (
-              <TouchableOpacity
-                key={user.id}
-                onPress={() => {
-                  console.log("user");
+              if (!user) return null;
 
-                  navigation.push("user", {
-                    previousScreenName: "Zahtjevi",
-                    id:
-                      friendRequest.userAId === authUser?.user?.id
-                        ? friendRequest.userBId
-                        : friendRequest.userAId,
-                  });
-                }}
-              >
+              return (
                 <Div
                   className={`flex flex-row items-center bg-accents-1 rounded-lg justify-between`}
                 >
-                  <Div className={`flex flex-row items-center g-4`}>
-                    <Img
-                      className={`w-20 h-20 rounded-full`}
-                      source={{
-                        uri: "https://images.unsplash.com/photo-1657320815727-2512f49f61d5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=100&h=100&q=60",
-                      }}
-                    />
-                    <Div className={`flex flex-col items-start justify-start`}>
-                      <Text
-                        className={`font-figtree-bold text-xl text-accents-12`}
+                  <TouchableOpacity
+                    key={friendRequest.id}
+                    onPress={() => {
+                      console.log("user");
+
+                      navigation.push("user", {
+                        previousScreenName: "Zahtjevi",
+                        id:
+                          friendRequest.userAId === authUser?.user?.id
+                            ? friendRequest.userBId
+                            : friendRequest.userAId,
+                      });
+                    }}
+                  >
+                    <Div className={`flex flex-row items-center g-4`}>
+                      <Img
+                        className={`w-20 h-20 rounded-full`}
+                        source={{
+                          uri: "https://images.unsplash.com/photo-1657320815727-2512f49f61d5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=100&h=100&q=60",
+                        }}
+                      />
+                      <Div
+                        className={`flex flex-col items-start justify-start`}
                       >
-                        {formatName(user.name, user.surname)}
-                      </Text>
-                      <Text className={`font-figtree text-accents-11`}>
-                        {formatUserDisplayName(user.displayname)}
-                      </Text>
+                        <Text
+                          className={`font-figtree-bold text-xl text-accents-12`}
+                        >
+                          {formatName(user.name, user.surname)}
+                        </Text>
+                        <Text className={`font-figtree text-accents-11`}>
+                          {formatUserDisplayName(user.displayname)}
+                        </Text>
+                      </Div>
                     </Div>
-                  </Div>
+                  </TouchableOpacity>
+
                   <Div className={`flex g-3 flex-row`}>
                     <Div className={``}>
                       <Button
@@ -177,10 +195,10 @@ export const UserFriendReqests: FC<
                     </Div>
                   </Div>
                 </Div>
-              </TouchableOpacity>
-            );
-          })}
-        </ScrollView>
+              );
+            })}
+          </ScrollView>
+        )}
       </SafeArea.Content>
     </SafeArea>
   );
