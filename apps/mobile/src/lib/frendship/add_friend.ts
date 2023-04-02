@@ -152,7 +152,8 @@ export const check_for_friend_request = async () => {
   const r = await supabase
     .from("Friendship")
     .select("*")
-    .eq("userBId", authUser.data.user.id);
+    .eq("userBId", authUser.data.user.id)
+    .eq("accepted", false)
   if (r.error) {
     onSupabaseError(r.error);
     return false;
