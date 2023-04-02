@@ -27,26 +27,57 @@ export default async function handler(
   const userId = record.userBid;
   const { data, error } = await supabase
     .from("Friendship")
-    .select(`userB: userBId (pushtoken), userA: userAId (displayname)`)
+    .select(`userB: userBId (id, pushtoken), userA: userAId (displayname)`)
     .or(`userAId.eq.${record.hostId}`)
     .eq("accepted", true);
   if (type == "INSERT") {
     console.log(data, error);
-    if (data)
+    if (data) {
       sendPush(
         data.map((el) => {
           console.log(el?.userB?.pushtoken);
           return {
             // @ts-ignore
             pushtoken: el?.userB?.pushtoken,
-            data: {},
+            // @ts-ignore
+            data: { partyId: record.id, userId: el.userB.id },
             // @ts-ignore
             body: `${el.userA.displayname} te poziva na ${record.name}`,
             categoryId: "new_party_notification",
           };
         })
       );
-    else console.log(data, "no data");
+
+      const { data: data_chat_res, error: error1 } = await supabase
+        .from("Chat")
+        .upsert([
+          {
+            partyId: record.id,
+          },
+        ]);
+      console.log("Chat", data_chat_res, error1);
+      // const { data: friend_list, error: error2 } = await supabase
+      //   .from("Friendship")
+      //   .select("*")
+      //   .eq("userAId", record.hostId)
+      //   .eq("accepted", true);
+
+      const { data: attending_return, error: attending_error } = await supabase
+        .from("Attending")
+        .upsert(
+          data.map((el) => {
+            return {
+              partyId: record.id,
+              //@ts-ignore
+              userId: el.userB.id,
+            };
+          })
+        );
+
+      console.log("Attending", attending_return, attending_error);
+
+      // console.log("🤯🤯", data_chat_res, error);
+    }
   } else if (type == "DELETE") {
     if (data)
       sendPush(

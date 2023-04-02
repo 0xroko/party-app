@@ -161,6 +161,23 @@ const App: FC = () => {
           console.log(r);
         } else if (actionIdentifier === 'decline-friendship-request') {
           await decline_friend_request(notification.request.content.data.userAid);
+        } else if (actionIdentifier === 'decline-party-attendance') {
+          const { data, error } = await supabase.from('Attending')
+            .update({
+              accepted: false,
+            })
+            .eq('partyId', notification.request.content.data.partyId)
+            .eq('userId', authUser?.user.id)
+          console.log(actionIdentifier, data, error);
+        } else if (actionIdentifier === 'accept-party-attendance') {
+          console.log(notification.request.content.data.party_id)
+          const { data, error } = await supabase.from('Attending')
+            .update({
+              accepted: true,
+            })
+            .eq('partyId', notification.request.content.data.partyId)
+            .eq('userId', authUser?.user.id)
+          console.log(actionIdentifier, data, error);
         }
       });
 
