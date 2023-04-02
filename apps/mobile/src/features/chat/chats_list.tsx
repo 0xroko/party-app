@@ -3,7 +3,7 @@ import { NavBar } from "@components/navbar";
 import { SafeArea } from "@components/safe-area";
 import { useAuthUser } from "@hooks/useAuthUser";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { FC, useEffect } from "react";
+import { FC, useEffect, useState } from "react";
 import { Pressable } from "react-native";
 import { supabase } from "@lib/supabase";
 // import { Button } from 'react-native';
