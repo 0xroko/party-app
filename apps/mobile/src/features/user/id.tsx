@@ -372,7 +372,7 @@ export const UserInfoScreen: FC<
             <Div className={`flex flex-col items-center`}>
               <Pressable
                 onPress={async () => {
-                  await pickImage();
+                  if (isMe) await pickImage();
                 }}
               >
                 <Img
