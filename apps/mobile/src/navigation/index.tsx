@@ -1,5 +1,7 @@
 import { UserLoginInfoScreen } from "@features/auth/info-screen";
 import { LoginLoginScreen } from "@features/auth/signup";
+import { Chat } from "@features/chat/chat";
+import { Chats } from "@features/chat/chats_list";
 import { HomeScreen } from "@features/home";
 import { PartyAdd } from "@features/party/add";
 import { UserEditScreen } from "@features/user/edit";
@@ -41,7 +43,7 @@ export const NativeNavigation = () => {
       }, 100);
     });
 
-    return () => {};
+    return () => { };
   }, []);
 
   return (
@@ -81,6 +83,16 @@ export const NativeNavigation = () => {
             name="user-friend-request"
             options={defaultScreenOptions}
             component={UserFriendReqests}
+          />
+          <Stack.Screen
+            name="chats"
+            options={defaultScreenOptions}
+            component={Chats}
+          />
+          <Stack.Screen
+            name="chat"
+            options={defaultScreenOptions}
+            component={Chat}
           />
         </>
       )}

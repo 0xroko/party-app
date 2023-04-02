@@ -60,6 +60,11 @@ export const HomeScreen: FC<
           >
             add party
           </Button>
+          <Button onPress={() => {
+            navigation.navigate("chats");
+          }}>
+            chats
+          </Button>
         </Div>
       </Div>
     </SafeArea>

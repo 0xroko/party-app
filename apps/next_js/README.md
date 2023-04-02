@@ -36,3 +36,29 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+
+default component with navigation
+```tsx
+import { SafeArea } from '@components/safe-area';
+import { useAuthUser } from '@hooks/useAuthUser';
+import { useUser } from '@hooks/useUser';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { FC, useMemo, useState } from 'react';
+
+
+
+export const Chats: FC<
+    NativeStackScreenProps<StackNavigatorParams, "chats">
+> = ({ navigation, route }) => {
+    // const userId = route.params?.id;
+
+    const { data: user, isLoading } = useUser(userId);
+    const { data: authUser, isFetched, refetch } = useAuthUser();
+
+    return (
+        <SafeArea gradient>
+
+        </SafeArea>
+    );
+};
+```
