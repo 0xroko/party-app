@@ -55,7 +55,7 @@ export const unsend_friend_request = async (
   return true;
 };
 
-export const decline_friend_request = async () => {
+export const decline_friend_request = async (userAId: string) => {
   const authUser = await supabase.auth.getUser();
   if (!authUser.data?.user?.id) {
     onSupabaseError("No user logged in");
@@ -65,6 +65,7 @@ export const decline_friend_request = async () => {
     .from("Friendship")
     .delete()
     .eq("userBId", authUser.data.user.id)
+    .eq("userAId", userAId)
     .eq("accepted", false);
 
   if (r.error) {
@@ -119,7 +120,7 @@ export const accept_friend_request = async (
     onSupabaseError("No user logged in");
     return false;
   }
-  const r = await supabase.from("Friendship").insert([
+  const r = await supabase.from("Friendship").upsert([
     {
       userAId: friend_id,
       userBId: authUser?.id,

@@ -10,6 +10,9 @@ import { registerForPushNotificationsAsync } from "@lib/actions/user";
 import { useAuthStore } from "@navigation/authStore";
 import * as Notifications from "expo-notifications";
 import * as SplashScreen from "expo-splash-screen";
+import { accept_friend_request, decline_friend_request } from "@lib/frendship/add_friend";
+import { useAuthUser } from "@hooks/useAuthUser";
+import { supabase } from "@lib/supabase";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -20,6 +23,93 @@ Notifications.setNotificationHandler({
     shouldSetBadge: true,
   }),
 });
+
+Notifications.setNotificationCategoryAsync('friendship_request', [
+  {
+    buttonTitle: `Prihvati`,
+    identifier: 'accept-friendship-request',
+
+  },
+  {
+    buttonTitle: 'Odbij',
+    identifier: 'decline-friendship-request',
+    // textInput: {
+    //   submitButtonTitle: 'Submit button',
+    //   placeholder: 'Placeholder text',
+    // },
+  },
+  {
+    buttonTitle: 'Otvori u aplikaciji',
+    identifier: 'open-friendship-request',
+    options: {
+      opensAppToForeground: true,
+    },
+  },
+])
+  .then((_category) => console.log("Set notification categoryar"))
+  .catch((error) => console.warn('Could not have set notification category', error));
+
+Notifications.setNotificationCategoryAsync('new_party_notification', [
+  {
+    buttonTitle: `Dolazim`,
+    identifier: 'accept-party-attendance',
+    options: {
+      opensAppToForeground: true,
+    },
+
+  },
+  {
+    buttonTitle: 'Ne dolazim',
+    identifier: 'decline-party-attendance',
+
+  },
+  {
+    buttonTitle: 'Pošalji poruku',
+    identifier: 'send-message',
+    textInput: {
+      submitButtonTitle: 'Submit button',
+      placeholder: 'Vaša poruka',
+    },
+  },
+])
+  .then((_category) => console.log("Set notification categoryar"))
+  .catch((error) => console.warn('Could not have set notification category', error));
+
+// Notifications.setNotificationCategoryAsync('generic_party_notification', [
+//   {
+//     buttonTitle: 'Pošalji poruku',
+//     identifier: 'send-message',
+//     textInput: {
+//       submitButtonTitle: 'Submit button',
+//       placeholder: 'Vaša poruka',
+//     },
+//   },
+// ])
+//   .then((_category) => console.log("Set notification categoryar"))
+//   .catch((error) => console.warn('Could not have set notification category', error));
+
+
+Notifications.setNotificationCategoryAsync('generic_party_notification', [
+  {
+    buttonTitle: 'Pošalji poruku',
+    identifier: 'send-message',
+    textInput: {
+      submitButtonTitle: 'Submit button',
+      placeholder: 'Vaša poruka',
+    },
+  },
+  {
+    buttonTitle: 'Otvori u aplikaciji',
+    identifier: 'open-friendship-request',
+    options: {
+      opensAppToForeground: true,
+    },
+  },
+])
+  .then((_category) => console.log("Set notification categoryar"))
+  .catch((error) => console.warn('Could not have set notification category', error));
+
+
 
 const App: FC = () => {
   const [loaded] = useFonts({
@@ -48,9 +138,30 @@ const App: FC = () => {
         setNotification(notification);
       });
 
+    // notificationListener.current =
+    //add category to notification
+    // Notifications.addNotificationsCategoryAsync()
+
+
     responseListener.current =
-      Notifications.addNotificationResponseReceivedListener((response) => {
-        console.log(response);
+      Notifications.addNotificationResponseReceivedListener(async (response) => {
+        // console.log(response);
+        const { actionIdentifier, notification, identifier, trigger } = response;
+        console.log(actionIdentifier, notification, identifier, trigger);
+        // const { data: authUser, isFetched, refetch } = useQuery(["user-auth"], async () => {
+        const { data: authUser, error } = await supabase.auth.getUser();
+
+
+        // create switch case for each action identifier
+        if (actionIdentifier === 'accept-friendship-request') {
+          const r = await accept_friend_request(
+            notification.request.content.data.userAid,
+            authUser?.user
+          )
+          console.log(r);
+        } else if (actionIdentifier === 'decline-friendship-request') {
+          await decline_friend_request(notification.request.content.data.userAid);
+        }
       });
 
     return () => {

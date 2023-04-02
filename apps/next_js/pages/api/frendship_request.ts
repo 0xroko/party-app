@@ -53,8 +53,9 @@ export default async function handler(
       sendPush([
         {
           pushtoken,
-          data: {},
+          data: { userAid: record.userAid },
           body: `${name} ${surname} vam šalje zahtjev za prijateljstvo`,
+          categoryId: "friendship_request",
         },
       ]);
     } else {
@@ -70,19 +71,20 @@ export default async function handler(
   res.status(200).json({ name: "John Doe" });
 }
 
-const sendPush = async (
+export const sendPush = async (
   pushobjects: {
     pushtoken: string;
     data: object;
     body: string;
     sound?: string;
+    categoryId?: string;
   }[]
 ) => {
   let expo = new Expo();
 
   let messages = [];
   for (let pushobject of pushobjects) {
-    const { pushtoken, data, body, sound } = pushobject;
+    const { pushtoken, data, body, sound, categoryId } = pushobject;
 
     // Each push token looks like ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]
 
@@ -98,7 +100,9 @@ const sendPush = async (
       sound: sound || "default",
       body,
       data,
+      categoryId,
     });
+    console.log(messages)
   }
 
   // The Expo push notification service accepts batches of notifications so
