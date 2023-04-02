@@ -40,7 +40,7 @@ export const Input = forwardRef(
           },
           large: {
             true: "rounded-md py-3",
-            false: "rounded-r-full",
+            false: "rounded-r-2xl",
           },
           state: {
             error: "border-error-primary text-error-primary",
@@ -57,14 +57,14 @@ export const Input = forwardRef(
           {
             leading: false,
             large: false,
-            className: "border-l rounded-l-full",
+            className: "border-l rounded-l-2xl",
           },
         ],
       }
     );
 
     const leadingStyles = cva(
-      "border-y border-l blur-md filter bg-glass-1 rounded-l-full flex justify-center px-4",
+      "border-y border-l blur-md filter bg-glass-1 rounded-l-2xl flex justify-center px-4",
       {
         variants: {
           state: {
@@ -92,15 +92,15 @@ export const Input = forwardRef(
     return (
       <Div className={`w-full max-w-full`}>
         {p.label && (
-          <Text className={`text-accents-10 font-figtree-medium`}>
+          <Text className={`text-accents-11 font-figtree-semi-bold text-sm`}>
             {p.label}
           </Text>
         )}
 
         <Div
           className={`w-full flex flex-row ${
-            large ? "h-40" : "h-10 rounded-full"
-          } text-accents-1  mt-3`}
+            large ? "h-40" : "h-10"
+          } text-accents-1  mt-2`}
         >
           {leading && <Div className={leadingStyles({ state })}>{leading}</Div>}
           <StyledInput

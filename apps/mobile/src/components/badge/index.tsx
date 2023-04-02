@@ -2,7 +2,7 @@ import { Div, Text } from "@components/index";
 import { cva, VariantProps } from "class-variance-authority";
 
 const style = cva(
-  "flex flex-row items-center justify-center rounded-full px-3 py-1.5 border g-1",
+  "flex flex-row items-center justify-center rounded-xl px-3 py-1.5 border g-1",
   {
     variants: {
       intent: {
