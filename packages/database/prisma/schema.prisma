@@ -52,11 +52,11 @@ model Party {
   location      String
   hostId        String      @db.Uuid
   time_starting DateTime
-  chatId        String?      @unique @db.Uuid
+  chatId        String?     @unique @db.Uuid
   tags          String[]
   ended         Boolean     @default(false)
   createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt @default(now())
+  updatedAt     DateTime    @default(now()) @updatedAt
   Attending     Attending[]
   PartyChat     Chat?
   Images        Images[]
@@ -74,6 +74,7 @@ model Attending {
   party     Party    @relation(fields: [partyId], references: [id])
   user      Users    @relation(fields: [userId], references: [id])
 
+  @@unique([partyId, userId])
   @@schema("public")
 }
 
