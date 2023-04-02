@@ -2,7 +2,7 @@ import { UserLoginInfoScreen } from "@features/auth/info-screen";
 import { LoginLoginScreen } from "@features/auth/signup";
 import { Chat } from "@features/chat/chat";
 import { Chats } from "@features/chat/chats_list";
-import { HomeScreen } from "@features/home";
+import { HomeScreen, ModalScreen } from "@features/home";
 import { PartyAdd } from "@features/party/add";
 import { UserEditScreen } from "@features/user/edit";
 import { UserFriendReqests } from "@features/user/friend-requests";
@@ -43,7 +43,7 @@ export const NativeNavigation = () => {
       }, 100);
     });
 
-    return () => { };
+    return () => {};
   }, []);
 
   return (
@@ -68,6 +68,15 @@ export const NativeNavigation = () => {
             options={defaultScreenOptions}
             name="user"
             component={UserInfoScreen}
+          />
+          <Stack.Screen
+            options={{
+              ...defaultScreenOptions,
+              presentation: "transparentModal",
+              animation: "none",
+            }}
+            name="user-modal"
+            component={ModalScreen}
           />
           <Stack.Screen
             options={defaultScreenOptions}

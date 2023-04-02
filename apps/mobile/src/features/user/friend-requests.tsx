@@ -8,6 +8,7 @@ import { useUser } from "@hooks/useUser";
 import { User } from "@lib/actions";
 import {
   accept_friend_request,
+  decline_friend_request,
   unsend_friend_request,
 } from "@lib/frendship/add_friend";
 import { formatName, formatUserDisplayName } from "@lib/misc";
@@ -15,7 +16,7 @@ import { supabase } from "@lib/supabase";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { User as AuthUser } from "@supabase/supabase-js";
 import { FC } from "react";
-import { Pressable, ScrollView } from "react-native";
+import { ScrollView, TouchableOpacity } from "react-native";
 import { useMutation, useQuery } from "react-query";
 
 const useFriendRequest = (authUser: AuthUser) => {
@@ -53,17 +54,23 @@ export const UserFriendReqests: FC<
   const { data: friendRequests, isLoading: isFriendRequestsLoading } =
     useFriendRequest(authUser?.user);
 
-  const usePositiveMutateStauts = useMutation<unknown, unknown, unknown>({
-    // @ts-ignore
-    mutationFn: async (friendId: string, status: "pending" | "accept") => {
-      if (status === "accept") {
+  const useFriendAction = useMutation({
+    mutationFn: async ({
+      friendId,
+      action,
+    }: {
+      friendId: string;
+      action: "decline" | "accept" | "cancel";
+    }) => {
+      if (action === "accept") {
         await accept_friend_request(friendId, authUser?.user);
-      } else {
+      } else if (action === "cancel") {
         await unsend_friend_request(friendId, authUser?.user);
+      } else if (action === "decline") {
+        await decline_friend_request(friendId, authUser?.user);
       }
-
-      return true;
     },
+
     onSuccess: () => {
       // queryClient.invalidateQueries({ queryKey: ["user", authUser.user.id] });
     },
@@ -98,11 +105,13 @@ export const UserFriendReqests: FC<
 
             if (!user) return null;
             return (
-              <Pressable
-                onClick={() => {
-                  console.log("go to user");
+              <TouchableOpacity
+                key={user.id}
+                onPress={() => {
+                  console.log("user");
 
-                  navigation.navigate("user", {
+                  navigation.push("user", {
+                    previousScreenName: "Zahtjevi",
                     id:
                       friendRequest.userAId === authUser?.user?.id
                         ? friendRequest.userBId
@@ -133,17 +142,42 @@ export const UserFriendReqests: FC<
                   </Div>
                   <Div className={`flex g-3 flex-row`}>
                     <Div className={``}>
-                      <Button intent="secondary">{negativeFriendStatus}</Button>
+                      <Button
+                        textClassName={`capitalize`}
+                        loading={useFriendAction.isLoading}
+                        onPress={() => {
+                          useFriendAction.mutate({
+                            friendId: user.id,
+                            action:
+                              negativeFriendStatus === "cancel"
+                                ? "cancel"
+                                : "decline",
+                          });
+                        }}
+                        intent="secondary"
+                      >
+                        {negativeFriendStatus}
+                      </Button>
                     </Div>
 
                     <Div className={``}>
-                      <Button disabled={friendStatus === "pending"}>
+                      <Button
+                        textClassName={`capitalize`}
+                        onPress={() => {
+                          useFriendAction.mutate({
+                            friendId: user.id,
+                            action: "accept",
+                          });
+                        }}
+                        loading={useFriendAction.isLoading}
+                        disabled={friendStatus === "pending"}
+                      >
                         {friendStatus}
                       </Button>
                     </Div>
                   </Div>
                 </Div>
-              </Pressable>
+              </TouchableOpacity>
             );
           })}
         </ScrollView>

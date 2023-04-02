@@ -163,6 +163,7 @@ export const UserEditScreen: FC<
                       onBlurValidate={z
                         .string()
                         .nonempty("Obavezno!")
+                        .max(20, "Maksimalno 20 znakova!")
                         .superRefine((v, _ctx) => {
                           return v;
                         })}
@@ -218,13 +219,13 @@ export const UserEditScreen: FC<
                     onBlurValidate={z.string()}
                     onChangeValidate={z
                       .string()
-                      .max(100, "Maksimalno 100 karaktera")}
+                      .max(100, "Maksimalno 100 znakova!")}
                   >
                     {({ value, setValue, onBlur, errors, validate }) => {
                       return (
                         <Input
                           value={value}
-                          label={"Biografija"}
+                          label={"Bio"}
                           onBlur={onBlur}
                           numberOfLines={4}
                           large
@@ -269,7 +270,7 @@ export const UserEditScreen: FC<
                   <Div className={`flex basis-[40%] grow`}>
                     <Field
                       name="location"
-                      onBlurValidate={z.string().max(30, "Max 30 znakova!")}
+                      onBlurValidate={z.string().max(23, "Max 23 znakova!")}
                     >
                       {({ value, setValue, onBlur, errors }) => {
                         return (

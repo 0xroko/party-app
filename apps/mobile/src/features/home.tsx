@@ -1,12 +1,14 @@
 import { Button } from "@components/button";
-import { Div } from "@components/index";
+import { Div, T } from "@components/index";
 import { SafeArea } from "@components/safe-area";
+import BottomSheet from "@gorhom/bottom-sheet";
 import { useAuthUser } from "@hooks/useAuthUser";
 import { User } from "@lib/actions";
 import { getRandomUserButNotMe } from "@lib/actions/user";
 
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { FC } from "react";
+import { FC, useCallback, useMemo, useRef } from "react";
+import { StyleSheet } from "react-native";
 import { useQuery } from "react-query";
 
 const useRandomUser = () => {
@@ -15,6 +17,60 @@ const useRandomUser = () => {
   });
 
   return q;
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "grey",
+  },
+  sheetContainer: {
+    // add horizontal space
+  },
+  contentContainer: {
+    flex: 1,
+    alignItems: "center",
+  },
+});
+
+export const ModalScreen: FC<
+  NativeStackScreenProps<StackNavigatorParams, "user-modal">
+> = ({ navigation, route }) => {
+  const bottomSheetRef = useRef<BottomSheet>(null);
+
+  // listen to a change event from react-navigation to trigger bottom sheet close method.
+  // variables
+  const snapPoints = useMemo(() => ["25%"], []);
+  const handleSheetChanges = useCallback(
+    (index: number) => {
+      if (index === -1) {
+        navigation.goBack();
+      }
+    },
+    [navigation]
+  );
+  return (
+    <BottomSheet
+      ref={bottomSheetRef}
+      snapPoints={snapPoints}
+      backdropComponent={() => (
+        <Div className={`bg-glass-1 absolute inset-0`}></Div>
+      )}
+      // add bottom inset to elevate the sheet
+      enablePanDownToClose
+      enableOverDrag
+      onClose={() => {}}
+      enableHandlePanningGesture
+      enableContentPanningGesture
+      // set `detached` to true
+      onChange={handleSheetChanges}
+      style={styles.sheetContainer}
+    >
+      <Div className={``}>
+        <T>Awesome 🎉</T>
+      </Div>
+    </BottomSheet>
+  );
 };
 
 export const HomeScreen: FC<
@@ -60,10 +116,19 @@ export const HomeScreen: FC<
           >
             add party
           </Button>
-          <Button onPress={() => {
-            navigation.navigate("chats");
-          }}>
+          <Button
+            onPress={() => {
+              navigation.navigate("chats");
+            }}
+          >
             chats
+          </Button>
+          <Button
+            onPress={() => {
+              navigation.push("user-modal");
+            }}
+          >
+            Dissmiss{" "}
           </Button>
         </Div>
       </Div>

@@ -1,3 +1,4 @@
+import { checkIfUserHasData } from "@lib/actions/user";
 import { mmkv } from "@lib/mmkv";
 import { AuthChangeEvent, Session } from "@supabase/supabase-js";
 import { create } from "zustand";
@@ -18,12 +19,22 @@ type AuthStoreState = {
 export const useAuthStore = create<AuthStoreState>()(
   persist(
     (set, get) => ({
-      onAuthStateChange: (event, session) => {
+      onAuthStateChange: async (event, session) => {
         if (event === "SIGNED_IN" || session != null) {
           if (get().authState === "INFO_SCREEN") {
             // ignore
           } else {
-            set({ authState: "SIGNED_IN" });
+            if (get().authState === "SIGNED_OUT") {
+              const userHasData = await checkIfUserHasData();
+              console.log("SIGN_OUT -> SIGNED_IN");
+              if (userHasData) {
+                set({ authState: "SIGNED_IN" });
+              } else {
+                set({ authState: "INFO_SCREEN" });
+              }
+            } else {
+              set({ authState: "SIGNED_IN" });
+            }
           }
         } else {
           set({ authState: "SIGNED_OUT" });

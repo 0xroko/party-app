@@ -7,12 +7,14 @@ import { NativeNavigation } from "./navigation";
 import { Provider } from "./provider";
 
 import { registerForPushNotificationsAsync } from "@lib/actions/user";
+import {
+  accept_friend_request,
+  decline_friend_request,
+} from "@lib/frendship/add_friend";
+import { supabase } from "@lib/supabase";
 import { useAuthStore } from "@navigation/authStore";
 import * as Notifications from "expo-notifications";
 import * as SplashScreen from "expo-splash-screen";
-import { accept_friend_request, decline_friend_request } from "@lib/frendship/add_friend";
-import { useAuthUser } from "@hooks/useAuthUser";
-import { supabase } from "@lib/supabase";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -24,56 +26,57 @@ Notifications.setNotificationHandler({
   }),
 });
 
-Notifications.setNotificationCategoryAsync('friendship_request', [
+Notifications.setNotificationCategoryAsync("friendship_request", [
   {
     buttonTitle: `Prihvati`,
-    identifier: 'accept-friendship-request',
-
+    identifier: "accept-friendship-request",
   },
   {
-    buttonTitle: 'Odbij',
-    identifier: 'decline-friendship-request',
+    buttonTitle: "Odbij",
+    identifier: "decline-friendship-request",
     // textInput: {
     //   submitButtonTitle: 'Submit button',
     //   placeholder: 'Placeholder text',
     // },
   },
   {
-    buttonTitle: 'Otvori u aplikaciji',
-    identifier: 'open-friendship-request',
+    buttonTitle: "Otvori u aplikaciji",
+    identifier: "open-friendship-request",
     options: {
       opensAppToForeground: true,
     },
   },
 ])
   .then((_category) => console.log("Set notification categoryar"))
-  .catch((error) => console.warn('Could not have set notification category', error));
+  .catch((error) =>
+    console.warn("Could not have set notification category", error)
+  );
 
-Notifications.setNotificationCategoryAsync('new_party_notification', [
+Notifications.setNotificationCategoryAsync("new_party_notification", [
   {
     buttonTitle: `Dolazim`,
-    identifier: 'accept-party-attendance',
+    identifier: "accept-party-attendance",
     options: {
       opensAppToForeground: true,
     },
-
   },
   {
-    buttonTitle: 'Ne dolazim',
-    identifier: 'decline-party-attendance',
-
+    buttonTitle: "Ne dolazim",
+    identifier: "decline-party-attendance",
   },
   {
-    buttonTitle: 'Pošalji poruku',
-    identifier: 'send-message',
+    buttonTitle: "Pošalji poruku",
+    identifier: "send-message",
     textInput: {
-      submitButtonTitle: 'Submit button',
-      placeholder: 'Vaša poruka',
+      submitButtonTitle: "Submit button",
+      placeholder: "Vaša poruka",
     },
   },
 ])
   .then((_category) => console.log("Set notification categoryar"))
-  .catch((error) => console.warn('Could not have set notification category', error));
+  .catch((error) =>
+    console.warn("Could not have set notification category", error)
+  );
 
 // Notifications.setNotificationCategoryAsync('generic_party_notification', [
 //   {
@@ -88,28 +91,27 @@ Notifications.setNotificationCategoryAsync('new_party_notification', [
 //   .then((_category) => console.log("Set notification categoryar"))
 //   .catch((error) => console.warn('Could not have set notification category', error));
 
-
-Notifications.setNotificationCategoryAsync('generic_party_notification', [
+Notifications.setNotificationCategoryAsync("generic_party_notification", [
   {
-    buttonTitle: 'Pošalji poruku',
-    identifier: 'send-message',
+    buttonTitle: "Pošalji poruku",
+    identifier: "send-message",
     textInput: {
-      submitButtonTitle: 'Submit button',
-      placeholder: 'Vaša poruka',
+      submitButtonTitle: "Submit button",
+      placeholder: "Vaša poruka",
     },
   },
   {
-    buttonTitle: 'Otvori u aplikaciji',
-    identifier: 'open-friendship-request',
+    buttonTitle: "Otvori u aplikaciji",
+    identifier: "open-friendship-request",
     options: {
       opensAppToForeground: true,
     },
   },
 ])
   .then((_category) => console.log("Set notification categoryar"))
-  .catch((error) => console.warn('Could not have set notification category', error));
-
-
+  .catch((error) =>
+    console.warn("Could not have set notification category", error)
+  );
 
 const App: FC = () => {
   const [loaded] = useFonts({
@@ -142,44 +144,49 @@ const App: FC = () => {
     //add category to notification
     // Notifications.addNotificationsCategoryAsync()
 
-
     responseListener.current =
-      Notifications.addNotificationResponseReceivedListener(async (response) => {
-        // console.log(response);
-        const { actionIdentifier, notification, identifier, trigger } = response;
-        console.log(actionIdentifier, notification, identifier, trigger);
-        // const { data: authUser, isFetched, refetch } = useQuery(["user-auth"], async () => {
-        const { data: authUser, error } = await supabase.auth.getUser();
+      Notifications.addNotificationResponseReceivedListener(
+        async (response) => {
+          // console.log(response);
+          const { actionIdentifier, notification } = response;
+          console.log(actionIdentifier, notification);
+          // const { data: authUser, isFetched, refetch } = useQuery(["user-auth"], async () => {
+          const { data: authUser, error } = await supabase.auth.getUser();
 
-
-        // create switch case for each action identifier
-        if (actionIdentifier === 'accept-friendship-request') {
-          const r = await accept_friend_request(
-            notification.request.content.data.userAid,
-            authUser?.user
-          )
-          console.log(r);
-        } else if (actionIdentifier === 'decline-friendship-request') {
-          await decline_friend_request(notification.request.content.data.userAid);
-        } else if (actionIdentifier === 'decline-party-attendance') {
-          const { data, error } = await supabase.from('Attending')
-            .update({
-              accepted: false,
-            })
-            .eq('partyId', notification.request.content.data.partyId)
-            .eq('userId', authUser?.user.id)
-          console.log(actionIdentifier, data, error);
-        } else if (actionIdentifier === 'accept-party-attendance') {
-          console.log(notification.request.content.data.party_id)
-          const { data, error } = await supabase.from('Attending')
-            .update({
-              accepted: true,
-            })
-            .eq('partyId', notification.request.content.data.partyId)
-            .eq('userId', authUser?.user.id)
-          console.log(actionIdentifier, data, error);
+          // create switch case for each action identifier
+          if (actionIdentifier === "accept-friendship-request") {
+            const r = await accept_friend_request(
+              notification.request.content.data.userAid,
+              authUser?.user
+            );
+            console.log(r);
+          } else if (actionIdentifier === "decline-friendship-request") {
+            await decline_friend_request(
+              notification.request.content.data.userAid,
+              authUser?.user
+            );
+          } else if (actionIdentifier === "decline-party-attendance") {
+            const { data, error } = await supabase
+              .from("Attending")
+              .update({
+                accepted: false,
+              })
+              .eq("partyId", notification.request.content.data.partyId)
+              .eq("userId", authUser?.user.id);
+            console.log(actionIdentifier, data, error);
+          } else if (actionIdentifier === "accept-party-attendance") {
+            console.log(notification.request.content.data.party_id);
+            const { data, error } = await supabase
+              .from("Attending")
+              .update({
+                accepted: true,
+              })
+              .eq("partyId", notification.request.content.data.partyId)
+              .eq("userId", authUser?.user.id);
+            console.log(actionIdentifier, data, error);
+          }
         }
-      });
+      );
 
     return () => {
       Notifications.removeNotificationSubscription(

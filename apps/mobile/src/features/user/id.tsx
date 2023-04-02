@@ -1,4 +1,3 @@
-import { Button } from "@components/button";
 import { Div, Img, Text } from "@components/index";
 import { SafeArea } from "@components/safe-area";
 import {
@@ -9,6 +8,7 @@ import {
 import { MapPinIcon } from "react-native-heroicons/mini";
 
 import { Badge } from "@components/badge";
+import { Button } from "@components/button";
 import { NavBar, NavBarItem } from "@components/navbar";
 import { useAuthUser } from "@hooks/useAuthUser";
 import { useUser } from "@hooks/useUser";
@@ -16,6 +16,7 @@ import { User } from "@lib/actions";
 import {
   accept_friend_request,
   checkIfFriend,
+  decline_friend_request,
   remove_friend,
   send_friend_request,
   unsend_friend_request,
@@ -27,8 +28,15 @@ import { AuthUser } from "@supabase/supabase-js";
 import { styled } from "nativewind";
 import { FC, useMemo, useState } from "react";
 import { Pressable, ScrollView } from "react-native";
-import { useQuery } from "react-query";
+import { useMutation, useQuery } from "react-query";
 import colors from "../../../colors";
+
+export type useFriendshipAction =
+  | "sendRequest"
+  | "acceptRequest"
+  | "removeFriend"
+  | "unsendRequest"
+  | "declineRequest";
 
 export const useFriendship = (id: User["id"]) => {
   const authUser = useAuthUser();
@@ -43,14 +51,32 @@ export const useFriendship = (id: User["id"]) => {
     }
   );
 
+  const m = useMutation({
+    mutationFn: async ({
+      action,
+      authUser,
+    }: {
+      action: useFriendshipAction;
+      authUser: AuthUser;
+    }) => {
+      switch (action) {
+        case "sendRequest":
+          return await send_friend_request(id, authUser);
+        case "acceptRequest":
+          return await accept_friend_request(id, authUser);
+        case "removeFriend":
+          return await remove_friend(id, authUser);
+        case "unsendRequest":
+          return await unsend_friend_request(id, authUser);
+        case "declineRequest":
+          return await decline_friend_request(id, authUser);
+      }
+    },
+  });
+
   return {
     ...q,
-    actions: {
-      sendFriendRequest: send_friend_request,
-      acceptFriendRequest: accept_friend_request,
-      removeFriend: remove_friend,
-      unsendFriendRequest: unsend_friend_request,
-    },
+    friendshipMutation: m,
   };
 };
 
@@ -63,7 +89,7 @@ export const StyledScrollDiv = styled(ScrollView);
 
 export const UserList = ({ users }: UserListProps) => {
   return (
-    <Div className={`flex flex-col g-7 px-4 bg-accents-9 rounded-3xl py-6`}>
+    <Div className={`flex flex-col g-7 px-5 bg-accents-1 rounded-3xl py-6`}>
       <Text className={`font-figtree-bold text-accents-12 text-xl`}>
         Prijatelji
       </Text>
@@ -145,8 +171,8 @@ export const UserInfoScreen: FC<
 
   const {
     data: friendShipStatus,
-    actions,
     refetch: refetchStatus,
+    friendshipMutation,
   } = useFriendship(userId);
 
   const isMe = authUser?.user.id === userId;
@@ -162,22 +188,41 @@ export const UserInfoScreen: FC<
     if (!isMe) {
       if (friendShipStatus === "friend") {
         return {
-          actionFn: async () => actions.removeFriend(userId, authUser),
+          actionFn: async () =>
+            friendshipMutation.mutateAsync({
+              action: "removeFriend",
+              authUser,
+            }),
           text: "Remove friend",
         };
       } else if (friendShipStatus === "accept") {
         return {
-          actionFn: async () => actions.acceptFriendRequest(userId, authUser),
+          actionFn: async () =>
+            friendshipMutation.mutateAsync({
+              action: "acceptRequest",
+              authUser,
+            }),
+          secoundaryActionFn: async () =>
+            friendshipMutation.mutateAsync({
+              action: "declineRequest",
+              authUser,
+            }),
+          secoundaryText: "Decline request",
           text: "Accept request",
         };
       } else if (friendShipStatus === "none") {
         return {
-          actionFn: async () => actions.sendFriendRequest(userId, authUser),
+          actionFn: async () =>
+            friendshipMutation.mutateAsync({ action: "sendRequest", authUser }),
           text: "Send friend request",
         };
       } else if (friendShipStatus === "requested") {
         return {
-          actionFn: async () => actions.unsendFriendRequest(userId, authUser),
+          actionFn: async () =>
+            friendshipMutation.mutateAsync({
+              action: "unsendRequest",
+              authUser,
+            }),
           text: "Cancel request",
         };
       }
@@ -190,9 +235,9 @@ export const UserInfoScreen: FC<
     };
   };
 
-  const { actionFn, text } = useMemo(() => {
+  const { actionFn, text, ...actions } = useMemo(() => {
     return handleUserAction(user?.id, authUser.user);
-  }, [friendShipStatus, actions, user, authUser]);
+  }, [friendShipStatus, user, authUser]);
 
   const { data: friendRequestCount } = useFriendReqestCount(user, isMe);
 
@@ -213,10 +258,10 @@ export const UserInfoScreen: FC<
           >
             {friendRequestCount?.count > 0 && (
               <Div
-                className={`bg-error-primary  rounded-full p-1 absolute min-w-[16px] text-center flex justify-center items-center -right-1 -top-1 z-30 shadow-lg`}
+                className={`bg-accents-7 shadow-md rounded-full p-1 absolute min-w-[16px] text-center flex justify-center items-center right-1 top-0 z-30`}
               >
                 <Text
-                  className={`text-[8px] text-accents-12 font-figtree-bold`}
+                  className={`text-[8px] text-accents-12 font-figtree-black`}
                 >
                   {friendRequestCount.count}
                 </Text>
@@ -227,97 +272,114 @@ export const UserInfoScreen: FC<
         )}
       </NavBar>
       {isFetched && (
-        <Div className={`mx-[20px] flex h-full `}>
-          <Div className={`flex flex-col items-center`}>
-            <Img
-              className={`rounded-full w-[124px] h-[124px] mt-4`}
-              source={{
-                uri: "https://images.unsplash.com/photo-1657320815727-2512f49f61d5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=100&h=100&q=60",
-                width: 100,
-              }}
-            />
-            <Pressable onPress={handleDataPress}>
-              <Div className={`mt-6`}>
-                <Text
-                  className={`text-4xl text-center font-figtree-bold text-accents-12`}
-                >
-                  {user?.name} {user?.surname}
-                </Text>
-              </Div>
-              <Div className={`mt-1`}>
-                <Text
-                  className={`text-2xl text-center font-figtree-medium tracking-tight text-accents-10`}
-                >
-                  @{user?.displayname}
-                </Text>
-              </Div>
-            </Pressable>
-            <Pressable onPress={handleDataPress}>
-              <Div
-                className={`mt-6 g-3 flex flex-row items-center justify-center`}
-              >
-                {user?.location ? (
-                  <Badge
-                    icon={<MapPinIcon color={"#fff"} size={16} />}
-                    intent="primary"
-                  >
-                    {user?.location}
-                  </Badge>
-                ) : (
-                  <Badge
-                    icon={<MapPinIcon color={colors.accents[9]} size={16} />}
-                    intent="disabled"
-                  >
-                    ???? grad
-                  </Badge>
-                )}
-                {user?.age ? (
-                  <Badge intent="primary">{user?.age} god.</Badge>
-                ) : (
-                  <Badge intent="disabled">?? god.</Badge>
-                )}
-              </Div>
-            </Pressable>
-            <Div className={`mt-12 max-h-[56px] h-full`}>
+        <>
+          <SafeArea.Content>
+            <Div className={`flex flex-col items-center`}>
+              <Img
+                className={`rounded-full w-[124px] h-[124px] mt-4`}
+                source={{
+                  uri: "https://images.unsplash.com/photo-1657320815727-2512f49f61d5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=100&h=100&q=60",
+                  width: 100,
+                }}
+              />
               <Pressable onPress={handleDataPress}>
-                <Text
-                  className={`font-figtree-medium text-base text-center ${
-                    !hasBio ? "text-accents-10" : "text-accents-12"
-                  } tracking-wide leading-7`}
-                >
-                  {formatBio(user?.bio)}
-                </Text>
+                <Div className={`mt-6`}>
+                  <Text
+                    className={`text-4xl text-center font-figtree-bold text-accents-12`}
+                  >
+                    {user?.name} {user?.surname}
+                  </Text>
+                </Div>
+                <Div className={`mt-1`}>
+                  <Text
+                    className={`text-2xl text-center font-figtree-medium tracking-tight text-accents-10`}
+                  >
+                    @{user?.displayname}
+                  </Text>
+                </Div>
               </Pressable>
-            </Div>
-            <Div className={`mt-16 flex g-4 flex-row w-full`}>
-              <Div className={`flex grow`}>
-                <Button
-                  disabled={isSubmitting}
-                  onPress={async () => {
-                    setIsSubmitting(true);
-                    await actionFn();
-                    refetchStatus();
-                    setIsSubmitting(false);
-                  }}
+              <Pressable onPress={handleDataPress}>
+                <Div
+                  className={`mt-6 g-3 flex flex-row items-center justify-center`}
                 >
-                  {text}
-                </Button>
+                  {user?.location ? (
+                    <Badge
+                      icon={<MapPinIcon color={"#fff"} size={16} />}
+                      intent="primary"
+                    >
+                      {user?.location}
+                    </Badge>
+                  ) : (
+                    <Badge
+                      icon={<MapPinIcon color={colors.accents[9]} size={16} />}
+                      intent="disabled"
+                    >
+                      ???? grad
+                    </Badge>
+                  )}
+                  {user?.age ? (
+                    <Badge intent="primary">{user?.age} god.</Badge>
+                  ) : (
+                    <Badge intent="disabled">?? god.</Badge>
+                  )}
+                </Div>
+              </Pressable>
+              <Div className={`mt-10 max-h-[79px]`}>
+                <Pressable onPress={handleDataPress}>
+                  <Text
+                    className={`font-figtree-medium text-base text-center ${
+                      !hasBio ? "text-accents-10" : "text-accents-12"
+                    } tracking-wide leading-7`}
+                  >
+                    {formatBio(user?.bio)}
+                  </Text>
+                </Pressable>
               </Div>
-              <Div className={`flex grow-0 shrink`}>
-                <Button className={`w-10`}>
-                  <EllipsisVerticalIcon
-                    strokeWidth={2}
-                    size={20}
-                    color={"#000"}
-                  />
-                </Button>
+              <Div className={`mt-16 flex g-4 flex-row w-full`}>
+                <Div className={`flex grow`}>
+                  <Button
+                    disabled={isSubmitting}
+                    onPress={async () => {
+                      setIsSubmitting(true);
+                      await actionFn();
+                      refetchStatus();
+                      setIsSubmitting(false);
+                    }}
+                  >
+                    {text}
+                  </Button>
+                </Div>
+                {actions.secoundaryActionFn && (
+                  <Div className={`flex grow`}>
+                    <Button
+                      disabled={isSubmitting}
+                      onPress={async () => {
+                        setIsSubmitting(true);
+                        await actions.secoundaryActionFn();
+                        refetchStatus();
+                        setIsSubmitting(false);
+                      }}
+                    >
+                      {actions.secoundaryText}
+                    </Button>
+                  </Div>
+                )}
+                <Div className={`flex grow-0 shrink`}>
+                  <Button iconOnly className={`w-10`}>
+                    <EllipsisVerticalIcon
+                      strokeWidth={2}
+                      size={20}
+                      color={"#000"}
+                    />
+                  </Button>
+                </Div>
               </Div>
             </Div>
-            <Div className={`mt-12 flex flex-col w-full`}>
-              <UserList users={testUsers} />
-            </Div>
+          </SafeArea.Content>
+          <Div className={`mt-8 mx-2`}>
+            <UserList users={testUsers} />
           </Div>
-        </Div>
+        </>
       )}
     </SafeArea>
   );

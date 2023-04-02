@@ -55,16 +55,18 @@ export const unsend_friend_request = async (
   return true;
 };
 
-export const decline_friend_request = async (userAId: string) => {
-  const authUser = await supabase.auth.getUser();
-  if (!authUser.data?.user?.id) {
+export const decline_friend_request = async (
+  userAId: string,
+  authUser: User
+) => {
+  if (!authUser?.id) {
     onSupabaseError("No user logged in");
     return false;
   }
   const r = await supabase
     .from("Friendship")
     .delete()
-    .eq("userBId", authUser.data.user.id)
+    .eq("userBId", authUser?.id)
     .eq("userAId", userAId)
     .eq("accepted", false);
 
@@ -153,7 +155,7 @@ export const check_for_friend_request = async () => {
     .from("Friendship")
     .select("*")
     .eq("userBId", authUser.data.user.id)
-    .eq("accepted", false)
+    .eq("accepted", false);
   if (r.error) {
     onSupabaseError(r.error);
     return false;

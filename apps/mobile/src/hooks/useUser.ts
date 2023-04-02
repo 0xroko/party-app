@@ -4,6 +4,8 @@ import { useQuery } from "react-query";
 
 export const useUser = (id: User["id"]) => {
   const q = useQuery(["user", id], async () => {
+    // console.log("useUser ->", id);
+
     const u = await getUserById(id);
     return u[0];
   });
