@@ -6,6 +6,7 @@ import { mmkv } from "@lib/mmkv";
 import { supabase, supabaseUrl } from "@lib/supabase";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
+import { queryClient } from "../../provider/index";
 
 export const googleSignIn = async () => {
   // This will create a redirectUri
@@ -102,6 +103,9 @@ export const logOut = async (reset = true) => {
       ...s,
       state: "PHONE",
     }));
+
+  queryClient.cancelQueries();
+  queryClient.clear();
 
   const { error } = await supabase.auth.signOut();
   if (error) {

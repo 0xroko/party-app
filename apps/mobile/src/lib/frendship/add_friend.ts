@@ -122,21 +122,24 @@ export const accept_friend_request = async (
     onSupabaseError("No user logged in");
     return false;
   }
-  const r = await supabase.from("Friendship").upsert([
-    {
-      userAId: friend_id,
-      userBId: authUser?.id,
-      accepted: true,
-    },
-  ]);
+  // const r = await supabase.from("Friendship").upsert({
+  //   accepted: true,
+  //   userAId: friend_id,
+  //   userBId: authUser?.id,
+  // });
+  const r = await supabase.from("Friendship").insert({
+    userAId: authUser.id,
+    userBId: friend_id,
+    accepted: true,
+  });
 
   const r2 = await supabase
     .from("Friendship")
     .update({
       accepted: true,
     })
-    .eq("userAId", authUser?.id)
-    .eq("userBId", friend_id);
+    .eq("userAId", friend_id)
+    .eq("userBId", authUser.id);
 
   if (r.error) {
     onSupabaseError(r.error);
