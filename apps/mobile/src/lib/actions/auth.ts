@@ -90,12 +90,19 @@ export const useLoginStore = create<LoginStore>()(
   )
 );
 
-export const logOut = async () => {
-  useLoginStore.setState((s) => ({
-    ...s,
-    phone: "",
-    state: "PHONE",
-  }));
+export const logOut = async (reset = true) => {
+  if (reset)
+    useLoginStore.setState((s) => ({
+      ...s,
+      phone: "",
+      state: "PHONE",
+    }));
+  else
+    useLoginStore.setState((s) => ({
+      ...s,
+      state: "PHONE",
+    }));
+
   const { error } = await supabase.auth.signOut();
   if (error) {
     onSupabaseError(error);

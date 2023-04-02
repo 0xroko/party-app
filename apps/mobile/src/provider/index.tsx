@@ -2,7 +2,15 @@ import { NavigationContainer } from "@react-navigation/native";
 import { Suspense, useEffect } from "react";
 import { focusManager, QueryClient, QueryClientProvider } from "react-query";
 
-export const queryClient = new QueryClient();
+export const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      // 1 min
+      cacheTime: 1000 * 60,
+      staleTime: 1000 * 60,
+    },
+  },
+});
 
 import type { AppStateStatus } from "react-native";
 import { AppState, Platform } from "react-native";
@@ -18,9 +26,9 @@ function onAppStateChange(status: AppStateStatus) {
 export const Provider: FCC = ({ children }) => {
   useEffect(() => {
     const subscription = AppState.addEventListener("change", onAppStateChange);
-
     return () => subscription.remove();
   }, []);
+
   return (
     <Suspense>
       <QueryClientProvider client={queryClient}>

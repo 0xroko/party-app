@@ -112,7 +112,7 @@ export const PartyAdd: FC<
         <Form<PartyAddForm> onSubmit={onVerify}>
           {({ isValid, submit }) => (
             <Div className={`flex`}>
-              <Div className={`flex flex-col mb-4 grow g-3`}>
+              <Div className={`flex flex-col mb-4 grow g-4`}>
                 <Field
                   name="name"
                   // onBlurValidate={z.string().min(6, "Minimalno 6 znakova")}
@@ -173,7 +173,7 @@ export const PartyAdd: FC<
                   }}
                 </Field>
                 <Div className="">
-                  <Div className={`flex flex-row g-3`}>
+                  <Div className={`flex flex-row g-4`}>
                     <Div className={`flex-1`}>
                       <Field name="start_date">
                         {({ value, setValue, onBlur, errors }) => {

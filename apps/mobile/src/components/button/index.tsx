@@ -3,11 +3,11 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { styled } from "nativewind";
 import { Pressable, TouchableOpacityProps } from "react-native";
 
-const buttonStyles = cva("justify-center items-center rounded-full flex-row", {
+const buttonStyles = cva("justify-center items-center rounded-2xl flex-row", {
   variants: {
     intent: {
       primary: "bg-accents-12 text-accents-1 hover:bg-accents-11",
-      secondary: "bg-accents-1 text-accents-12 border border-accents-12",
+      secondary: "bg-glass-1 text-accents-12 border border-accents-12",
       disabled: "bg-accents-2 text-accents-6",
     },
     size: {
@@ -42,7 +42,7 @@ interface ButtonProps
   children?: React.ReactNode | React.ReactNode[];
   className?: string;
   iconOnly?: boolean;
-
+  textClassName?: string;
   disabled?: boolean;
   loading?: boolean;
   leadingIcon?: React.ReactNode | React.ReactNode[];
@@ -67,6 +67,7 @@ export const Button = ({
   className,
   intent,
   iconOnly = false,
+  textClassName,
   leadingIcon,
   trailingIcon,
   disabled,
@@ -114,6 +115,7 @@ export const Button = ({
   const btnText = buttonTextStyles({
     intent: intentI,
     iconOnly,
+    className: textClassName,
   });
 
   return (

@@ -8,7 +8,7 @@ import { googleSignIn, useLoginStore } from "@lib/actions/auth";
 import { checkIfUserHasData } from "@lib/actions/user";
 import { supabase } from "@lib/supabase";
 import { useAuthStore } from "@navigation/authStore";
-import { Field, Form } from "houseform";
+import { Field, Form, FormInstance } from "houseform";
 import { FC, useState } from "react";
 export interface InfoSectionForm {
   name: string;
@@ -25,8 +25,10 @@ export const LoginLoginScreen: FC<any> = ({ navigation }) => {
 
   return (
     <SafeArea gradient>
-      {loginState.state === "PHONE" && <PhoneSection />}
-      {loginState.state === "OTP" && <OtpSection />}
+      <SafeArea.Content>
+        {loginState.state === "PHONE" && <PhoneSection />}
+        {loginState.state === "OTP" && <OtpSection />}
+      </SafeArea.Content>
     </SafeArea>
   );
 };
@@ -36,9 +38,7 @@ interface SectionProps {
 }
 
 export const Section = ({ children }: SectionProps) => {
-  return (
-    <Div className={`mx-[22px] flex h-full justify-evenly`}>{children}</Div>
-  );
+  return <Div className={`flex h-full justify-evenly`}>{children}</Div>;
 };
 
 interface SectionTitleProps {
@@ -70,7 +70,14 @@ const _DEV_USE_MAIL_LOGIN = true;
 export const PhoneSection = ({ children }: PhoneSectionProps) => {
   const loginState = useLoginStore();
 
-  const onLoginSubmit = async (values: { phone: string }) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const onLoginSubmit = async (
+    values: { phone: string },
+    form: FormInstance<{ phone: string }>
+  ) => {
+    console.log(form);
+    setIsSubmitting(true);
     let res;
     if (_DEV_USE_MAIL_LOGIN) {
       res = await supabase.auth.signInWithOtp({
@@ -81,11 +88,13 @@ export const PhoneSection = ({ children }: PhoneSectionProps) => {
         phone: "+385" + values.phone,
       });
 
-    console.log(res);
-
     if (res.error) {
+      form.getFieldValue("phone").setErrors([res.error.message]);
+      setIsSubmitting(false);
       return;
     }
+
+    setIsSubmitting(false);
 
     loginState.setPhone(values.phone);
 
@@ -110,13 +119,16 @@ export const PhoneSection = ({ children }: PhoneSectionProps) => {
                 initialValue={loginState.phone}
                 onBlurValidate={_DEV_USE_MAIL_LOGIN ? z.string() : phoneShema}
               >
-                {({ value, setValue, onBlur, errors }) => {
+                {({ value, setValue, onBlur, errors, validate }) => {
                   return (
                     <Input
                       value={value}
                       onBlur={onBlur}
                       error={errors.join("\n")}
-                      onChangeText={(text) => setValue(text)}
+                      onChangeText={(text) => {
+                        setValue(text);
+                        validate("onBlurValidate");
+                      }}
                       // todo toast onclick da je hr only il tak nes
                       leading={
                         <Text
@@ -139,7 +151,7 @@ export const PhoneSection = ({ children }: PhoneSectionProps) => {
             </Div>
 
             <Div className={`flex gap-3 flex-row`}>
-              {__DEV__ && (
+              {false && (
                 <>
                   <Div className={`flex basis-[15%] grow-0`}>
                     <Button
@@ -160,6 +172,7 @@ export const PhoneSection = ({ children }: PhoneSectionProps) => {
               <Div className={`flex grow`}>
                 <Button
                   size={"medium"}
+                  disabled={!isValid || isSubmitting}
                   onPress={() => {
                     submit();
                   }}

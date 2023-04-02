@@ -31,11 +31,14 @@ export const checkIfDisplayNameExists = async (
   displayName: string,
   ignoreId?: string
 ) => {
-  const { data, error } = await supabase
+  const query = supabase
     .from("Users")
     .select("count")
-    .filter("displayname", "eq", displayName)
-    .filter("id", "neq", ignoreId ?? "");
+    .filter("displayname", "eq", displayName);
+
+  if (ignoreId) query.filter("id", "neq", ignoreId ?? "");
+
+  const { data, error } = await query;
 
   if (error) {
     onSupabaseError(error);
