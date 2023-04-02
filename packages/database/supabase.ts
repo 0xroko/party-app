@@ -11,18 +11,21 @@ export interface Database {
     Tables: {
       Attending: {
         Row: {
+          accepted: boolean
           createdAt: string
           id: string
           partyId: string
           userId: string
         }
         Insert: {
+          accepted?: boolean
           createdAt?: string
           id?: string
           partyId: string
           userId: string
         }
         Update: {
+          accepted?: boolean
           createdAt?: string
           id?: string
           partyId?: string
