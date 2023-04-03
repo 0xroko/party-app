@@ -125,6 +125,13 @@ export const HomeScreen: FC<
           </Button>
           <Button
             onPress={() => {
+              navigation.navigate("upload-images");
+            }}
+          >
+            Upload
+          </Button>
+          <Button
+            onPress={() => {
               navigation.push("user-modal");
             }}
           >

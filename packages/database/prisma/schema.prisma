@@ -28,6 +28,8 @@ model Users {
   Message       Message[]
   hostedParties Party[]      @relation("HostedParties")
   users         users        @relation(fields: [id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  //add many to many relation with images
+  taggedIn      Images[]     @relation("PeopleOnPic")
 
   @@schema("public")
 }
@@ -113,6 +115,8 @@ model Images {
   Comment     Comment[]
   author      Users     @relation("ImageAuthor", fields: [authorId], references: [id])
   party       Party     @relation(fields: [partyId], references: [id])
+  //add many to many relation with users
+  peopleOnPic Users[]   @relation("PeopleOnPic")
 
   @@schema("public")
 }

@@ -3,6 +3,7 @@ import { LoginLoginScreen } from "@features/auth/signup";
 import { Chat } from "@features/chat/chat";
 import { Chats } from "@features/chat/chats_list";
 import { HomeScreen, ModalScreen } from "@features/home";
+import { Upload } from "@features/images/upload";
 import { PartyAdd } from "@features/party/add";
 import { UserEditScreen } from "@features/user/edit";
 import { UserFriendReqests } from "@features/user/friend-requests";
@@ -43,7 +44,7 @@ export const NativeNavigation = () => {
       }, 100);
     });
 
-    return () => {};
+    return () => { };
   }, []);
 
   return (
@@ -102,6 +103,11 @@ export const NativeNavigation = () => {
             name="chat"
             options={defaultScreenOptions}
             component={Chat}
+          />
+          <Stack.Screen
+            name="upload-images"
+            options={defaultScreenOptions}
+            component={Upload}
           />
         </>
       )}

@@ -20,4 +20,5 @@ type StackNavigatorParams = {
   "party-add": undefined;
   chats: undefined;
   chat: { id: string };
+  "upload-images": undefined;
 };
