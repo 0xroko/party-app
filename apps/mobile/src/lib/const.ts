@@ -5,4 +5,6 @@ export const queryKeys = {
   friendship: (id: string) => ["friendship", id],
   friendReqest: (id: string) => ["friendRequests", id],
   friendRequestCount: ["friendRequestCount"],
+  latestParties: ["latestParties"],
+  partyId: (id: string) => ["partyId", id],
 } as const;

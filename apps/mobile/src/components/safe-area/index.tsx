@@ -13,13 +13,19 @@ interface SafeAreaProps {
   children?: React.ReactNode | React.ReactNode[];
   className?: string;
   gradient?: boolean;
+  midGradient?: boolean;
 }
 
 let debug = __DEV__;
 
 debug = false;
 
-export const SafeArea = ({ children, className, gradient }: SafeAreaProps) => {
+export const SafeArea = ({
+  children,
+  className,
+  gradient,
+  midGradient = true,
+}: SafeAreaProps) => {
   const d = useWindowDimensions();
 
   return (
@@ -47,7 +53,7 @@ export const SafeArea = ({ children, className, gradient }: SafeAreaProps) => {
         <Svg
           style={{
             position: "absolute",
-            opacity: 0.7,
+            opacity: 0.6,
           }}
           height={d.height * 0.4}
           width={d.width}
@@ -69,7 +75,7 @@ export const SafeArea = ({ children, className, gradient }: SafeAreaProps) => {
         </Svg>
       )}
 
-      {true && (
+      {midGradient && (
         <Svg
           style={{
             position: "absolute",

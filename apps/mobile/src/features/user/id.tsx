@@ -89,18 +89,19 @@ export type FriendshipUser = Pick<
 interface UserListProps {
   children?: React.ReactNode | React.ReactNode[];
   users: FriendshipUser[];
+  title?: string;
   onUserPress?: (user: FriendshipUser) => void;
 }
 
 export const StyledScrollDiv = styled(ScrollView);
 
-export const UserList = ({ users, onUserPress }: UserListProps) => {
+export const UserList = ({ users, onUserPress, title }: UserListProps) => {
   const hasFriends = users.length > 0;
 
   return (
     <Div className={`flex flex-col g-7 px-5 bg-accents-1 rounded-3xl py-6`}>
       <Text className={`font-figtree-bold text-accents-12 text-xl`}>
-        Prijatelji
+        {title ? title : "Prijatelji"}
       </Text>
       {hasFriends ? (
         <ScrollView

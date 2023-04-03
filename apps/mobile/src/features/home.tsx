@@ -1,14 +1,18 @@
 import { Button } from "@components/button";
-import { Div, T } from "@components/index";
+import { Div, Img, T } from "@components/index";
+import { NavBar } from "@components/navbar";
 import { SafeArea } from "@components/safe-area";
 import BottomSheet from "@gorhom/bottom-sheet";
 import { useAuthUser } from "@hooks/useAuthUser";
+import { useUser } from "@hooks/useUser";
 import { User } from "@lib/actions";
 import { getRandomUserButNotMe } from "@lib/actions/user";
+import { queryKeys } from "@lib/const";
+import { supabase } from "@lib/supabase";
 
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { FC, useCallback, useMemo, useRef } from "react";
-import { StyleSheet } from "react-native";
+import { Pressable, ScrollView, StyleSheet } from "react-native";
 import { useQuery } from "react-query";
 
 const useRandomUser = () => {
@@ -76,20 +80,111 @@ export const ModalScreen: FC<
 export const HomeScreen: FC<
   NativeStackScreenProps<StackNavigatorParams, "home">
 > = ({ navigation, route }) => {
-  const { data, isFetched, refetch } = useAuthUser();
+  const { data: authUser, isFetched, refetch } = useAuthUser();
+
+  const { data: authUserData, isFetched: authUserFetched } = useUser(
+    authUser?.user.id
+  );
 
   const { data: randomUserData, isFetched: randomUserFetched } =
     useRandomUser();
 
+  const useParties = () => {
+    const q = useQuery(queryKeys.latestParties, async () => {
+      const { data, error } = await supabase.from("Party").select(`*,
+      host: hostId(id, displayname, imagesId)
+      `);
+
+      return data;
+    });
+
+    return q;
+  };
+
+  const { data: parties, isFetched: partiesFetched } = useParties();
+
   return (
     <SafeArea gradient>
-      <Div className={`justify-evenly mx-[22px] flex h-full`}>
+      <NavBar leadingLogo />
+      <Div className={`flex grow-0 mb-12`}>
+        <ScrollView
+          horizontal
+          contentContainerStyle={{
+            paddingTop: 8,
+            alignItems: "center",
+            flexDirection: "row",
+            paddingHorizontal: 18,
+            gap: 8,
+          }}
+        >
+          <Pressable
+            key={authUser?.user.id}
+            onPress={() => {
+              navigation.navigate("party-add");
+            }}
+          >
+            <Div className={`flex g-3 w-24 h-36 items-center`}>
+              <Div className={`relative`}>
+                <Div
+                  className={`absolute -right-2 -top-2 w-8 h-8 flex justify-center z-50 items-center rounded-full bg-accents-5`}
+                >
+                  <T
+                    className={`font-figtree-semi-bold text-3xl leading-8 text-accents-12`}
+                  >
+                    +
+                  </T>
+                </Div>
+                <Img
+                  className={`w-20 h-20 rounded-full`}
+                  source={{
+                    uri: authUserData?.imagesId,
+                  }}
+                ></Img>
+              </Div>
+              <T
+                className={`text-center text-accents-12 font-figtree-bold text-sm px-1`}
+              >
+                Dodaj party
+              </T>
+            </Div>
+          </Pressable>
+          {parties?.map((party) => {
+            // @ts-ignore
+            const hostAvatar = party?.host?.imagesId;
+            return (
+              <Pressable
+                key={party.id}
+                onPress={() => {
+                  navigation.navigate("chat", {
+                    id: party.chatId,
+                  });
+                }}
+              >
+                <Div className={`flex g-3 w-24 h-36 items-center`}>
+                  <Img
+                    className={`w-20 h-20 rounded-full border-0 border-spacing-2 border-accents-12`}
+                    source={{
+                      uri: hostAvatar,
+                    }}
+                  ></Img>
+                  <T
+                    className={`text-center text-accents-12 font-figtree-bold text-sm px-1`}
+                  >
+                    {party.name}
+                  </T>
+                </Div>
+              </Pressable>
+            );
+          })}
+        </ScrollView>
+      </Div>
+      <SafeArea.Content>
         <Div className={`flex flex-col g-2`}>
           <Button
             disabled={!isFetched}
             onPress={() => {
               navigation.navigate("user", {
-                id: data?.user.id,
+                id: authUser?.user.id,
                 previousScreenName: "Home",
               });
             }}
@@ -137,8 +232,19 @@ export const HomeScreen: FC<
           >
             Dissmiss{" "}
           </Button>
+          <Button
+            intent="secondary"
+            onPress={() => {
+              navigation.push("party", {
+                id: parties[0]?.id,
+                previousScreenName: "Home",
+              });
+            }}
+          >
+            Party random
+          </Button>
         </Div>
-      </Div>
+      </SafeArea.Content>
     </SafeArea>
   );
 };

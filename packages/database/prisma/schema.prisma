@@ -55,6 +55,7 @@ model Party {
   location      String
   hostId        String      @db.Uuid
   time_starting DateTime
+  imageUrl      String?
   chatId        String?     @unique @db.Uuid
   tags          String[]
   ended         Boolean     @default(false)
