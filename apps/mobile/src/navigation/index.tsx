@@ -20,7 +20,8 @@ const Stack = createNativeStackNavigator<StackNavigatorParams>();
 const defaultScreenOptions = {
   title: "",
   headerShown: false,
-};
+  animation: "none",
+} as const;
 
 export const Splash = () => {
   return <></>;
@@ -75,6 +76,7 @@ export const NativeNavigation = () => {
             options={{
               ...defaultScreenOptions,
               presentation: "transparentModal",
+
               animation: "none",
             }}
             name="user-modal"

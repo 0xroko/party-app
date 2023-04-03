@@ -274,8 +274,8 @@ export const PartyAdd: FC<
                   <Button
                     size={"medium"}
                     disabled={!isValid || isSubmitting}
-                    onPress={() => {
-                      submit();
+                    onPress={async () => {
+                      await submit();
                       navigation.navigate("home");
                     }}
                     intent={"primary"}

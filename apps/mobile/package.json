@@ -23,6 +23,7 @@
     "@rnmapbox/maps": "rnmapbox/maps#main",
     "@supabase/supabase-js": "^2.12.1",
     "class-variance-authority": "^0.4.0",
+    "date-fns": "^2.29.3",
     "expo": "~48.0.9",
     "expo-auth-session": "^4.0.3",
     "expo-constants": "^14.2.1",

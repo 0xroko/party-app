@@ -232,6 +232,17 @@ export const HomeScreen: FC<
           >
             Dissmiss{" "}
           </Button>
+          <Button
+            intent="secondary"
+            onPress={() => {
+              navigation.push("party", {
+                id: parties[0]?.id,
+                previousScreenName: "Home",
+              });
+            }}
+          >
+            Party random
+          </Button>
         </Div>
       </SafeArea.Content>
     </SafeArea>

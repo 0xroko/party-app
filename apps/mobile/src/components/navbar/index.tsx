@@ -25,7 +25,7 @@ export const DefaultNavBarTrailing = ({ children }: DefaultNavBarProps) => {
           }}
           key="2"
         >
-          <DropdownMenu.ItemTitle>Log out</DropdownMenu.ItemTitle>
+          Log out
         </DropdownMenu.Item>
       </DropdownMenu.Content>
     </DropdownMenu.Root>
@@ -66,12 +66,12 @@ export const NavBar = ({
     ?.previousScreenName;
 
   return (
-    <Div className={`flex px-4 flex-row items-center justify-between py-3 `}>
+    <Div className={`flex px-3 flex-row items-center justify-between py-3 `}>
       {leadingLogo ? (
         <T className={`text-lg font-figtree-bold text-accents-12 px-2`}>LOGO</T>
       ) : (
         <Pressable onPress={() => navigation.goBack()}>
-          <Div className={`flex   p-3 g-4 flex-row items-center`}>
+          <Div className={`flex p-3 g-4 flex-row items-center`}>
             <ArrowLeftIcon color={"#fff"} size={20} strokeWidth={2.4} />
             <Text className={`text-accents-12 font-figtree-bold leading-[20]`}>
               {explicitTitle ? explicitTitle : lastRouteName.name}
