@@ -21,4 +21,7 @@ type StackNavigatorParams = {
   chats: undefined;
   chat: { id: string };
   "upload-images": undefined;
+  party: {
+    id: string;
+  } & DefaultNavigationOptions;
 };

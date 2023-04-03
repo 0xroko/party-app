@@ -5,6 +5,7 @@ import { Chats } from "@features/chat/chats_list";
 import { HomeScreen, ModalScreen } from "@features/home";
 import { Upload } from "@features/images/upload";
 import { PartyAdd } from "@features/party/add";
+import { PartyInfo } from "@features/party/id";
 import { UserEditScreen } from "@features/user/edit";
 import { UserFriendReqests } from "@features/user/friend-requests";
 import { UserInfoScreen } from "@features/user/id";
@@ -44,7 +45,7 @@ export const NativeNavigation = () => {
       }, 100);
     });
 
-    return () => { };
+    return () => {};
   }, []);
 
   return (
@@ -108,6 +109,11 @@ export const NativeNavigation = () => {
             name="upload-images"
             options={defaultScreenOptions}
             component={Upload}
+          />
+          <Stack.Screen
+            name="party"
+            options={defaultScreenOptions}
+            component={PartyInfo}
           />
         </>
       )}

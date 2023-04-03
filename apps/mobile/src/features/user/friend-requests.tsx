@@ -93,11 +93,13 @@ export const UserFriendReqests: FC<
           Zahtjevi
         </Text>
         {friendRequests?.length === 0 ? (
-          <Text
-            className={`text-2xl font-figtree-medium text-accents-10 mb-8 mt-2`}
-          >
-            Trenutno nemaš zahtjeva
-          </Text>
+          <Div className={`h-36 flex justify-center items-center`}>
+            <Text
+              className={`text-lg font-figtree-medium text-accents-8 text-center mb-8 mt-2`}
+            >
+              Trenutno nemaš zahtjeva
+            </Text>
+          </Div>
         ) : (
           <ScrollView>
             {friendRequests?.map((friendRequest) => {

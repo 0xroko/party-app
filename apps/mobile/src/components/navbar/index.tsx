@@ -1,4 +1,4 @@
-import { Div, Text } from "@components/index";
+import { Div, T, Text } from "@components/index";
 import { logOut } from "@lib/actions/auth";
 import { useNavigation, useNavigationState } from "@react-navigation/native";
 import { Pressable } from "react-native";
@@ -49,11 +49,13 @@ export const NavBarItem = ({ children, ...props }: NavBarItemProps) => {
 interface NavBarProps {
   children?: React.ReactNode | React.ReactNode[];
   includeDefaultTrailing?: boolean;
+  leadingLogo?: boolean;
 }
 
 export const NavBar = ({
   children,
   includeDefaultTrailing = true,
+  leadingLogo = false,
 }: NavBarProps) => {
   const navigationState = useNavigationState((state) => state.routes);
   const navigation = useNavigation();
@@ -64,15 +66,19 @@ export const NavBar = ({
     ?.previousScreenName;
 
   return (
-    <Div className={`flex px-3 flex-row items-center justify-between py-3 `}>
-      <Pressable onPress={() => navigation.goBack()}>
-        <Div className={`flex   p-3 g-4 flex-row items-center`}>
-          <ArrowLeftIcon color={"#fff"} size={20} strokeWidth={2.4} />
-          <Text className={`text-accents-12 font-figtree-bold leading-[20]`}>
-            {explicitTitle ? explicitTitle : lastRouteName.name}
-          </Text>
-        </Div>
-      </Pressable>
+    <Div className={`flex px-4 flex-row items-center justify-between py-3 `}>
+      {leadingLogo ? (
+        <T className={`text-lg font-figtree-bold text-accents-12 px-2`}>LOGO</T>
+      ) : (
+        <Pressable onPress={() => navigation.goBack()}>
+          <Div className={`flex   p-3 g-4 flex-row items-center`}>
+            <ArrowLeftIcon color={"#fff"} size={20} strokeWidth={2.4} />
+            <Text className={`text-accents-12 font-figtree-bold leading-[20]`}>
+              {explicitTitle ? explicitTitle : lastRouteName.name}
+            </Text>
+          </Div>
+        </Pressable>
+      )}
       <Div className={`flex g-3 flex-row`}>
         {children && children}
         {includeDefaultTrailing && <DefaultNavBarTrailing />}
