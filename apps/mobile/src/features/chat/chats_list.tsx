@@ -16,9 +16,7 @@ export const Chats: FC<
   const [chats, setChats] = useState([])
   useEffect(() => {
     (async () => {
-      const { data, error } = await supabase.from("Attending")
-        .select("*, Party(name, Chat(Message(*)))")
-        .eq("userId", authUser?.user.id);
+      const { data, error } = await supabase.rpc('get_messages_for_user', { user_id: authUser?.user.id })
       console.log(data, error)
 
       setChats(data)
@@ -33,9 +31,9 @@ export const Chats: FC<
         >
           Razgorvori
         </Text>
-        {chats.map(el => {
+        {chats?.map(el => {
 
-          return <Pressable onPress={() => navigation.navigate("chat")}>
+          return <Pressable onPress={() => navigation.navigate("chat", { id: el.chat_id })}>
             <Div
               className={`flex flex-row items-center bg-accents-1 rounded-lg justify-between`}
             >
@@ -50,10 +48,10 @@ export const Chats: FC<
                   <Text
                     className={`font-figtree-bold text-xl text-accents-12`}
                   >
-                    {el?.Party?.name}
+                    {el?.party_name}
                   </Text>
                   <Text className={`font-figtree text-accents-11`}>
-                    {el?.Party?.Chat[0]?.Message[0]?.text}
+                    <Text className={`font-black text-accents-11`}>{el.displayname}</Text> {el.last_message_content}
                   </Text>
                 </Div>
               </Div>

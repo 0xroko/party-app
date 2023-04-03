@@ -95,7 +95,7 @@ model Message {
   chatId    String   @db.Uuid
   senderId  String   @db.Uuid
   content   String
-  createdAt DateTime @default(now())
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
   chat      Chat     @relation(fields: [chatId], references: [id])
   sender    Users    @relation(fields: [senderId], references: [id])
 
