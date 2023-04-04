@@ -13,6 +13,7 @@ import { supabase } from "@lib/supabase";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { FC, useCallback, useMemo, useRef } from "react";
 import { Pressable, ScrollView, StyleSheet } from "react-native";
+import { Squares2X2Icon, TagIcon } from "react-native-heroicons/outline";
 import { useQuery } from "react-query";
 
 const useRandomUser = () => {
@@ -44,7 +45,7 @@ export const ModalScreen: FC<
 
   // listen to a change event from react-navigation to trigger bottom sheet close method.
   // variables
-  const snapPoints = useMemo(() => ["25%"], []);
+  const snapPoints = useMemo(() => ["55%"], []);
   const handleSheetChanges = useCallback(
     (index: number) => {
       if (index === -1) {
@@ -57,6 +58,16 @@ export const ModalScreen: FC<
     <BottomSheet
       ref={bottomSheetRef}
       snapPoints={snapPoints}
+      backgroundStyle={{
+        backgroundColor: "#050505",
+      }}
+      handleIndicatorStyle={{
+        backgroundColor: "#494949",
+      }}
+      style={{
+        backgroundColor: "#fff0ff00",
+      }}
+      containerStyle={{}}
       backdropComponent={() => (
         <Div className={`bg-glass-1 absolute inset-0`}></Div>
       )}
@@ -68,10 +79,20 @@ export const ModalScreen: FC<
       enableContentPanningGesture
       // set `detached` to true
       onChange={handleSheetChanges}
-      style={styles.sheetContainer}
     >
-      <Div className={``}>
-        <T>Awesome 🎉</T>
+      <Div className={`bg-accents-1 flex-1`}>
+        <Div className={`h-16 flex flex-row w-full`}>
+          <Div
+            className={`flex grow border-b-2 border-b-accents-12  justify-center items-center`}
+          >
+            <Squares2X2Icon strokeWidth={2} size={26} color={"#fff"} />
+          </Div>
+          <Div
+            className={`flex border-b-2 border-b-accents-1  grow justify-center items-center`}
+          >
+            <TagIcon size={26} strokeWidth={2} color={"#fff"} />
+          </Div>
+        </Div>
       </Div>
     </BottomSheet>
   );
@@ -201,7 +222,7 @@ export const HomeScreen: FC<
               });
             }}
           >
-            {randomUserData?.displayname}
+            @{randomUserData?.displayname} (random user)
           </Button>
           <Button
             // disabled={!isFetched}
@@ -209,28 +230,28 @@ export const HomeScreen: FC<
               navigation.navigate("party-add");
             }}
           >
-            add party
+            Add party
           </Button>
           <Button
             onPress={() => {
               navigation.navigate("chats");
             }}
           >
-            chats
+            Chats
           </Button>
           <Button
             onPress={() => {
               navigation.navigate("upload-images");
             }}
           >
-            Upload
+            Upload Image test
           </Button>
           <Button
             onPress={() => {
               navigation.push("user-modal");
             }}
           >
-            Dissmiss{" "}
+            User modal test{" "}
           </Button>
           <Button
             intent="secondary"
@@ -241,7 +262,7 @@ export const HomeScreen: FC<
               });
             }}
           >
-            Party random
+            Random party page
           </Button>
         </Div>
       </SafeArea.Content>

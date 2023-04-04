@@ -1,6 +1,6 @@
 import { NavigationContainer } from "@react-navigation/native";
 import { Suspense, useEffect } from "react";
-import { focusManager, QueryClient, QueryClientProvider } from "react-query";
+import { QueryClient, QueryClientProvider, focusManager } from "react-query";
 
 export const queryClient = new QueryClient({
   defaultOptions: {
@@ -14,6 +14,7 @@ export const queryClient = new QueryClient({
 
 import type { AppStateStatus } from "react-native";
 import { AppState, Platform } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 // iako je ovo cool nezz dal revalidate sve query ili samo one koje su u component tree
 // (iako je to cudno jel neznas kj react-navigation stavi u tree)
@@ -31,9 +32,11 @@ export const Provider: FCC = ({ children }) => {
 
   return (
     <Suspense>
-      <QueryClientProvider client={queryClient}>
-        <NavigationContainer>{children}</NavigationContainer>
-      </QueryClientProvider>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <QueryClientProvider client={queryClient}>
+          <NavigationContainer>{children}</NavigationContainer>
+        </QueryClientProvider>
+      </GestureHandlerRootView>
     </Suspense>
   );
 };
