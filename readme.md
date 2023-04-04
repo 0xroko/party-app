@@ -1,5 +1,7 @@
 # Party app
 
+# PROTO - NEMA SECRETA!!!
+
 ## Dizajn
 
 - [Figma File](https://www.figma.com/file/AJCEXi6P13yXk1yh6gXvG3/)

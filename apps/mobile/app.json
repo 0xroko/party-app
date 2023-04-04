@@ -29,13 +29,8 @@
     },
     "scheme": "party-app",
     "extra": {
-      "eas": {
-        "projectId": "2211064f-52db-449d-ad20-1d791f2a0d50"
-      }
+      "eas": {}
     },
-    "owner": "alfe-party",
-    "originalFullName": "@alfe-party/partyapp",
-    "currentFullName": "@alfe-party/partyapp",
     "plugins": [
       [
         "expo-image-picker",
