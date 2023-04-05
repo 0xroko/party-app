@@ -12,7 +12,7 @@ import { Button } from "@components/button";
 import { NavBar, NavBarItem } from "@components/navbar";
 import { useAuthUser } from "@hooks/useAuthUser";
 import { useUser } from "@hooks/useUser";
-import { onSupabaseError, User } from "@lib/actions";
+import { User } from "@lib/actions";
 import { queryKeys } from "@lib/const";
 import {
   accept_friend_request,
@@ -193,7 +193,7 @@ export const useFriends = (userId: User["id"], page: number = 0) => {
   return req;
 };
 
-import * as ImagePicker from "expo-image-picker";
+import { uploadPfp } from "@lib/actions/img";
 
 export const UserInfoScreen: FC<
   NativeStackScreenProps<StackNavigatorParams, "user">
@@ -273,62 +273,6 @@ export const UserInfoScreen: FC<
     };
   };
 
-  const pickImage = async () => {
-    // No permissions request is necessary for launching the image library
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [1, 1],
-      base64: true,
-      quality: 0.6,
-    });
-
-    // get image from uri
-
-    if (!result.canceled) {
-      const body = new FormData();
-      let localUri = result.assets[0].uri;
-      let filename = localUri.split("/").pop();
-
-      // Infer the type of the image
-      let match = /\.(\w+)$/.exec(filename);
-      let type = match ? `image/${match[1]}` : `image`;
-
-      // Upload the image using the fetch and FormData APIs
-      let formData = new FormData();
-      // Assume "photo" is the name of the form field the server expects
-
-      formData.append("photo", { uri: localUri, name: filename, type } as any);
-
-      const f = await supabase.storage
-        .from("pfp")
-        .upload(authUser?.user.id, formData, {
-          upsert: true,
-          contentType: "multipart/form-data",
-        });
-
-      const timeStamp = Date.now();
-      const i =
-        supabase.storage.from("pfp").getPublicUrl(authUser?.user.id).data
-          .publicUrl + `?t=${timeStamp}`;
-
-      if (f.error) {
-        onSupabaseError(f.error);
-      } else {
-        const u = await supabase
-          .from("Users")
-          .update({
-            imagesId: i,
-          })
-          .eq("id", authUser?.user.id);
-
-        if (!u.error) {
-          refetch();
-        }
-      }
-    }
-  };
-
   const { actionFn, text, ...actions } = useMemo(() => {
     return handleUserAction(user?.id, authUser.user);
   }, [friendShipStatus, user, authUser]);
@@ -373,7 +317,10 @@ export const UserInfoScreen: FC<
             <Div className={`flex flex-col items-center`}>
               <Pressable
                 onPress={async () => {
-                  if (isMe) await pickImage();
+                  if (isMe) {
+                    await uploadPfp({ userId: user.id });
+                    refetch();
+                  }
                 }}
               >
                 <Img

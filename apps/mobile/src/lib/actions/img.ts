@@ -1,7 +1,10 @@
 import { onSupabaseError } from "@lib/actions";
 import { supabase } from "@lib/supabase";
 import * as ImageManipulator from "expo-image-manipulator";
-import ImagePicker from "expo-image-picker";
+import ImagePicker, {
+  MediaTypeOptions,
+  launchImageLibraryAsync,
+} from "expo-image-picker";
 
 export type UploadType = "pfp" | "party" | "party-cover";
 
@@ -11,17 +14,20 @@ interface GetImgProps {
   pickerProps?: ImagePicker.ImagePickerOptions;
 }
 
+/**
+ * Get image from user's library + compress + resize + return form data for supa upload
+ */
 export const getImg = async ({ pickerProps }: GetImgProps) => {
   const props = {
-    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    mediaTypes: MediaTypeOptions.Images,
     allowsEditing: true,
     aspect: [1, 1] as [number, number],
     base64: true,
-    quality: 0.6,
+    quality: 1,
     ...pickerProps,
   };
 
-  let result = await ImagePicker.launchImageLibraryAsync(props);
+  let result = await launchImageLibraryAsync(props);
   // get image from uri
   if (!result.assets) {
     return null;
@@ -30,10 +36,10 @@ export const getImg = async ({ pickerProps }: GetImgProps) => {
   const manipResult = await ImageManipulator.manipulateAsync(
     result.assets[0].uri,
     [{ resize: { width: 500 } }],
-    { compress: 0.6, format: ImageManipulator.SaveFormat.JPEG }
+    { compress: 0.65, format: ImageManipulator.SaveFormat.JPEG }
   );
 
-  let localUri = result.assets[0].uri;
+  let localUri = manipResult.uri;
   let filename = localUri.split("/").pop();
 
   // Infer the type of the image
@@ -56,13 +62,14 @@ export const uploadPfp = async (params: Params) => {
   // No permissions request is necessary for launching the image library
 
   try {
-    const { formData, contentType } = await getImg({});
+    const img = await getImg({});
+    if (!img) return;
 
     const f = await supabase.storage
       .from("pfp")
-      .upload(params.userId, formData, {
+      .upload(params.userId, img.formData, {
         upsert: true,
-        contentType: contentType,
+        contentType: img.contentType,
       });
 
     const timeStamp = Date.now();
