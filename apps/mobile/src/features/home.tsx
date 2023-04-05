@@ -16,6 +16,9 @@ import { Pressable, ScrollView, StyleSheet } from "react-native";
 import { Squares2X2Icon, TagIcon } from "react-native-heroicons/outline";
 import { useQuery } from "react-query";
 
+export const placeHolderBaseImage =
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAYAAABw4pVUAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAADxSURBVHgB7dFBAQAgDAChaYf1j6o17gEVOLv7how7pAiJERIjJEZIjJAYITFCYoTECIkREiMkRkiMkBghMUJihMQIiRESIyRGSIyQGCExQmKExAiJERIjJEZIjJAYITFCYoTECIkREiMkRkiMkBghMUJihMQIiRESIyRGSIyQGCExQmKExAiJERIjJEZIjJAYITFCYoTECIkREiMkRkiMkBghMUJihMQIiRESIyRGSIyQGCExQmKExAiJERIjJEZIjJAYITFCYoTECIkREiMkRkiMkBghMUJihMQIiRESIyRGSIyQGCExQmKExAiJERLzAWryAgaCD7znAAAAAElFTkSuQmCC";
+
 const useRandomUser = () => {
   const q = useQuery("random-user", async () => {
     return (await getRandomUserButNotMe()) as User;
@@ -98,6 +101,33 @@ export const ModalScreen: FC<
   );
 };
 
+import {
+  Canvas,
+  Circle,
+  Group,
+  LinearGradient,
+  Mask,
+  Rect,
+  useValue,
+  vec,
+} from "@shopify/react-native-skia";
+
+import { Image, useImage } from "@shopify/react-native-skia";
+
+export const HelloWorld = () => {
+  const size = 256;
+  const r = size * 0.33;
+  return (
+    <Canvas style={{ flex: 1 }}>
+      <Group blendMode="multiply">
+        <Circle cx={r} cy={r} r={r} color="cyan" />
+        <Circle cx={size - r} cy={r} r={r} color="magenta" />
+        <Circle cx={size / 2} cy={size - r} r={r} color="yellow" />
+      </Group>
+    </Canvas>
+  );
+};
+
 export const HomeScreen: FC<
   NativeStackScreenProps<StackNavigatorParams, "home">
 > = ({ navigation, route }) => {
@@ -106,7 +136,6 @@ export const HomeScreen: FC<
   const { data: authUserData, isFetched: authUserFetched } = useUser(
     authUser?.user.id
   );
-
   const { data: randomUserData, isFetched: randomUserFetched } =
     useRandomUser();
 
@@ -124,6 +153,8 @@ export const HomeScreen: FC<
 
   const { data: parties, isFetched: partiesFetched } = useParties();
 
+  const image1 = useImage(require("../assets/ppp.png"));
+  const size = useValue({ width: 0, height: 0 });
   return (
     <SafeArea gradient>
       <NavBar leadingLogo />
@@ -158,7 +189,7 @@ export const HomeScreen: FC<
                 <Img
                   className={`w-20 h-20 rounded-full`}
                   source={{
-                    uri: authUserData?.imagesId,
+                    uri: authUserData?.imagesId ?? placeHolderBaseImage,
                   }}
                 ></Img>
               </Div>
@@ -185,7 +216,7 @@ export const HomeScreen: FC<
                   <Img
                     className={`w-20 h-20 rounded-full border-0 border-spacing-2 border-accents-12`}
                     source={{
-                      uri: hostAvatar,
+                      uri: hostAvatar ?? placeHolderBaseImage,
                     }}
                   ></Img>
                   <T
@@ -264,6 +295,44 @@ export const HomeScreen: FC<
           >
             Random party page
           </Button>
+          <Div className={`h-[40%]`}>
+            <Canvas onSize={size} style={{ flex: 1 }}>
+              <Mask
+                mode="luminance"
+                mask={
+                  // <LinearGradient
+                  //   start={vec(0, 0)}
+                  //   end={vec(size, size)}
+                  //   colors={["#FFFFFF22", "#FFFFFF22"]}
+                  // />
+                  <Rect
+                    x={0}
+                    y={0}
+                    width={size.current.width}
+                    height={size.current.height}
+                  >
+                    <LinearGradient
+                      start={vec(size.current.width / 2, 0)}
+                      end={vec(size.current.width / 2, size.current.height)}
+                      positions={[0.3, 0.99]}
+                      colors={["#FFFFFFFF", "#FFFFFF00"]}
+                    />
+                  </Rect>
+                }
+              >
+                {image1 && (
+                  <Image
+                    fit={"cover"}
+                    image={image1}
+                    x={0}
+                    y={0}
+                    width={size.current.width}
+                    height={size.current.height}
+                  />
+                )}
+              </Mask>
+            </Canvas>
+          </Div>
         </Div>
       </SafeArea.Content>
     </SafeArea>

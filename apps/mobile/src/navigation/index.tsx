@@ -21,6 +21,7 @@ const defaultScreenOptions = {
   title: "",
   headerShown: false,
   animation: "none",
+  animationDuration: 0,
 } as const;
 
 export const Splash = () => {

@@ -165,7 +165,7 @@ interface ContentProps {
 }
 
 export const Content = ({ children, className }: ContentProps) => {
-  return <Div className={`mx-[18px] flex `}>{children}</Div>;
+  return <Div className={`mx-[18px] flex`}>{children}</Div>;
 };
 
 SafeArea.Content = Content;
