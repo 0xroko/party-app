@@ -90,16 +90,24 @@ interface UserListProps {
   children?: React.ReactNode | React.ReactNode[];
   users: FriendshipUser[];
   title?: string;
+  emptyText?: string;
   onUserPress?: (user: FriendshipUser) => void;
 }
 
 export const StyledScrollDiv = styled(ScrollView);
 
-export const UserList = ({ users, onUserPress, title }: UserListProps) => {
+export const UserList = ({
+  users,
+  onUserPress,
+  title,
+  emptyText,
+}: UserListProps) => {
   const hasFriends = users.length > 0;
 
   return (
-    <Div className={`flex flex-col g-7 px-5 bg-accents-1 rounded-3xl py-6`}>
+    <Div
+      className={`flex flex-col g-7 px-5 bg-accents-1 rounded-3xl py-6 border-accents-2 border`}
+    >
       <Text className={`font-figtree-bold text-accents-12 text-xl`}>
         {title ? title : "Prijatelji"}
       </Text>
@@ -145,7 +153,7 @@ export const UserList = ({ users, onUserPress, title }: UserListProps) => {
       ) : (
         <Div className={`h-44 flex items-center justify-center`}>
           <Text className={`text-accents-10 text-base font-figtree-medium`}>
-            Korisnik nema prijatelja
+            {emptyText ?? "Korisnik nema prijatelja"}
           </Text>
         </Div>
       )}

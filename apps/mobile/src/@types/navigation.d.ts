@@ -18,6 +18,9 @@ type StackNavigatorParams = {
   "user-modal": undefined;
   "user-friend-request": {} & DefaultNavigationOptionsundefined;
   "party-add": undefined;
+  "party-add-more": {
+    id: string;
+  };
   chats: undefined;
   chat: { id: string };
   "upload-images": undefined;

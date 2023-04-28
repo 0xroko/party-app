@@ -1,6 +1,7 @@
 import { Div, T } from "@components/index";
 import { NavBar } from "@components/navbar";
 import { SafeArea } from "@components/safe-area";
+import { useRefreshOnFocus } from "@hooks/useRefetchOnFocus";
 import { queryKeys } from "@lib/const";
 import { supabase } from "@lib/supabase";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -27,6 +28,8 @@ const useParty = (partyId?: string) => {
     }
   );
 
+  useRefreshOnFocus(q.refetch);
+
   return q;
 };
 
@@ -40,7 +43,44 @@ import { UserList } from "@features/user/id";
 import { formatUserDisplayName } from "@lib/misc";
 import { hr } from "date-fns/locale";
 import { Image } from "expo-image";
+import { LinearGradient } from "expo-linear-gradient";
 import { ShareIcon, UserIcon } from "react-native-heroicons/mini";
+
+interface PartyCoverProps {
+  children?: React.ReactNode | React.ReactNode[];
+  imgUri?: string;
+}
+export const PartyCover = ({ children, imgUri }: PartyCoverProps) => {
+  return (
+    <Div
+      className={`absolute`}
+      style={{
+        height: "55%",
+        width: "100%",
+      }}
+    >
+      <Image
+        style={{
+          height: "100%",
+          width: "100%",
+          opacity: 0.8,
+        }}
+        source={{ uri: imgUri }}
+      ></Image>
+      <LinearGradient
+        style={{
+          height: "100%",
+          width: "100%",
+          position: "absolute",
+          top: 0,
+          left: 0,
+        }}
+        // Background Linear Gradient
+        colors={["rgba(0,0,0,0.8)", "transparent"]}
+      />
+    </Div>
+  );
+};
 
 export const PartyInfo: FC<
   NativeStackScreenProps<StackNavigatorParams, "party">
@@ -53,12 +93,11 @@ export const PartyInfo: FC<
     return null;
   }
 
+  const hasBg = !!party.imageUrl;
+
   return (
-    <SafeArea midGradient={false}>
-      <Image
-        style={{ height: "55%", width: "100%", position: "absolute" }}
-        source={require("../../assets/ppp.png")}
-      ></Image>
+    <SafeArea midGradient={false} gradient={!hasBg}>
+      <PartyCover imgUri={party.imageUrl} />
       <NavBar />
       <SafeArea.Content className="z-10">
         <T
@@ -102,7 +141,7 @@ export const PartyInfo: FC<
         </T>
       </SafeArea.Content>
       <Div className={`mt-6 px-2`}>
-        <UserList users={[]} title="Ko dolazi" />
+        <UserList emptyText="Još niko ne dolazi" users={[]} title="Ko dolazi" />
       </Div>
     </SafeArea>
   );

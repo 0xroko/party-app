@@ -1,14 +1,16 @@
 import { onSupabaseError } from "@lib/actions";
+import { queryKeys } from "@lib/const";
 import { supabase } from "@lib/supabase";
 import * as ImageManipulator from "expo-image-manipulator";
 import ImagePicker, {
   MediaTypeOptions,
   launchImageLibraryAsync,
 } from "expo-image-picker";
+import { queryClient } from "../../provider/index";
 
 export type UploadType = "pfp" | "party" | "party-cover";
 
-export type Params = { userId: string };
+export type PfpParams = { userId: string };
 
 interface GetImgProps {
   pickerProps?: ImagePicker.ImagePickerOptions;
@@ -58,9 +60,8 @@ export const getImg = async ({ pickerProps }: GetImgProps) => {
   };
 };
 
-export const uploadPfp = async (params: Params) => {
+export const uploadPfp = async (params: PfpParams) => {
   // No permissions request is necessary for launching the image library
-
   try {
     const img = await getImg({});
     if (!img) return;
@@ -88,6 +89,45 @@ export const uploadPfp = async (params: Params) => {
         .eq("id", params.userId);
 
       if (!u.error) {
+      }
+    }
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const uploadPartyCover = async (partyId: string) => {
+  try {
+    const img = await getImg({});
+    if (!img) return;
+
+    const f = await supabase.storage
+      .from("party-covers")
+      .upload(partyId, img.formData, {
+        upsert: true,
+        contentType: img.contentType,
+      });
+
+    const timeStamp = Date.now();
+    const i =
+      supabase.storage.from("party-covers").getPublicUrl(partyId).data
+        .publicUrl + `?t=${timeStamp}`;
+
+    if (f.error) {
+      onSupabaseError(f.error);
+    } else {
+      try {
+        const u = await supabase
+          .from("Party")
+          .update({
+            imageUrl: i,
+          })
+          .eq("id", partyId);
+
+        queryClient.invalidateQueries(queryKeys.partyId(partyId));
+        console.log(u);
+      } catch (error) {
+        onSupabaseError(error);
       }
     }
   } catch (error) {

@@ -5,6 +5,7 @@ import { Chats } from "@features/chat/chats_list";
 import { HomeScreen, ModalScreen } from "@features/home";
 import { Upload } from "@features/images/upload";
 import { PartyAdd } from "@features/party/add";
+import { PartyAddMore } from "@features/party/add-more";
 import { PartyInfo } from "@features/party/id";
 import { UserEditScreen } from "@features/user/edit";
 import { UserFriendReqests } from "@features/user/friend-requests";
@@ -92,6 +93,11 @@ export const NativeNavigation = () => {
             options={defaultScreenOptions}
             name="party-add"
             component={PartyAdd}
+          />
+          <Stack.Screen
+            options={defaultScreenOptions}
+            name="party-add-more"
+            component={PartyAddMore}
           />
           <Stack.Screen
             name="user-friend-request"

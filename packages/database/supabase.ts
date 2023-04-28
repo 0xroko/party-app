@@ -175,6 +175,7 @@ export interface Database {
           ended: boolean
           hostId: string
           id: string
+          imageUrl: string | null
           location: string
           name: string
           tags: string[] | null
@@ -188,6 +189,7 @@ export interface Database {
           ended?: boolean
           hostId: string
           id?: string
+          imageUrl?: string | null
           location: string
           name: string
           tags?: string[] | null
@@ -201,6 +203,7 @@ export interface Database {
           ended?: boolean
           hostId?: string
           id?: string
+          imageUrl?: string | null
           location?: string
           name?: string
           tags?: string[] | null

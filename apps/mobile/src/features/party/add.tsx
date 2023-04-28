@@ -4,7 +4,7 @@ import { Input } from "@components/input";
 import { SafeArea } from "@components/safe-area";
 import { supabase } from "@lib/supabase";
 import { Field, Form, FormInstance } from "houseform";
-import { FC, useState } from "react";
+import { FC, useRef, useState } from "react";
 // import { AddressAutofill } from '@mapbox/search-js-react';
 import RNDateTimePicker from "@react-native-community/datetimepicker";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -74,6 +74,8 @@ export const PartyAdd: FC<
     return mergedDate;
   }
 
+  const idRef = useRef<any>();
+
   async function onVerify(values: PartyAddForm, form: FormInstance<any>) {
     console.log("Function not implemented.", values);
 
@@ -94,6 +96,7 @@ export const PartyAdd: FC<
         },
       ])
       .select("*");
+    idRef.current = res.data[0].id;
     console.log(res);
   }
 
@@ -102,7 +105,7 @@ export const PartyAdd: FC<
   const [date, setDate] = React.useState<"none" | "date" | "time">("none");
 
   return (
-    <SafeArea gradient>
+    <SafeArea>
       <Section>
         <SectionTitle
           title={"Kreiraj party"}
@@ -276,7 +279,9 @@ export const PartyAdd: FC<
                     disabled={!isValid || isSubmitting}
                     onPress={async () => {
                       await submit();
-                      navigation.navigate("home");
+                      navigation.navigate("party-add-more", {
+                        id: idRef.current,
+                      });
                     }}
                     intent={"primary"}
                   >

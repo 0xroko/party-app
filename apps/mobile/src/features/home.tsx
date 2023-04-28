@@ -141,9 +141,14 @@ export const HomeScreen: FC<
 
   const useParties = () => {
     const q = useQuery(queryKeys.latestParties, async () => {
-      const { data, error } = await supabase.from("Party").select(`*,
+      const { data, error } = await supabase
+        .from("Party")
+        .select(
+          `*,
       host: hostId(id, displayname, imagesId)
-      `);
+      `
+        )
+        .order("id");
 
       return data;
     });
@@ -287,13 +292,24 @@ export const HomeScreen: FC<
           <Button
             intent="secondary"
             onPress={() => {
+              navigation.push("party-add-more", {
+                id: parties[0]?.id,
+                // previousScreenName: "Home",
+              });
+            }}
+          >
+            Random party page
+          </Button>
+          <Button
+            intent="secondary"
+            onPress={() => {
               navigation.push("party", {
                 id: parties[0]?.id,
                 previousScreenName: "Home",
               });
             }}
           >
-            Random party page
+            Random party page (true)
           </Button>
           <Div className={`h-[40%]`}>
             <Canvas onSize={size} style={{ flex: 1 }}>
