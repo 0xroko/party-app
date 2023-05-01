@@ -57,8 +57,11 @@ export const getImg = async ({ pickerProps }: GetImgProps) => {
   return {
     formData,
     contentType: "multipart/form-data",
+    localUri,
   };
 };
+
+export type GetImageProps = Awaited<ReturnType<typeof getImg>>;
 
 export const uploadPfp = async (params: PfpParams) => {
   // No permissions request is necessary for launching the image library
@@ -129,6 +132,37 @@ export const uploadPartyCover = async (partyId: string) => {
       } catch (error) {
         onSupabaseError(error);
       }
+    }
+  } catch (error) {
+    throw error;
+  }
+};
+
+import uuid from "react-native-uuid";
+
+export const uploadPost = async ({
+  contentType,
+  formData,
+  localUri,
+}: GetImageProps) => {
+  try {
+    const uuidImg = uuid.v4().toString();
+    const f = await supabase.storage
+      .from("party-images")
+      .upload(uuidImg, formData, {
+        upsert: true,
+        contentType: contentType,
+      });
+
+    const timeStamp = Date.now();
+    const i =
+      supabase.storage.from("party-images").getPublicUrl(uuidImg).data
+        .publicUrl + `?t=${timeStamp}`;
+
+    if (f.error) {
+      onSupabaseError(f.error);
+    } else {
+      return i;
     }
   } catch (error) {
     throw error;

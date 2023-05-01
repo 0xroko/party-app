@@ -7,6 +7,7 @@ import { Upload } from "@features/images/upload";
 import { PartyAdd } from "@features/party/add";
 import { PartyAddMore } from "@features/party/add-more";
 import { PartyInfo } from "@features/party/id";
+import { AddPostScreen } from "@features/posts/add";
 import { UserEditScreen } from "@features/user/edit";
 import { UserFriendReqests } from "@features/user/friend-requests";
 import { UserInfoScreen } from "@features/user/id";
@@ -98,6 +99,11 @@ export const NativeNavigation = () => {
             options={defaultScreenOptions}
             name="party-add-more"
             component={PartyAddMore}
+          />
+          <Stack.Screen
+            options={defaultScreenOptions}
+            name="postAdd"
+            component={AddPostScreen}
           />
           <Stack.Screen
             name="user-friend-request"

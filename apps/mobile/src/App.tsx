@@ -1,7 +1,7 @@
 import { useFonts } from "expo-font";
 
 import { FC, useEffect, useRef, useState } from "react";
-import { Keyboard, KeyboardAvoidingView } from "react-native";
+import { Keyboard, KeyboardAvoidingView, Platform } from "react-native";
 
 import { NativeNavigation } from "./navigation";
 import { Provider } from "./provider";
@@ -208,6 +208,7 @@ const App: FC = () => {
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
       onStartShouldSetResponder={handleUnhandledTouches}
     >
       <Provider>

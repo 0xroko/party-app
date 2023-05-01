@@ -101,18 +101,9 @@ export const ModalScreen: FC<
   );
 };
 
-import {
-  Canvas,
-  Circle,
-  Group,
-  LinearGradient,
-  Mask,
-  Rect,
-  useValue,
-  vec,
-} from "@shopify/react-native-skia";
+import { Canvas, Circle, Group, useValue } from "@shopify/react-native-skia";
 
-import { Image, useImage } from "@shopify/react-native-skia";
+import { useImage } from "@shopify/react-native-skia";
 
 export const HelloWorld = () => {
   const size = 256;
@@ -311,44 +302,17 @@ export const HomeScreen: FC<
           >
             Random party page (true)
           </Button>
-          <Div className={`h-[40%]`}>
-            <Canvas onSize={size} style={{ flex: 1 }}>
-              <Mask
-                mode="luminance"
-                mask={
-                  // <LinearGradient
-                  //   start={vec(0, 0)}
-                  //   end={vec(size, size)}
-                  //   colors={["#FFFFFF22", "#FFFFFF22"]}
-                  // />
-                  <Rect
-                    x={0}
-                    y={0}
-                    width={size.current.width}
-                    height={size.current.height}
-                  >
-                    <LinearGradient
-                      start={vec(size.current.width / 2, 0)}
-                      end={vec(size.current.width / 2, size.current.height)}
-                      positions={[0.3, 0.99]}
-                      colors={["#FFFFFFFF", "#FFFFFF00"]}
-                    />
-                  </Rect>
-                }
-              >
-                {image1 && (
-                  <Image
-                    fit={"cover"}
-                    image={image1}
-                    x={0}
-                    y={0}
-                    width={size.current.width}
-                    height={size.current.height}
-                  />
-                )}
-              </Mask>
-            </Canvas>
-          </Div>
+          <Button
+            intent="secondary"
+            onPress={() => {
+              navigation.push("postAdd", {
+                partyId: parties[0]?.id,
+                previousScreenName: "Home",
+              });
+            }}
+          >
+            post add for {parties?.[0]?.name}
+          </Button>
         </Div>
       </SafeArea.Content>
     </SafeArea>

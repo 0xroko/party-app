@@ -8,7 +8,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { FC } from "react";
 import { useQuery } from "react-query";
 
-const useParty = (partyId?: string) => {
+export const useParty = (partyId?: string) => {
   const q = useQuery(
     queryKeys.partyId(partyId),
     async () => {
