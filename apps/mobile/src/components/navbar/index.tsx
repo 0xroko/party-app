@@ -66,7 +66,9 @@ export const NavBar = ({
     ?.previousScreenName;
 
   return (
-    <Div className={`flex px-3 flex-row items-center justify-between py-3 `}>
+    <Div
+      className={`flex px-3 flex-row items-center justify-between py-3 h-16`}
+    >
       {leadingLogo ? (
         <T className={`text-lg font-figtree-bold text-accents-12 px-2`}>LOGO</T>
       ) : (
