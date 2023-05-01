@@ -2,7 +2,10 @@ import { useAuthUser } from "@hooks/useAuthUser";
 import { supabase } from "@lib/supabase";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React, { FC, useCallback, useEffect, useState } from "react";
-import { GiftedChat } from "react-native-gifted-chat";
+import { View, useWindowDimensions } from "react-native";
+import { Bubble, Composer, GiftedChat, InputToolbar, Send, Time } from "react-native-gifted-chat";
+import { SafeArea } from "@components/safe-area";
+// import { Input } from "@components/input";
 
 // export function Chat() {
 export const Chat: FC<NativeStackScreenProps<StackNavigatorParams, "chat">> = ({
@@ -112,22 +115,83 @@ export const Chat: FC<NativeStackScreenProps<StackNavigatorParams, "chat">> = ({
     console.log("✅✅", data, error);
   }, []);
   console.log(authUser.user.id);
+  const d = useWindowDimensions();
   return (
-    <GiftedChat
-      // isLoadingEarlier={messages.length === 0}
-      messages={messages}
-      onPressAvatar={(profile) => {
-        navigation.navigate("user", {
-          id: profile?._id as string,
-          previousScreenName: `Chats`,
-        });
-      }}
-      onSend={(messages) => onSend(messages)}
-      user={{
-        _id: authUser.user.id,
-      }}
-      inverted={true}
-      alwaysShowSend={true}
-    />
+    <SafeArea>
+      <GiftedChat
+        // isLoadingEarlier={messages.length === 0}
+        // renderLoading={() => <></>}
+        // renderBubble={() => <View style={{ width: 100, height: 100, backgroundColor: "red" }} />}
+        renderUsernameOnMessage={true}
+        messages={messages}
+        onPressAvatar={(profile) => {
+          navigation.navigate("user", {
+            id: profile?._id as string,
+            previousScreenName: `Chats`,
+          });
+        }}
+        onSend={(messages) => onSend(messages)}
+        user={{
+          _id: authUser.user.id,
+        }}
+        placeholder="Poruka..."
+        inverted={true}
+        alwaysShowSend={true}
+        renderInputToolbar={(props) => <InputToolbar {...props}
+          optionTintColor="white"
+          renderComposer={(props) => <Composer {...props} textInputStyle={{ color: "white" }} />}
+          containerStyle={{
+            backgroundColor: "black",
+            borderTopColor: "rgba(255, 255, 255, 0.1)",
+            borderTopWidth: 1
+
+          }} />}
+
+
+        renderBubble={(props) => <Bubble {...props} wrapperStyle={{
+          left: {
+            backgroundColor: "black",
+            borderColor: "rgba(255, 255, 255, 1)",
+            borderWidth: 1,
+          },
+          right: {
+            backgroundColor: "white",
+            borderColor: "black",
+            borderWidth: 1,
+
+          }
+        }}
+          textStyle={{
+            left: {
+              color: "white"
+            },
+            right: {
+              color: "black",
+
+              // textShadowColor: "black"
+            }
+          }}
+          renderTime={(props) => <Time {...props} timeTextStyle={{
+            right: {
+              color: "black"
+            }
+          }} />}
+          renderUsernameOnMessage={true}
+          tickStyle={{ color: "red" }}
+
+        />}
+
+        listViewProps={{
+          style: {
+            backgroundColor: "transparent",
+            // background: "radial-gradient(ellipse at center, #6500B7 54%, #6500B7 77%, #FFA0FF 100%)"
+          },
+        }}
+        renderSend={(props) => <Send {...props} text="Pošalji" textStyle={{ color: "white" }} />}
+
+
+
+      />
+    </SafeArea>
   );
 };

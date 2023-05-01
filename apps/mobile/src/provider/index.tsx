@@ -1,4 +1,4 @@
-import { NavigationContainer } from "@react-navigation/native";
+import { DefaultTheme, NavigationContainer } from "@react-navigation/native";
 import { Suspense, useEffect } from "react";
 import { QueryClient, QueryClientProvider, focusManager } from "react-query";
 
