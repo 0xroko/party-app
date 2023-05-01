@@ -76,7 +76,8 @@ export const PartyCover = ({ children, imgUri }: PartyCoverProps) => {
           left: 0,
         }}
         // Background Linear Gradient
-        colors={["rgba(0,0,0,0.8)", "transparent"]}
+        locations={[0.0, 0.3, 0.9]}
+        colors={["rgba(0,0,0,0.7)", "transparent", "rgba(0,0,0,1)"]}
       />
     </Div>
   );
