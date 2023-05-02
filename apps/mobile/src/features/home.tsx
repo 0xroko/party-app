@@ -9,11 +9,12 @@ import { User } from "@lib/actions";
 import { getRandomUserButNotMe } from "@lib/actions/user";
 import { queryKeys } from "@lib/const";
 import { supabase } from "@lib/supabase";
-
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { UserFriendReqests } from "@features/user/friend-requests";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { FC, useCallback, useMemo, useRef } from "react";
 import { Pressable, ScrollView, StyleSheet } from "react-native";
-import { Squares2X2Icon, TagIcon } from "react-native-heroicons/outline";
+import { BellAlertIcon, BellIcon, HomeIcon, MagnifyingGlassIcon, PlusCircleIcon, Squares2X2Icon, TagIcon } from "react-native-heroicons/outline";
 import { useQuery } from "react-query";
 
 export const placeHolderBaseImage =
@@ -77,7 +78,7 @@ export const ModalScreen: FC<
       // add bottom inset to elevate the sheet
       enablePanDownToClose
       enableOverDrag
-      onClose={() => {}}
+      onClose={() => { }}
       enableHandlePanningGesture
       enableContentPanningGesture
       // set `detached` to true
@@ -104,6 +105,10 @@ export const ModalScreen: FC<
 import { Canvas, Circle, Group, useValue } from "@shopify/react-native-skia";
 
 import { useImage } from "@shopify/react-native-skia";
+import { Chats } from "./chat/chats_list";
+import { PartyAdd } from "./party/add";
+import { UserInfoScreen } from "./user/id";
+import { withSpring } from "react-native-reanimated";
 
 export const HelloWorld = () => {
   const size = 256;
@@ -118,6 +123,81 @@ export const HelloWorld = () => {
     </Canvas>
   );
 };
+
+export const HomeNavigation = () => {
+  const Tab = createBottomTabNavigator();
+  const { data: authUser, isFetched, refetch } = useAuthUser();
+
+  const { data: authUserData, isFetched: authUserFetched } = useUser(
+    authUser?.user.id
+  );
+  return (
+    <Tab.Navigator screenOptions={({ route }) => ({
+      headerShown: false,
+      // keyboardHidesTabBar: true,
+      tabBarHideOnKeyboard: true,
+      tabBarIcon: ({ focused, color, size }) => {
+        let iconName;
+
+        const { data: authUser, isFetched, refetch } = useAuthUser();
+        const { data: authUserData, isFetched: authUserFetched } = useUser(
+          authUser?.user.id
+        );
+
+        if (route.name === 'Home') {
+          return focused
+            ? <HomeIcon onPress={() => {
+              offset.value = withSpring(Math.random());
+            }}
+              size={size + 5} color={"white"} strokeWidth="2" />
+            : <HomeIcon size={size + 2} color={color} />;
+        } else if (route.name === 'Search') {
+          return focused
+            ? <MagnifyingGlassIcon size={size + 5} color={"white"} strokeWidth="2" />
+            : <MagnifyingGlassIcon size={size + 2} color={color} />;
+        } else if (route.name === 'Add') {
+          return focused
+            ? <PlusCircleIcon size={size + 5} color={"white"} strokeWidth="2" />
+            : <PlusCircleIcon size={size + 2} color={color} />;
+        } else if (route.name === 'Notifications') {
+          return focused
+            ? <BellIcon size={size + 5} color={"white"} strokeWidth="2" />
+            : <BellIcon size={size + 2} color={color} />;
+        } else if (route.name === 'Profile') {
+          return focused ? <Img
+            className={`w-7 h-7 rounded-full border-2 border-white`}
+            source={{
+              uri: authUserData?.imagesId ?? "",
+            }}
+          /> : <Img
+            className={`w-8 h-8 rounded-full border-3 border-gray-700`}
+            source={{
+              uri: authUserData?.imagesId ?? "",
+            }}
+          />
+
+        }
+
+      },
+      tabBarAllowFontScaling: true,
+      tabBarActiveBackgroundColor: "black",
+      tabBarInactiveBackgroundColor: "black",
+      tabBarStyle: {
+        backgroundColor: "black",
+        borderTopWidth: 0,
+      },
+      title: ""
+    })}
+    >
+
+      <Tab.Screen name="Home" component={HomeScreen} />
+      <Tab.Screen name="Search" component={Chats} />
+      <Tab.Screen name="Add" component={PartyAdd} />
+      <Tab.Screen name="Notifications" component={UserFriendReqests} />
+      <Tab.Screen name="Profile" component={UserInfoScreen} initialParams={{ id: authUser?.user.id }} />
+    </Tab.Navigator>
+  )
+}
 
 export const HomeScreen: FC<
   NativeStackScreenProps<StackNavigatorParams, "home">
@@ -151,6 +231,8 @@ export const HomeScreen: FC<
 
   const image1 = useImage(require("../assets/ppp.png"));
   const size = useValue({ width: 0, height: 0 });
+  // const Tab = createBottomTabNavigator();
+
   return (
     <SafeArea gradient>
       <NavBar leadingLogo />
