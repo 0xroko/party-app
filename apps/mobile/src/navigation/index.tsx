@@ -2,7 +2,7 @@ import { UserLoginInfoScreen } from "@features/auth/info-screen";
 import { LoginLoginScreen } from "@features/auth/signup";
 import { Chat } from "@features/chat/chat";
 import { Chats } from "@features/chat/chats_list";
-import { HomeScreen } from "@features/home";
+import { HomeNavigation } from "@features/home";
 import { Upload } from "@features/images/upload";
 import { PartyAdd } from "@features/party/add";
 import { PartyAddMore } from "@features/party/add-more";
@@ -67,9 +67,10 @@ export const NativeNavigation = () => {
         // TU idu svi screenovi, home prvi
         <>
           <Stack.Screen
-            options={defaultScreenOptions}
+            // options={defaultScreenOptions}
             name="home"
-            component={HomeScreen}
+            component={HomeNavigation}
+            options={{ ...defaultScreenOptions, headerShown: false }}
           />
           <Stack.Screen
             options={defaultScreenOptions}

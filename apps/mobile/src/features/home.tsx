@@ -2,124 +2,20 @@ import { Button } from "@components/button";
 import { Div, Img, T } from "@components/index";
 import { NavBar } from "@components/navbar";
 import { SafeArea } from "@components/safe-area";
-import {
-  BottomSheetScrollableProps,
-  SCROLLABLE_TYPE,
-} from "@gorhom/bottom-sheet";
+import { UserFriendReqests } from "@features/user/friend-requests";
 import { useAuthUser } from "@hooks/useAuthUser";
 import { useUser } from "@hooks/useUser";
 import { User } from "@lib/actions";
 import { getRandomUserButNotMe } from "@lib/actions/user";
 import { queryKeys } from "@lib/const";
 import { supabase } from "@lib/supabase";
-
-import { createBottomSheetScrollableComponent } from "@gorhom/bottom-sheet";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { FlashListProps } from "@shopify/flash-list";
 import { useValue } from "@shopify/react-native-skia";
-import { FC, ReactNode, Ref, RefObject, memo } from "react";
-import {
-  Pressable,
-  ScrollView,
-  ScrollViewComponent,
-  StyleSheet,
-  View,
-} from "react-native";
-import Animated from "react-native-reanimated";
+import { FC } from "react";
+import { Pressable, ScrollView, StyleSheet } from "react-native";
 import { useQuery } from "react-query";
 
-export type BottomSheetFlashListProps<T> = Omit<
-  Animated.AnimateProps<FlashListProps<T>>,
-  "decelerationRate" | "onScroll" | "scrollEventThrottle"
-> &
-  BottomSheetScrollableProps & {
-    ref?: Ref<BottomSheetFlashListMethods>;
-  };
-
-export interface BottomSheetFlashListMethods {
-  /**
-   * Scrolls to the end of the content. May be janky without `getItemLayout` prop.
-   */
-  scrollToEnd: (params?: { animated?: boolean | null }) => void;
-
-  /**
-   * Scrolls to the item at the specified index such that it is positioned in the viewable area
-   * such that viewPosition 0 places it at the top, 1 at the bottom, and 0.5 centered in the middle.
-   * Cannot scroll to locations outside the render window without specifying the getItemLayout prop.
-   */
-  scrollToIndex: (params: {
-    animated?: boolean | null;
-    index: number;
-    viewOffset?: number;
-    viewPosition?: number;
-  }) => void;
-
-  /**
-   * Requires linear scan through data - use `scrollToIndex` instead if possible.
-   * May be janky without `getItemLayout` prop.
-   */
-  scrollToItem: (params: {
-    animated?: boolean | null;
-    item: any;
-    viewPosition?: number;
-  }) => void;
-
-  /**
-   * Scroll to a specific content pixel offset, like a normal `ScrollView`.
-   */
-  scrollToOffset: (params: {
-    animated?: boolean | null;
-    offset: number;
-  }) => void;
-
-  /**
-   * Tells the list an interaction has occured, which should trigger viewability calculations,
-   * e.g. if waitForInteractions is true and the user has not scrolled. This is typically called
-   * by taps on items or by navigation actions.
-   */
-  recordInteraction: () => void;
-
-  /**
-   * Displays the scroll indicators momentarily.
-   */
-  flashScrollIndicators: () => void;
-
-  /**
-   * Provides a handle to the underlying scroll responder.
-   */
-  getScrollResponder: () => ReactNode | null | undefined;
-
-  /**
-   * Provides a reference to the underlying host component
-   */
-  getNativeScrollRef: () =>
-    | RefObject<View>
-    | RefObject<ScrollViewComponent>
-    | null
-    | undefined;
-
-  getScrollableNode: () => any;
-
-  // TODO: use `unknown` instead of `any` for Typescript >= 3.0
-  setNativeProps: (props: { [key: string]: any }) => void;
-}
-
-const AnimatedFlashList =
-  Animated.createAnimatedComponent<FlashListProps<any>>(FlashList);
-
-const BottomSheetFlashListComponent = createBottomSheetScrollableComponent<
-  BottomSheetFlashListMethods,
-  BottomSheetFlashListProps<any>
->(SCROLLABLE_TYPE.FLASHLIST, AnimatedFlashList);
-
-const BottomSheetFlashList = memo(BottomSheetFlashListComponent);
-BottomSheetFlashList.displayName = "BottomSheetFlashList";
-
-export default BottomSheetFlashList as <T>(
-  props: BottomSheetFlashListProps<T>
-) => ReturnType<typeof BottomSheetFlashList>;
-
-import { useImage } from "@shopify/react-native-skia";
 export const placeHolderBaseImage =
   "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAYAAABw4pVUAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAADxSURBVHgB7dFBAQAgDAChaYf1j6o17gEVOLv7how7pAiJERIjJEZIjJAYITFCYoTECIkREiMkRkiMkBghMUJihMQIiRESIyRGSIyQGCExQmKExAiJERIjJEZIjJAYITFCYoTECIkREiMkRkiMkBghMUJihMQIiRESIyRGSIyQGCExQmKExAiJERIjJEZIjJAYITFCYoTECIkREiMkRkiMkBghMUJihMQIiRESIyRGSIyQGCExQmKExAiJERIjJEZIjJAYITFCYoTECIkREiMkRkiMkBghMUJihMQIiRESIyRGSIyQGCExQmKExAiJERLzAWryAgaCD7znAAAAAElFTkSuQmCC";
 
@@ -145,7 +41,184 @@ const styles = StyleSheet.create({
   },
 });
 
-import { FlashList } from "@shopify/flash-list";
+export const ModalScreen: FC<
+  NativeStackScreenProps<StackNavigatorParams, "user-modal">
+> = ({ navigation, route }) => {
+  const bottomSheetRef = useRef<BottomSheet>(null);
+
+  // listen to a change event from react-navigation to trigger bottom sheet close method.
+  // variables
+  const snapPoints = useMemo(() => ["55%"], []);
+  const handleSheetChanges = useCallback(
+    (index: number) => {
+      if (index === -1) {
+        navigation.goBack();
+      }
+    },
+    [navigation]
+  );
+  return (
+    <BottomSheet
+      ref={bottomSheetRef}
+      snapPoints={snapPoints}
+      backgroundStyle={{
+        backgroundColor: "#050505",
+      }}
+      handleIndicatorStyle={{
+        backgroundColor: "#494949",
+      }}
+      style={{
+        backgroundColor: "#fff0ff00",
+      }}
+      containerStyle={{}}
+      backdropComponent={() => (
+        <Div className={`bg-glass-1 absolute inset-0`}></Div>
+      )}
+      // add bottom inset to elevate the sheet
+      enablePanDownToClose
+      enableOverDrag
+      onClose={() => {}}
+      enableHandlePanningGesture
+      enableContentPanningGesture
+      // set `detached` to true
+      onChange={handleSheetChanges}
+    >
+      <Div className={`bg-accents-1 flex-1`}>
+        <Div className={`h-16 flex flex-row w-full`}>
+          <Div
+            className={`flex grow border-b-2 border-b-accents-12  justify-center items-center`}
+          >
+            <Squares2X2Icon strokeWidth={2} size={26} color={"#fff"} />
+          </Div>
+          <Div
+            className={`flex border-b-2 border-b-accents-1  grow justify-center items-center`}
+          >
+            <TagIcon size={26} strokeWidth={2} color={"#fff"} />
+          </Div>
+        </Div>
+      </Div>
+    </BottomSheet>
+  );
+};
+
+import { Canvas, Circle, Group } from "@shopify/react-native-skia";
+
+import { useImage } from "@shopify/react-native-skia";
+import { withSpring } from "react-native-reanimated";
+import { Chats } from "./chat/chats_list";
+import { PartyAdd } from "./party/add";
+import { UserInfoScreen } from "./user/id";
+
+export const HelloWorld = () => {
+  const size = 256;
+  const r = size * 0.33;
+  return (
+    <Canvas style={{ flex: 1 }}>
+      <Group blendMode="multiply">
+        <Circle cx={r} cy={r} r={r} color="cyan" />
+        <Circle cx={size - r} cy={r} r={r} color="magenta" />
+        <Circle cx={size / 2} cy={size - r} r={r} color="yellow" />
+      </Group>
+    </Canvas>
+  );
+};
+
+export const HomeNavigation = () => {
+  const Tab = createBottomTabNavigator();
+  const { data: authUser, isFetched, refetch } = useAuthUser();
+
+  const { data: authUserData, isFetched: authUserFetched } = useUser(
+    authUser?.user.id
+  );
+  return (
+    <Tab.Navigator
+      screenOptions={({ route }) => ({
+        headerShown: false,
+        // keyboardHidesTabBar: true,
+        tabBarHideOnKeyboard: true,
+        tabBarIcon: ({ focused, color, size }) => {
+          let iconName;
+
+          const { data: authUser, isFetched, refetch } = useAuthUser();
+          const { data: authUserData, isFetched: authUserFetched } = useUser(
+            authUser?.user.id
+          );
+
+          if (route.name === "Home") {
+            return focused ? (
+              <HomeIcon
+                onPress={() => {
+                  offset.value = withSpring(Math.random());
+                }}
+                size={size + 5}
+                color={"white"}
+                strokeWidth="2"
+              />
+            ) : (
+              <HomeIcon size={size + 2} color={color} />
+            );
+          } else if (route.name === "Search") {
+            return focused ? (
+              <MagnifyingGlassIcon
+                size={size + 5}
+                color={"white"}
+                strokeWidth="2"
+              />
+            ) : (
+              <MagnifyingGlassIcon size={size + 2} color={color} />
+            );
+          } else if (route.name === "Add") {
+            return focused ? (
+              <PlusCircleIcon size={size + 5} color={"white"} strokeWidth="2" />
+            ) : (
+              <PlusCircleIcon size={size + 2} color={color} />
+            );
+          } else if (route.name === "Notifications") {
+            return focused ? (
+              <BellIcon size={size + 5} color={"white"} strokeWidth="2" />
+            ) : (
+              <BellIcon size={size + 2} color={color} />
+            );
+          } else if (route.name === "Profile") {
+            return focused ? (
+              <Img
+                className={`w-7 h-7 rounded-full border-2 border-white`}
+                source={{
+                  uri: authUserData?.imagesId ?? "",
+                }}
+              />
+            ) : (
+              <Img
+                className={`w-8 h-8 rounded-full border-3 border-gray-700`}
+                source={{
+                  uri: authUserData?.imagesId ?? "",
+                }}
+              />
+            );
+          }
+        },
+        tabBarAllowFontScaling: true,
+        tabBarActiveBackgroundColor: "black",
+        tabBarInactiveBackgroundColor: "black",
+        tabBarStyle: {
+          backgroundColor: "black",
+          borderTopWidth: 0,
+        },
+        title: "",
+      })}
+    >
+      <Tab.Screen name="Home" component={HomeScreen} />
+      <Tab.Screen name="Search" component={Chats} />
+      <Tab.Screen name="Add" component={PartyAdd} />
+      <Tab.Screen name="Notifications" component={UserFriendReqests} />
+      <Tab.Screen
+        name="Profile"
+        component={UserInfoScreen}
+        initialParams={{ id: authUser?.user.id }}
+      />
+    </Tab.Navigator>
+  );
+};
 
 export const HomeScreen: FC<
   NativeStackScreenProps<StackNavigatorParams, "home">
@@ -179,6 +252,8 @@ export const HomeScreen: FC<
 
   const image1 = useImage(require("../assets/ppp.png"));
   const size = useValue({ width: 0, height: 0 });
+  // const Tab = createBottomTabNavigator();
+
   return (
     <SafeArea gradient>
       <NavBar leadingLogo />
