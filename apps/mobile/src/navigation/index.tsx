@@ -2,12 +2,13 @@ import { UserLoginInfoScreen } from "@features/auth/info-screen";
 import { LoginLoginScreen } from "@features/auth/signup";
 import { Chat } from "@features/chat/chat";
 import { Chats } from "@features/chat/chats_list";
-import { HomeScreen, ModalScreen } from "@features/home";
+import { HomeScreen } from "@features/home";
 import { Upload } from "@features/images/upload";
 import { PartyAdd } from "@features/party/add";
 import { PartyAddMore } from "@features/party/add-more";
 import { PartyInfo } from "@features/party/id";
 import { AddPostScreen } from "@features/posts/add";
+import { PostInfoScreen } from "@features/posts/id";
 import { UserEditScreen } from "@features/user/edit";
 import { UserFriendReqests } from "@features/user/friend-requests";
 import { UserInfoScreen } from "@features/user/id";
@@ -75,7 +76,7 @@ export const NativeNavigation = () => {
             name="user"
             component={UserInfoScreen}
           />
-          <Stack.Screen
+          {/* <Stack.Screen
             options={{
               ...defaultScreenOptions,
               presentation: "transparentModal",
@@ -84,7 +85,7 @@ export const NativeNavigation = () => {
             }}
             name="user-modal"
             component={ModalScreen}
-          />
+          /> */}
           <Stack.Screen
             options={defaultScreenOptions}
             name="user-edit"
@@ -104,6 +105,11 @@ export const NativeNavigation = () => {
             options={defaultScreenOptions}
             name="postAdd"
             component={AddPostScreen}
+          />
+          <Stack.Screen
+            options={defaultScreenOptions}
+            component={PostInfoScreen}
+            name="post"
           />
           <Stack.Screen
             name="user-friend-request"

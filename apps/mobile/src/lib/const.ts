@@ -7,4 +7,7 @@ export const queryKeys = {
   friendRequestCount: ["friendRequestCount"],
   latestParties: ["latestParties"],
   partyId: (id: string) => ["partyId", id],
+  postsByUser: (id: string, page: number) => ["postByUser", page, id],
+  postsByPartyId: (id: string) => ["postById", id],
+  post: (id: string) => ["post", id],
 } as const;
