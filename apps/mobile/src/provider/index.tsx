@@ -1,17 +1,8 @@
-import { DefaultTheme, NavigationContainer } from "@react-navigation/native";
+import { NavigationContainer } from "@react-navigation/native";
 import { Suspense, useEffect } from "react";
-import { QueryClient, QueryClientProvider, focusManager } from "react-query";
+import { QueryClientProvider, focusManager } from "react-query";
 
-export const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      // 1 min
-      cacheTime: 1000 * 60,
-      staleTime: 1000 * 60,
-    },
-  },
-});
-
+import { queryClient } from "@lib/queryCache";
 import type { AppStateStatus } from "react-native";
 import { AppState, Platform } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";

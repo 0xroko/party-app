@@ -13,13 +13,13 @@ import {
   unsend_friend_request,
 } from "@lib/frendship/add_friend";
 import { formatName, formatUserDisplayName } from "@lib/misc";
+import { queryClient } from "@lib/queryCache";
 import { supabase } from "@lib/supabase";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { User as AuthUser } from "@supabase/supabase-js";
 import { FC } from "react";
 import { ScrollView, TouchableOpacity } from "react-native";
 import { useMutation, useQuery } from "react-query";
-import { queryClient } from "../../provider/index";
 
 const useFriendRequests = (authUser: AuthUser) => {
   return useQuery(
@@ -71,6 +71,9 @@ export const UserFriendReqests: FC<
       } else if (action === "decline") {
         await decline_friend_request(friendId, authUser?.user);
       }
+      queryClient.invalidateQueries(queryKeys.friends(user?.id, 0));
+      queryClient.invalidateQueries(queryKeys.friendship(user?.id));
+      queryClient.invalidateQueries(queryKeys.friendRequestCount);
     },
 
     onSuccess: () => {
@@ -86,8 +89,8 @@ export const UserFriendReqests: FC<
   return (
     <SafeArea gradient>
       <NavBar
-        showBackButton={route.params.showBackButton}
-        showNavBar={route.params.showNavBar}
+        showBackButton={route.params?.showBackButton}
+        showNavBar={route.params?.showNavBar}
         includeDefaultTrailing={false}
       />
       <SafeArea.Content>

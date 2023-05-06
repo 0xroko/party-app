@@ -26,8 +26,8 @@ export const Chats: FC<
   return (
     <SafeArea gradient>
       <NavBar
-        showBackButton={route.params.showBackButton}
-        showNavBar={route.params.showNavBar}
+        showBackButton={route.params?.showBackButton}
+        showNavBar={route.params?.showNavBar}
         includeDefaultTrailing={false}
       />
       <SafeArea.Content>

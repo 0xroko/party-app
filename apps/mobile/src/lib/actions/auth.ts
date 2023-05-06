@@ -3,10 +3,10 @@ import { makeRedirectUri, startAsync } from "expo-auth-session";
 import { InfoSectionForm } from "@features/auth/signup";
 import { onSupabaseError } from "@lib/actions";
 import { mmkv } from "@lib/mmkv";
+import { queryClient } from "@lib/queryCache";
 import { supabase, supabaseUrl } from "@lib/supabase";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import { queryClient } from "../../provider/index";
 
 export const googleSignIn = async () => {
   // This will create a redirectUri

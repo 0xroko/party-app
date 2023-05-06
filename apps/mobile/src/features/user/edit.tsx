@@ -9,12 +9,12 @@ import { useAuthUser } from "@hooks/useAuthUser";
 import { useUser } from "@hooks/useUser";
 import { User } from "@lib/actions";
 import { updateUser } from "@lib/actions/user";
+import { queryClient } from "@lib/queryCache";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Field, Form, FormInstance } from "houseform";
 import { FC, useEffect, useRef, useState } from "react";
 import { useMutation } from "react-query";
 import { z } from "zod";
-import { queryClient } from "../../provider";
 
 type UserEditForm = Pick<
   User,

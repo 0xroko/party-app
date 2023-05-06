@@ -264,6 +264,7 @@ export const HomeNavigation = () => {
           showNavBar: false,
         }}
       />
+
       <Tab.Screen
         name="Profile"
         component={UserInfoScreen}

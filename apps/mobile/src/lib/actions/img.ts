@@ -1,12 +1,12 @@
 import { onSupabaseError } from "@lib/actions";
 import { queryKeys } from "@lib/const";
+import { queryClient } from "@lib/queryCache";
 import { supabase } from "@lib/supabase";
 import * as ImageManipulator from "expo-image-manipulator";
 import ImagePicker, {
   MediaTypeOptions,
   launchImageLibraryAsync,
 } from "expo-image-picker";
-import { queryClient } from "../../provider/index";
 
 export type UploadType = "pfp" | "party" | "party-cover";
 

@@ -7,6 +7,8 @@ import { PartyCover, useParty } from "@features/party/id";
 import { useAuthUser } from "@hooks/useAuthUser";
 import { onSupabaseError } from "@lib/actions";
 import { GetImageProps, getImg, uploadPost } from "@lib/actions/img";
+import { queryKeys } from "@lib/const";
+import { queryClient } from "@lib/queryCache";
 import { supabase } from "@lib/supabase";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Image } from "expo-image";
@@ -37,6 +39,9 @@ export const AddPostScreen: FC<
           description: description,
         });
         console.log(r);
+        queryClient.invalidateQueries(
+          queryKeys.postsByUser(authUser.data.user.id, 0)
+        );
       } catch (error) {
         onSupabaseError(error);
       }
