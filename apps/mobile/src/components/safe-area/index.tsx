@@ -1,5 +1,7 @@
-import { Div, Text } from "@components/index";
+import { Div, DivScroll, Text } from "@components/index";
+import { useBottomTabBarHeightNonThrowable } from "@hooks/useBottomTabBarHeightNonThrowable";
 import { logOut } from "@lib/actions/auth";
+import React, { forwardRef } from "react";
 import { Pressable, StatusBar, useWindowDimensions } from "react-native";
 import Svg, {
   Defs,
@@ -28,6 +30,7 @@ export const SafeArea = ({
 }: SafeAreaProps) => {
   const d = useWindowDimensions();
 
+  const tabBarHeight = useBottomTabBarHeightNonThrowable();
   return (
     <Div
       className={`flex flex-col justify-between relative h-full bg-accents-1 text-accents-12`}
@@ -152,7 +155,12 @@ export const SafeArea = ({
         </Svg>
       )}
 
-      <Div className={`${className} h-full pt-[30] flex flex-col`}>
+      <Div
+        className={`${className} h-full flex flex-col`}
+        style={{
+          paddingTop: StatusBar.currentHeight || 0,
+        }}
+      >
         {children}
       </Div>
     </Div>
@@ -168,4 +176,31 @@ export const Content = ({ children, className }: ContentProps) => {
   return <Div className={`mx-[18px] flex`}>{children}</Div>;
 };
 
+type ScrollViewProps = React.ComponentProps<typeof DivScroll>;
+
+interface ContentScrollViewProps extends ScrollViewProps {
+  children?: React.ReactNode | React.ReactNode[];
+  className?: string;
+}
+
+export const ContentScrollView = forwardRef(
+  ({ children, className, ...props }: ContentScrollViewProps, ref: any) => {
+    const tabBarHeight = useBottomTabBarHeightNonThrowable();
+
+    return (
+      <DivScroll ref={ref} className={`mx-[18px] flex ${className}`} {...props}>
+        {children}
+        <Div
+          style={{
+            height: tabBarHeight,
+            width: "100%",
+            backgroundColor: "transparent",
+          }}
+        ></Div>
+      </DivScroll>
+    );
+  }
+);
+
 SafeArea.Content = Content;
+SafeArea.ContentScrollView = ContentScrollView;

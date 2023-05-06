@@ -11,7 +11,6 @@ import { queryKeys } from "@lib/const";
 import { supabase } from "@lib/supabase";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useValue } from "@shopify/react-native-skia";
 import { FC } from "react";
 import { Pressable, ScrollView, StyleSheet } from "react-native";
 import { useQuery } from "react-query";
@@ -41,95 +40,93 @@ const styles = StyleSheet.create({
   },
 });
 
-export const ModalScreen: FC<
-  NativeStackScreenProps<StackNavigatorParams, "user-modal">
-> = ({ navigation, route }) => {
-  const bottomSheetRef = useRef<BottomSheet>(null);
+// export const ModalScreen: FC<
+//   NativeStackScreenProps<StackNavigatorParams, "user-modal">
+// > = ({ navigation, route }) => {
+//   const bottomSheetRef = useRef<BottomSheet>(null);
 
-  // listen to a change event from react-navigation to trigger bottom sheet close method.
-  // variables
-  const snapPoints = useMemo(() => ["55%"], []);
-  const handleSheetChanges = useCallback(
-    (index: number) => {
-      if (index === -1) {
-        navigation.goBack();
-      }
-    },
-    [navigation]
-  );
-  return (
-    <BottomSheet
-      ref={bottomSheetRef}
-      snapPoints={snapPoints}
-      backgroundStyle={{
-        backgroundColor: "#050505",
-      }}
-      handleIndicatorStyle={{
-        backgroundColor: "#494949",
-      }}
-      style={{
-        backgroundColor: "#fff0ff00",
-      }}
-      containerStyle={{}}
-      backdropComponent={() => (
-        <Div className={`bg-glass-1 absolute inset-0`}></Div>
-      )}
-      // add bottom inset to elevate the sheet
-      enablePanDownToClose
-      enableOverDrag
-      onClose={() => {}}
-      enableHandlePanningGesture
-      enableContentPanningGesture
-      // set `detached` to true
-      onChange={handleSheetChanges}
-    >
-      <Div className={`bg-accents-1 flex-1`}>
-        <Div className={`h-16 flex flex-row w-full`}>
-          <Div
-            className={`flex grow border-b-2 border-b-accents-12  justify-center items-center`}
-          >
-            <Squares2X2Icon strokeWidth={2} size={26} color={"#fff"} />
-          </Div>
-          <Div
-            className={`flex border-b-2 border-b-accents-1  grow justify-center items-center`}
-          >
-            <TagIcon size={26} strokeWidth={2} color={"#fff"} />
-          </Div>
-        </Div>
-      </Div>
-    </BottomSheet>
-  );
-};
+//   // listen to a change event from react-navigation to trigger bottom sheet close method.
+//   // variables
+//   const snapPoints = useMemo(() => ["55%"], []);
+//   const handleSheetChanges = useCallback(
+//     (index: number) => {
+//       if (index === -1) {
+//         navigation.goBack();
+//       }
+//     },
+//     [navigation]
+//   );
+//   return (
+//     <BottomSheet
+//       ref={bottomSheetRef}
+//       snapPoints={snapPoints}
+//       backgroundStyle={{
+//         backgroundColor: "#050505",
+//       }}
+//       handleIndicatorStyle={{
+//         backgroundColor: "#494949",
+//       }}
+//       style={{
+//         backgroundColor: "#fff0ff00",
+//       }}
+//       containerStyle={{}}
+//       backdropComponent={() => (
+//         <Div className={`bg-glass-1 absolute inset-0`}></Div>
+//       )}
+//       // add bottom inset to elevate the sheet
+//       enablePanDownToClose
+//       enableOverDrag
+//       onClose={() => {}}
+//       enableHandlePanningGesture
+//       enableContentPanningGesture
+//       // set `detached` to true
+//       onChange={handleSheetChanges}
+//     >
+//       <Div className={`bg-accents-1 flex-1`}>
+//         <Div className={`h-16 flex flex-row w-full`}>
+//           <Div
+//             className={`flex grow border-b-2 border-b-accents-12  justify-center items-center`}
+//           >
+//             <Squares2X2Icon strokeWidth={2} size={26} color={"#fff"} />
+//           </Div>
+//           <Div
+//             className={`flex border-b-2 border-b-accents-1  grow justify-center items-center`}
+//           >
+//             <TagIcon size={26} strokeWidth={2} color={"#fff"} />
+//           </Div>
+//         </Div>
+//       </Div>
+//     </BottomSheet>
+//   );
+// };
 
-import { Canvas, Circle, Group } from "@shopify/react-native-skia";
+import {
+  BellIcon,
+  HomeIcon,
+  PlusCircleIcon,
+} from "react-native-heroicons/mini";
 
-import { useImage } from "@shopify/react-native-skia";
-import { withSpring } from "react-native-reanimated";
+import { LinearGradient } from "expo-linear-gradient";
+import {
+  BellIcon as BellIconOutline,
+  HomeIcon as HomeIconOutline,
+  MagnifyingGlassIcon as MagnifyingGlassIconOutline,
+  PlusCircleIcon as PlusCircleIconOutline,
+} from "react-native-heroicons/outline";
+import { useSharedValue, withSpring } from "react-native-reanimated";
 import { Chats } from "./chat/chats_list";
 import { PartyAdd } from "./party/add";
 import { UserInfoScreen } from "./user/id";
 
-export const HelloWorld = () => {
-  const size = 256;
-  const r = size * 0.33;
-  return (
-    <Canvas style={{ flex: 1 }}>
-      <Group blendMode="multiply">
-        <Circle cx={r} cy={r} r={r} color="cyan" />
-        <Circle cx={size - r} cy={r} r={r} color="magenta" />
-        <Circle cx={size / 2} cy={size - r} r={r} color="yellow" />
-      </Group>
-    </Canvas>
-  );
-};
-
 export const HomeNavigation = () => {
   const Tab = createBottomTabNavigator();
   const { data: authUser, isFetched, refetch } = useAuthUser();
+  const offset = useSharedValue(0);
 
   const { data: authUserData, isFetched: authUserFetched } = useUser(
-    authUser?.user.id
+    authUser?.user?.id
   );
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -137,84 +134,140 @@ export const HomeNavigation = () => {
         // keyboardHidesTabBar: true,
         tabBarHideOnKeyboard: true,
         tabBarIcon: ({ focused, color, size }) => {
-          let iconName;
-
-          const { data: authUser, isFetched, refetch } = useAuthUser();
-          const { data: authUserData, isFetched: authUserFetched } = useUser(
-            authUser?.user.id
-          );
-
           if (route.name === "Home") {
             return focused ? (
               <HomeIcon
                 onPress={() => {
                   offset.value = withSpring(Math.random());
                 }}
-                size={size + 5}
+                size={size}
                 color={"white"}
-                strokeWidth="2"
+                strokeWidth="2.5"
               />
             ) : (
-              <HomeIcon size={size + 2} color={color} />
+              <HomeIconOutline strokeWidth="2.5" size={size} color={color} />
             );
           } else if (route.name === "Search") {
             return focused ? (
-              <MagnifyingGlassIcon
-                size={size + 5}
+              <MagnifyingGlassIconOutline
+                size={size}
                 color={"white"}
-                strokeWidth="2"
+                strokeWidth="2.5"
               />
             ) : (
-              <MagnifyingGlassIcon size={size + 2} color={color} />
+              <MagnifyingGlassIconOutline
+                strokeWidth="2.5"
+                size={size}
+                color={color}
+              />
             );
           } else if (route.name === "Add") {
             return focused ? (
-              <PlusCircleIcon size={size + 5} color={"white"} strokeWidth="2" />
+              <PlusCircleIcon size={size} color={"white"} strokeWidth="2.5" />
             ) : (
-              <PlusCircleIcon size={size + 2} color={color} />
+              <PlusCircleIconOutline
+                size={size}
+                color={color}
+                strokeWidth="2.5"
+              />
             );
           } else if (route.name === "Notifications") {
             return focused ? (
-              <BellIcon size={size + 5} color={"white"} strokeWidth="2" />
+              <BellIcon size={size} color={"white"} strokeWidth="2.5" />
             ) : (
-              <BellIcon size={size + 2} color={color} />
+              <BellIconOutline strokeWidth="2.5" size={size} color={color} />
             );
           } else if (route.name === "Profile") {
             return focused ? (
               <Img
                 className={`w-7 h-7 rounded-full border-2 border-white`}
                 source={{
-                  uri: authUserData?.imagesId ?? "",
+                  uri: authUserData?.imagesId ?? placeHolderBaseImage,
                 }}
               />
             ) : (
               <Img
                 className={`w-8 h-8 rounded-full border-3 border-gray-700`}
                 source={{
-                  uri: authUserData?.imagesId ?? "",
+                  uri: authUserData?.imagesId ?? placeHolderBaseImage,
                 }}
               />
             );
           }
         },
         tabBarAllowFontScaling: true,
-        tabBarActiveBackgroundColor: "black",
-        tabBarInactiveBackgroundColor: "black",
-        tabBarStyle: {
-          backgroundColor: "black",
-          borderTopWidth: 0,
+        tabBarBackground: () => (
+          // <Div
+          //   className={` absolute top-0 bottom-0 left-0 right-0`}
+          // ></Div>
+          <LinearGradient
+            pointerEvents="none"
+            style={{
+              position: "absolute",
+              borderTopStartRadius: 20,
+              borderTopEndRadius: 20,
+              top: 0,
+              bottom: 0,
+              left: 0,
+              right: 0,
+            }}
+            locations={[0.0, 0.2, 1.1]}
+            colors={["transparent", "rgba(0,0,0,0.1)", "rgba(0,0,0,1)"]}
+          />
+        ),
+        tabBarIconStyle: {
+          borderWidth: 0,
+          elevation: 0,
+          color: "white",
         },
-        title: "",
+
+        tabBarStyle: {
+          borderWidth: 0,
+          elevation: 0,
+          zIndex: 100,
+          height: 60,
+          paddingTop: 10,
+          backgroundColor: "transparent",
+          borderTopWidth: 0,
+          position: "absolute",
+        },
+        tabBarShowLabel: false,
       })}
     >
-      <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="Search" component={Chats} />
-      <Tab.Screen name="Add" component={PartyAdd} />
-      <Tab.Screen name="Notifications" component={UserFriendReqests} />
+      <Tab.Screen
+        name="Home"
+        component={HomeScreen}
+        initialParams={{
+          showBackButton: true,
+        }}
+      />
+      <Tab.Screen
+        name="Search"
+        component={Chats}
+        initialParams={{
+          showBackButton: false,
+          showNavBar: false,
+        }}
+      />
+      <Tab.Screen
+        name="Add"
+        component={PartyAdd}
+        initialParams={{
+          showBackButton: false,
+        }}
+      />
+      <Tab.Screen
+        name="Notifications"
+        component={UserFriendReqests}
+        initialParams={{
+          showBackButton: false,
+          showNavBar: false,
+        }}
+      />
       <Tab.Screen
         name="Profile"
         component={UserInfoScreen}
-        initialParams={{ id: authUser?.user.id }}
+        initialParams={{ id: authUserData?.id, showBackButton: false }}
       />
     </Tab.Navigator>
   );
@@ -249,10 +302,6 @@ export const HomeScreen: FC<
   };
 
   const { data: parties, isFetched: partiesFetched } = useParties();
-
-  const image1 = useImage(require("../assets/ppp.png"));
-  const size = useValue({ width: 0, height: 0 });
-  // const Tab = createBottomTabNavigator();
 
   return (
     <SafeArea gradient>
@@ -329,7 +378,7 @@ export const HomeScreen: FC<
           })}
         </ScrollView>
       </Div>
-      <SafeArea.Content>
+      <SafeArea.ContentScrollView>
         <Div className={`flex flex-col g-2`}>
           <Button
             disabled={!isFetched}
@@ -410,8 +459,10 @@ export const HomeScreen: FC<
           >
             post add for {parties?.[0]?.name}
           </Button>
+
+          <Div className={`w-full h-screen bg-slate-500 mb-4`}></Div>
         </Div>
-      </SafeArea.Content>
+      </SafeArea.ContentScrollView>
     </SafeArea>
   );
 };

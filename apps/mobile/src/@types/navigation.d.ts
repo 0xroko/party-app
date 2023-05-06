@@ -1,5 +1,7 @@
 interface DefaultNavigationOptions {
   previousScreenName?: string;
+  showBackButton?: boolean;
+  showNavBar?: boolean;
 }
 
 type StackNavigatorParams = {
@@ -16,8 +18,8 @@ type StackNavigatorParams = {
   } & DefaultNavigationOptions;
   "user-edit": {} & DefaultNavigationOptions;
   "user-modal": undefined;
-  "user-friend-request": {} & DefaultNavigationOptionsundefined;
-  "party-add": undefined;
+  "user-friend-request": {} & DefaultNavigationOptions;
+  "party-add": DefaultNavigationOptions;
   "party-add-more": {
     id: string;
   };
@@ -27,7 +29,7 @@ type StackNavigatorParams = {
   post: {
     id: string;
   } & DefaultNavigationOptions;
-  chats: undefined;
+  chats: DefaultNavigationOptions;
   chat: { id: string };
   "upload-images": undefined;
   party: {

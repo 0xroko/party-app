@@ -85,7 +85,11 @@ export const UserFriendReqests: FC<
 
   return (
     <SafeArea gradient>
-      <NavBar includeDefaultTrailing={false} />
+      <NavBar
+        showBackButton={route.params.showBackButton}
+        showNavBar={route.params.showNavBar}
+        includeDefaultTrailing={false}
+      />
       <SafeArea.Content>
         <Text
           className={`text-3xl tracking-tight font-figtree-bold text-accents-12 mb-8 mt-6`}

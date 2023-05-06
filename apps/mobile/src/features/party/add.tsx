@@ -49,7 +49,7 @@ interface PartyAddForm {
 }
 
 export const PartyAdd: FC<
-  NativeStackScreenProps<StackNavigatorParams, "home">
+  NativeStackScreenProps<StackNavigatorParams, "party-add">
 > = ({ navigation, route }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 

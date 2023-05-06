@@ -409,7 +409,11 @@ export const UserInfoScreen: FC<
 
   return (
     <SafeArea gradient={!stickyRendered}>
-      <NavBar includeDefaultTrailing={isMe}>
+      <NavBar
+        showBackButton={route.params.showBackButton}
+        showNavBar={route.params.showNavBar}
+        includeDefaultTrailing={isMe}
+      >
         {isMe && (
           <NavBarItem
             onPress={() => {
