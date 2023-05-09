@@ -3,7 +3,6 @@ import { LoginLoginScreen } from "@features/auth/signup";
 import { Chat } from "@features/chat/chat";
 import { Chats } from "@features/chat/chats_list";
 import { HomeNavigation } from "@features/home";
-import { Upload } from "@features/images/upload";
 import { PartyAdd } from "@features/party/add";
 import { PartyAddMore } from "@features/party/add-more";
 import { PartyInfo } from "@features/party/id";
@@ -127,11 +126,7 @@ export const NativeNavigation = () => {
             options={defaultScreenOptions}
             component={Chat}
           />
-          <Stack.Screen
-            name="upload-images"
-            options={defaultScreenOptions}
-            component={Upload}
-          />
+
           <Stack.Screen
             name="party"
             options={defaultScreenOptions}

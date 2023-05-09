@@ -12,8 +12,15 @@ import { queryClient } from "@lib/queryCache";
 import { supabase } from "@lib/supabase";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Image } from "expo-image";
-import { FC, useState } from "react";
-import { Pressable, ScrollView, TouchableOpacity } from "react-native";
+import { FC, useRef, useState } from "react";
+import {
+  Dimensions,
+  Pressable,
+  ScrollView,
+  TouchableOpacity,
+} from "react-native";
+import { XMarkIcon } from "react-native-heroicons/outline";
+import Carousel from "react-native-reanimated-carousel";
 import { useMutation } from "react-query";
 
 export const AddPostScreen: FC<
@@ -22,23 +29,48 @@ export const AddPostScreen: FC<
   const { partyId } = route.params;
   const authUser = useAuthUser();
   const { data: party } = useParty(partyId);
-  const [imageSelected, setImageSelected] = useState(false);
 
-  const [img, setImg] = useState<GetImageProps | null>(null);
+  const [img, setImg] = useState<GetImageProps[]>([]);
+
   const [description, setDescription] = useState("");
 
   const addPost = useMutation({
     mutationFn: async () => {
       try {
-        const imageUrl = await uploadPost(img);
+        let nisu = await Promise.allSettled(
+          img!.map(async (i) => {
+            const r = await uploadPost(i);
+            return r;
+          })
+        );
 
-        const r = await supabase.from("Images").insert({
-          authorId: authUser.data.user.id,
-          partyId: partyId,
-          pic_url: imageUrl,
-          description: description,
-        });
-        console.log(r);
+        const ids = nisu
+          .filter((i) => i.status === "fulfilled")
+          .map((i) => (i as PromiseFulfilledResult<string>).value);
+
+        console.log(ids);
+
+        const r = await supabase
+          .from("Post")
+          .insert({
+            authorId: authUser.data.user.id,
+            partyId: partyId,
+            description: description,
+          })
+          .select()
+          .single();
+
+        if (r.data) {
+          await supabase.from("Images").insert(
+            ids.map((i) => {
+              return {
+                pic_url: i,
+                postId: r.data.id,
+              };
+            })
+          );
+        }
+
         queryClient.invalidateQueries(
           queryKeys.postsByUser(authUser.data.user.id, 0)
         );
@@ -47,6 +79,21 @@ export const AddPostScreen: FC<
       }
     },
   });
+
+  const width = Dimensions.get("window").width;
+  const carRef = useRef<any>(null);
+  const height = Dimensions.get("window").height;
+
+  const addImg = async () => {
+    const i = await getImg({});
+    if (i) {
+      setImg((t) => [...t, i]);
+      carRef.current?.scrollTo({
+        count: 1,
+        animated: true,
+      });
+    }
+  };
 
   return (
     <SafeArea midGradient={false}>
@@ -85,13 +132,70 @@ export const AddPostScreen: FC<
           </Div>
           <Div className={`mt-2`}>
             <T>Dodaj novu objavu</T>
-            <Pressable
-              onPress={async () => {
+            {img.length === 0 ? (
+              <Pressable onPress={addImg}>
+                <Div
+                  className={`h-[400px] flex justify-center items-center rounded-3xl bg-accents-1 border border-accents-12`}
+                >
+                  <T className={`text-accents-11 font-figtree-medium text-lg`}>
+                    Dodaj sliku
+                  </T>
+                </Div>
+              </Pressable>
+            ) : (
+              <Carousel
+                width={width - 30}
+                height={400}
+                ref={carRef}
+                data={img}
+                loop={false}
+                scrollAnimationDuration={1000}
+                onSnapToItem={(index) => console.log("current index:", index)}
+                renderItem={({ item, index }) => (
+                  <Div
+                    style={{
+                      flex: 1,
+                      position: "relative",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Div
+                      className={`absolute bg-white shadow rounded-xl p-2 top-2 right-2 z-50`}
+                    >
+                      <Pressable
+                        onPress={() => {
+                          carRef.current?.scrollTo({
+                            count: -1,
+                            animated: true,
+                          });
+                          setImg((t) => t.filter((i) => i !== item));
+                        }}
+                      >
+                        <XMarkIcon color={"black"} size={20} />
+                      </Pressable>
+                    </Div>
+                    <Image
+                      style={{
+                        borderRadius: 12,
+                        width: "100%",
+                        height: "100%",
+                        resizeMode: "cover",
+                      }}
+                      source={{
+                        uri: item?.localUri,
+                      }}
+                    />
+                  </Div>
+                )}
+              />
+            )}
+            {/* <Pressable
+            onPress={async () => {
                 const i = await getImg({});
                 if (i) {
                   setImg(i);
                 }
-
+                
                 // setImg();
               }}
             >
@@ -116,8 +220,12 @@ export const AddPostScreen: FC<
                   </T>
                 </Div>
               )}
-            </Pressable>
-
+            </Pressable> */}
+            {img.length > 0 && (
+              <Div className={`mt-5`}>
+                <Button onPress={addImg}>Dodaj sliku</Button>
+              </Div>
+            )}
             <Div className={`mt-5`}>
               <Input
                 value={description}
