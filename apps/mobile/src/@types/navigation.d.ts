@@ -35,4 +35,5 @@ type StackNavigatorParams = {
   party: {
     id: string;
   } & DefaultNavigationOptions;
+  "search-page": undefined;
 };

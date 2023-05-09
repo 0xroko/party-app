@@ -117,6 +117,7 @@ import { useSharedValue, withSpring } from "react-native-reanimated";
 import { Chats } from "./chat/chats_list";
 import { PartyAdd } from "./party/add";
 import { UserInfoScreen } from "./user/id";
+import { SearchPage } from "./search/page";
 
 export const HomeNavigation = () => {
   const Tab = createBottomTabNavigator();
@@ -243,7 +244,7 @@ export const HomeNavigation = () => {
       />
       <Tab.Screen
         name="Search"
-        component={Chats}
+        component={SearchPage}
         initialParams={{
           showBackButton: false,
           showNavBar: false,

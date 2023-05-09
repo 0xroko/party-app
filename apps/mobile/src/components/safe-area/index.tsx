@@ -16,6 +16,7 @@ interface SafeAreaProps {
   className?: string;
   gradient?: boolean;
   midGradient?: boolean;
+  pureBlack?: boolean;
 }
 
 let debug = __DEV__;
@@ -27,6 +28,7 @@ export const SafeArea = ({
   className,
   gradient,
   midGradient = true,
+  pureBlack = false,
 }: SafeAreaProps) => {
   const d = useWindowDimensions();
 
@@ -37,7 +39,7 @@ export const SafeArea = ({
     >
       <StatusBar
         barStyle="light-content"
-        backgroundColor={"transparent"}
+        backgroundColor={pureBlack ? "black" : "transparent"}
         translucent
       />
       {debug && (
