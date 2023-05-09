@@ -3,13 +3,13 @@
 	"version": "1.0.0",
 	"private": true,
 	"scripts": {
-		"sl": "supabase login",
-		"sg": "supabase gen types typescript --project-id nfdwiivovdwuobzxompi --schema public > supabase.ts",
+		"sl": "npx supabase login",
+		"sg": "npx supabase gen types typescript --project-id nfdwiivovdwuobzxompi --schema public > supabase.ts",
 		"db": "prisma migrate dev"
 	},
 	"dependencies": {
 		"@prisma/client": "^4.11.0",
 		"prisma": "^4.11.0",
-		"supabase": "^1.46.4"
+		"supabase": "^1.57.3"
 	}
 }

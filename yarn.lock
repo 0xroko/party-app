@@ -8292,6 +8292,11 @@ minipass@^4.0.0:
   resolved "https://registry.yarnpkg.com/minipass/-/minipass-4.2.5.tgz#9e0e5256f1e3513f8c34691dd68549e85b2c8ceb"
   integrity sha512-+yQl7SX3bIT83Lhb4BVorMAHVuqsskxRdlmO9kTpyukp8vsm2Sn/fUOV9xlnG8/a5JsypJzap21lz/y3FBMJ8Q==
 
+minipass@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/minipass/-/minipass-5.0.0.tgz#3e9788ffb90b694a5d0ec94479a45b5d8738133d"
+  integrity sha512-3FnjYuehv9k6ovOEbyOswadCDPX1piCfhV8ncmYtHOjuPwylVWsghTLo7rabjC3Rx5xD4HDx8Wm1xnMF7S5qFQ==
+
 minizlib@^2.1.1:
   version "2.1.2"
   resolved "https://registry.yarnpkg.com/minizlib/-/minizlib-2.1.2.tgz#e90d3466ba209b932451508a11ce3d3632145931"
@@ -9615,6 +9620,11 @@ react-native-ratings@8.0.4:
   dependencies:
     lodash "^4.17.15"
 
+react-native-reanimated-carousel@^3.3.2:
+  version "3.3.2"
+  resolved "https://registry.yarnpkg.com/react-native-reanimated-carousel/-/react-native-reanimated-carousel-3.3.2.tgz#386583d680d16db78d0d518f52d21084e0c2f37a"
+  integrity sha512-mlYLt43dEQzYhfioBr59/iDk25UzU3Rb48HYcI+nnDLu7bWO7y6pC22ugL0RV/XehmMxo5oK6QlaoEPgcdRxLg==
+
 react-native-reanimated@^3.0.2:
   version "3.0.2"
   resolved "https://registry.yarnpkg.com/react-native-reanimated/-/react-native-reanimated-3.0.2.tgz#8f7284fab2b0cd949779429e48f32d19a966bbd6"
@@ -10724,14 +10734,14 @@ sudo-prompt@^9.0.0:
   resolved "https://registry.yarnpkg.com/sudo-prompt/-/sudo-prompt-9.2.1.tgz#77efb84309c9ca489527a4e749f287e6bdd52afd"
   integrity sha512-Mu7R0g4ig9TUuGSxJavny5Rv0egCEtpZRNMrZaYS1vxkiIxGiGUwoezU3LazIQ+KE04hTrTfNPgxU5gzi7F5Pw==
 
-supabase@^1.46.4:
-  version "1.46.4"
-  resolved "https://registry.yarnpkg.com/supabase/-/supabase-1.46.4.tgz#e6572009a6a13089bf7e04fdd305517fec315ead"
-  integrity sha512-MG+lsu8MrCyqAyArMKtHuzYDxO1JLeKX7myKpONHHv4lgIJBuO5C8OsjBF0HknrRHHCF9u7KveSxLMLfYoYy8w==
+supabase@^1.57.3:
+  version "1.57.3"
+  resolved "https://registry.yarnpkg.com/supabase/-/supabase-1.57.3.tgz#3ed3f95e3b2933da2603c661314da1af8575de60"
+  integrity sha512-4XTWt6NNkXo7tQs6byKHsk83I581YPTkhcOgcirUbX4QgObkK3uMG9HvTolUECpMN2/ZrihmfHer5EgWF1uK0A==
   dependencies:
     bin-links "^4.0.1"
     node-fetch "^3.2.10"
-    tar "6.1.13"
+    tar "6.1.14"
 
 supports-color@^5.3.0:
   version "5.5.0"
@@ -10814,7 +10824,19 @@ tapable@^2.2.0:
   resolved "https://registry.yarnpkg.com/tapable/-/tapable-2.2.1.tgz#1967a73ef4060a82f12ab96af86d52fdb76eeca0"
   integrity sha512-GNzQvQTOIP6RyTfE2Qxb8ZVlNmw0n88vp1szwWRimP02mnTsx3Wtn5qRdqY9w2XduFNUgvOwhNnQsjwCp+kqaQ==
 
-tar@6.1.13, tar@^6.0.2, tar@^6.0.5:
+tar@6.1.14:
+  version "6.1.14"
+  resolved "https://registry.yarnpkg.com/tar/-/tar-6.1.14.tgz#e87926bec1cfe7c9e783a77a79f3e81c1cfa3b66"
+  integrity sha512-piERznXu0U7/pW7cdSn7hjqySIVTYT6F76icmFk7ptU7dDYlXTm5r9A6K04R2vU3olYgoKeo1Cg3eeu5nhftAw==
+  dependencies:
+    chownr "^2.0.0"
+    fs-minipass "^2.0.0"
+    minipass "^5.0.0"
+    minizlib "^2.1.1"
+    mkdirp "^1.0.3"
+    yallist "^4.0.0"
+
+tar@^6.0.2, tar@^6.0.5:
   version "6.1.13"
   resolved "https://registry.yarnpkg.com/tar/-/tar-6.1.13.tgz#46e22529000f612180601a6fe0680e7da508847b"
   integrity sha512-jdIBIN6LTIe2jqzay/2vtYLlBHa3JF42ot3h1dW8Q0PaAG4v8rm0cvpVePtau5C6OKXGGcgO9q2AMNSWxiLqKw==
