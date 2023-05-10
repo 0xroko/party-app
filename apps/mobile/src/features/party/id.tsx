@@ -47,7 +47,7 @@ import { hr } from "date-fns/locale";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { Pressable } from "react-native";
-import { ShareIcon, UserIcon } from "react-native-heroicons/mini";
+import { MapPinIcon, ShareIcon, UserIcon } from "react-native-heroicons/mini";
 
 interface PartyCoverProps {
   children?: React.ReactNode | React.ReactNode[];
@@ -126,7 +126,9 @@ export const PartyInfo: FC<
               })}
             </T>
             <Div className={`flex flex-grow-0 flex-row g-3 mt-4 flex-wrap `}>
-              <Badge>{party.location}</Badge>
+              <Badge icon={<MapPinIcon color={"#fff"} size={16} />}>
+                {party.location}
+              </Badge>
               <Pressable
                 onPress={() =>
                   navigation.navigate("user", {
@@ -153,7 +155,9 @@ export const PartyInfo: FC<
                     <Button disabled className={`flex-1`}>
                       Uredi
                     </Button>
-                    <Button className={`flex-1`}>Obriši</Button>
+                    <Button disabled className={`flex-1`}>
+                      Obriši
+                    </Button>
                     {partyStarted && (
                       <Button className={`flex-1`}>Završi</Button>
                     )}
