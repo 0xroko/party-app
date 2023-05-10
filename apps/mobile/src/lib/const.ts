@@ -2,6 +2,7 @@ export const queryKeys = {
   authUser: ["authUser"],
   user: (id: string) => ["user", id],
   friends: (id: string, page: number) => ["friends", page, id],
+  allFriends: (id: string) => ["allFriends", id],
   friendship: (id: string) => ["friendship", id],
   friendReqest: (id: string) => ["friendRequests", id],
   friendRequestCount: ["friendRequestCount"],

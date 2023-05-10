@@ -4,6 +4,7 @@ import { Input } from "@components/input";
 import { NavBar } from "@components/navbar";
 import { SafeArea } from "@components/safe-area";
 import { PartyCover, useParty } from "@features/party/id";
+import { useTaggedUsers } from "@features/posts/tag";
 import { useAuthUser } from "@hooks/useAuthUser";
 import { onSupabaseError } from "@lib/actions";
 import { GetImageProps, getImg, uploadPost } from "@lib/actions/img";
@@ -19,6 +20,7 @@ import {
   ScrollView,
   TouchableOpacity,
 } from "react-native";
+import { TagIcon } from "react-native-heroicons/mini";
 import { XMarkIcon } from "react-native-heroicons/outline";
 import Carousel from "react-native-reanimated-carousel";
 import { useMutation } from "react-query";
@@ -34,6 +36,15 @@ export const AddPostScreen: FC<
 
   const [description, setDescription] = useState("");
 
+  const {
+    setCurrentImgID,
+    clearForCurrentImgID,
+    currentImgID,
+    countTaggedUsers,
+    getTaggedUsers,
+    taggedUsers,
+  } = useTaggedUsers();
+
   const addPost = useMutation({
     mutationFn: async () => {
       try {
@@ -46,9 +57,10 @@ export const AddPostScreen: FC<
 
         const ids = nisu
           .filter((i) => i.status === "fulfilled")
-          .map((i) => (i as PromiseFulfilledResult<string>).value);
-
-        console.log(ids);
+          .map(
+            (i) =>
+              (i as PromiseFulfilledResult<{ uuid: string; url: string }>).value
+          );
 
         const r = await supabase
           .from("Post")
@@ -61,14 +73,35 @@ export const AddPostScreen: FC<
           .single();
 
         if (r.data) {
-          await supabase.from("Images").insert(
-            ids.map((i) => {
-              return {
-                pic_url: i,
-                postId: r.data.id,
-              };
+          const { data, count, error } = await supabase
+            .from("Images")
+            .insert(
+              ids.map((i) => {
+                return {
+                  pic_url: i.url,
+                  postId: r.data.id,
+                  originalUuid: i.uuid,
+                };
+              })
+            )
+            .select();
+
+          // create object of {imageId : string, userId: string}[]
+          const taggedOnImages = data
+            .map((img) => {
+              return taggedUsers[img.originalUuid].map((user) => {
+                return {
+                  imageId: img.id,
+                  userId: user.id,
+                };
+              });
             })
-          );
+            .flat();
+
+          // add all tagged users
+          const p = await supabase
+            .from("TaggedOnImages")
+            .insert(taggedOnImages);
         }
 
         queryClient.invalidateQueries(
@@ -88,12 +121,15 @@ export const AddPostScreen: FC<
     const i = await getImg({});
     if (i) {
       setImg((t) => [...t, i]);
+
       carRef.current?.scrollTo({
         count: 1,
         animated: true,
       });
     }
   };
+
+  const [currentCarouselIndex, setCurrentCarouselIndex] = useState(0);
 
   return (
     <SafeArea midGradient={false}>
@@ -150,80 +186,120 @@ export const AddPostScreen: FC<
                 data={img}
                 loop={false}
                 scrollAnimationDuration={1000}
-                onSnapToItem={(index) => console.log("current index:", index)}
-                renderItem={({ item, index }) => (
-                  <Div
-                    style={{
-                      flex: 1,
-                      position: "relative",
-                      justifyContent: "center",
-                    }}
-                  >
+                onSnapToItem={(index) => {
+                  setCurrentCarouselIndex(index);
+                }}
+                renderItem={({ item, index }) => {
+                  const cnt = countTaggedUsers(item.uuid);
+
+                  return (
                     <Div
-                      className={`absolute bg-white shadow rounded-xl p-2 top-2 right-2 z-50`}
+                      style={{
+                        flex: 1,
+                        position: "relative",
+                        justifyContent: "center",
+                      }}
                     >
-                      <Pressable
+                      <Div
+                        className={`absolute bg-white shadow rounded-xl p-2.5 top-2 right-2 z-50`}
+                      >
+                        <TouchableOpacity
+                          onPress={() => {
+                            carRef.current?.scrollTo({
+                              count: -1,
+                              animated: true,
+                            });
+                            setImg((t) => t.filter((i) => i !== item));
+                          }}
+                        >
+                          <XMarkIcon
+                            color={"black"}
+                            strokeWidth={2}
+                            size={20}
+                          />
+                        </TouchableOpacity>
+                      </Div>
+
+                      {cnt > 0 && (
+                        <Div
+                          className={`absolute bg-accents-1 flex flex-row justify-center g-2 items-center shadow rounded-xl p-2.5 bottom-2 left-2 z-50`}
+                        >
+                          <TagIcon color={"white"} strokeWidth={2} size={20} />
+                          <T
+                            className={`text-white font-figtree-semi-bold text-base`}
+                          >
+                            {cnt}
+                          </T>
+                        </Div>
+                      )}
+
+                      <Div
+                        className={`absolute bg-white shadow rounded-xl p-2.5 top-2 right-2 z-50`}
+                      >
+                        <TouchableOpacity
+                          onPress={() => {
+                            carRef.current?.scrollTo({
+                              count: -1,
+                              animated: true,
+                            });
+                            setImg((t) => t.filter((i) => i !== item));
+                          }}
+                        >
+                          <XMarkIcon
+                            color={"black"}
+                            strokeWidth={2}
+                            size={20}
+                          />
+                        </TouchableOpacity>
+                      </Div>
+
+                      <TouchableOpacity
+                        activeOpacity={0.8}
                         onPress={() => {
-                          carRef.current?.scrollTo({
-                            count: -1,
-                            animated: true,
+                          setCurrentImgID(item?.uuid);
+                          navigation.navigate("tag-users", {
+                            previousScreenName: "Nova objava",
+                            userId: authUser.data.user.id,
+                            imgUuId: item?.uuid,
                           });
-                          setImg((t) => t.filter((i) => i !== item));
                         }}
                       >
-                        <XMarkIcon color={"black"} size={20} />
-                      </Pressable>
+                        <Image
+                          style={{
+                            borderRadius: 12,
+                            width: "100%",
+                            height: "100%",
+                            resizeMode: "cover",
+                          }}
+                          source={{
+                            uri: item?.localUri,
+                          }}
+                        />
+                      </TouchableOpacity>
                     </Div>
-                    <Image
-                      style={{
-                        borderRadius: 12,
-                        width: "100%",
-                        height: "100%",
-                        resizeMode: "cover",
-                      }}
-                      source={{
-                        uri: item?.localUri,
-                      }}
-                    />
-                  </Div>
-                )}
+                  );
+                }}
               />
             )}
-            {/* <Pressable
-            onPress={async () => {
-                const i = await getImg({});
-                if (i) {
-                  setImg(i);
-                }
-                
-                // setImg();
-              }}
-            >
-              {img ? (
-                <Image
-                  style={{
-                    width: "100%",
-                    height: 400,
-                    resizeMode: "cover",
-                    borderRadius: 12,
-                  }}
-                  source={{
-                    uri: img?.localUri,
-                  }}
-                ></Image>
-              ) : (
-                <Div
-                  className={`h-[400px] flex justify-center items-center rounded-3xl bg-accents-1 border border-accents-12`}
-                >
-                  <T className={`text-accents-11 font-figtree-medium text-lg`}>
-                    Dodaj sliku
-                  </T>
-                </Div>
-              )}
-            </Pressable> */}
+
             {img.length > 0 && (
-              <Div className={`mt-5`}>
-                <Button onPress={addImg}>Dodaj sliku</Button>
+              <Div className={`mt-5 flex flex-row g-2`}>
+                {/* <Button
+                  className={`flex-1`}
+                  intent="secondary"
+                  onPress={() => {
+                    setCurrentImgID(img[currentCarouselIndex].localUri);
+                    navigation.navigate("tag-users", {
+                      previousScreenName: "Nova objava",
+                      userId: authUser.data.user.id,
+                    });
+                  }}
+                >
+                  Taggaj
+                </Button> */}
+                <Button className={`flex-1`} onPress={addImg}>
+                  Dodaj sliku
+                </Button>
               </Div>
             )}
             <Div className={`mt-5`}>
@@ -237,7 +313,7 @@ export const AddPostScreen: FC<
                 placeholder={"Opis partyja"}
               />
             </Div>
-            <Div className={`mt-10`}>
+            <Div className={`my-10`}>
               <Button
                 disabled={!img}
                 loading={addPost.isLoading}

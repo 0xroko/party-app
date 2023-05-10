@@ -4,8 +4,8 @@ export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       // 1 min
-      cacheTime: 1000 * 60,
-      staleTime: 1000 * 60,
+      cacheTime: 1000 * 60 * 0,
+      staleTime: 1000 * 60 * 0,
     },
   },
 });

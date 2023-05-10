@@ -8,6 +8,7 @@ import { PartyAddMore } from "@features/party/add-more";
 import { PartyInfo } from "@features/party/id";
 import { AddPostScreen } from "@features/posts/add";
 import { PostInfoScreen } from "@features/posts/id";
+import { TagModal } from "@features/posts/tag";
 import { UserEditScreen } from "@features/user/edit";
 import { UserFriendReqests } from "@features/user/friend-requests";
 import { UserInfoScreen } from "@features/user/id";
@@ -131,6 +132,14 @@ export const NativeNavigation = () => {
             name="party"
             options={defaultScreenOptions}
             component={PartyInfo}
+          />
+          <Stack.Screen
+            name="tag-users"
+            options={{
+              ...defaultScreenOptions,
+              presentation: "transparentModal",
+            }}
+            component={TagModal}
           />
         </>
       )}

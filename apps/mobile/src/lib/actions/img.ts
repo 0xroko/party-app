@@ -29,6 +29,8 @@ export const getImg = async ({ pickerProps }: GetImgProps) => {
     ...pickerProps,
   };
 
+  const uuidImg = uuid.v4().toString();
+
   let result = await launchImageLibraryAsync(props);
   // get image from uri
   if (!result.assets) {
@@ -58,6 +60,7 @@ export const getImg = async ({ pickerProps }: GetImgProps) => {
     formData,
     contentType: "multipart/form-data",
     localUri,
+    uuid: uuidImg,
   };
 };
 
@@ -142,27 +145,30 @@ import uuid from "react-native-uuid";
 
 export const uploadPost = async ({
   contentType,
+  uuid,
   formData,
   localUri,
 }: GetImageProps) => {
   try {
-    const uuidImg = uuid.v4().toString();
     const f = await supabase.storage
       .from("party-images")
-      .upload(uuidImg, formData, {
+      .upload(uuid, formData, {
         upsert: true,
         contentType: contentType,
       });
 
     const timeStamp = Date.now();
     const i =
-      supabase.storage.from("party-images").getPublicUrl(uuidImg).data
-        .publicUrl + `?t=${timeStamp}`;
+      supabase.storage.from("party-images").getPublicUrl(uuid).data.publicUrl +
+      `?t=${timeStamp}`;
 
     if (f.error) {
       onSupabaseError(f.error);
     } else {
-      return i;
+      return {
+        url: i,
+        uuid,
+      };
     }
   } catch (error) {
     throw error;

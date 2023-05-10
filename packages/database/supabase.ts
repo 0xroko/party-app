@@ -9,20 +9,6 @@ export type Json =
 export interface Database {
   public: {
     Tables: {
-      _PeopleOnPic: {
-        Row: {
-          A: string
-          B: string
-        }
-        Insert: {
-          A: string
-          B: string
-        }
-        Update: {
-          A?: string
-          B?: string
-        }
-      }
       Attending: {
         Row: {
           accepted: boolean | null
@@ -119,6 +105,7 @@ export interface Database {
         Row: {
           createdAt: string
           id: string
+          originalUuid: string
           pic_url: string
           postId: string | null
           updatedAt: string | null
@@ -126,6 +113,7 @@ export interface Database {
         Insert: {
           createdAt?: string
           id?: string
+          originalUuid: string
           pic_url: string
           postId?: string | null
           updatedAt?: string | null
@@ -133,6 +121,7 @@ export interface Database {
         Update: {
           createdAt?: string
           id?: string
+          originalUuid?: string
           pic_url?: string
           postId?: string | null
           updatedAt?: string | null
@@ -226,6 +215,26 @@ export interface Database {
           description?: string | null
           id?: string
           partyId?: string | null
+        }
+      }
+      TaggedOnImages: {
+        Row: {
+          created_at: string | null
+          id: string
+          imageId: string
+          userId: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          imageId: string
+          userId: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          imageId?: string
+          userId?: string
         }
       }
       Users: {

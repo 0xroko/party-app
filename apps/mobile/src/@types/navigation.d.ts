@@ -36,4 +36,8 @@ type StackNavigatorParams = {
     id: string;
   } & DefaultNavigationOptions;
   "search-page": undefined;
+  "tag-users": {
+    userId: string;
+    imgUuId: string;
+  } & DefaultNavigationOptions;
 };

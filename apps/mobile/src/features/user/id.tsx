@@ -92,6 +92,7 @@ interface UserListProps {
   children?: React.ReactNode | React.ReactNode[];
   users: FriendshipUser[];
   title?: string;
+  loading?: boolean;
   emptyText?: string;
   onUserPress?: (user: FriendshipUser) => void;
 }
@@ -102,9 +103,10 @@ export const UserList = ({
   users,
   onUserPress,
   title,
+  loading = false,
   emptyText,
 }: UserListProps) => {
-  const hasFriends = users.length > 0;
+  const hasFriends = users?.length > 0;
 
   return (
     <Div
@@ -113,51 +115,65 @@ export const UserList = ({
       <Text className={`font-figtree-bold text-accents-12 text-xl`}>
         {title ? title : "Prijatelji"}
       </Text>
-      {hasFriends ? (
-        <ScrollView
-          horizontal
-          contentContainerStyle={{
-            alignItems: "center",
-            flexDirection: "row",
-            gap: 22,
-          }}
-        >
-          {users.map((user, i) => (
-            <Pressable
-              key={i.toString()}
-              onPress={() => {
-                onUserPress?.(user);
+      {loading ? (
+        <Div className={`h-44 flex items-center justify-center`}>
+          <Spinner />
+        </Div>
+      ) : (
+        <>
+          {hasFriends ? (
+            <ScrollView
+              horizontal
+              contentContainerStyle={{
+                alignItems: "center",
+                flexDirection: "row",
+                gap: 22,
               }}
             >
-              <Div className={`flex flex-col items-center justify-between g-4`}>
-                <Img
-                  className={`w-28 h-28 rounded-full`}
-                  source={{
-                    uri:
-                      user.imagesId ??
-                      "https://images.unsplash.com/photo-1657320815727-2512f49f61d5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=100&h=100&q=60",
+              {users.map((user, i) => (
+                <Pressable
+                  key={i.toString()}
+                  onPress={() => {
+                    onUserPress?.(user);
                   }}
-                />
-                <Div className={`flex flex-col items-center  justify-center`}>
-                  <Text
-                    className={`font-figtree-bold text-center text-lg text-accents-12`}
+                >
+                  <Div
+                    className={`flex flex-col items-center justify-between g-4`}
                   >
-                    {formatName(user.name, user.surname)}
-                  </Text>
-                  <Text className={`font-figtree text-accents-11 text-center`}>
-                    {formatUserDisplayName(user.displayname)}
-                  </Text>
-                </Div>
-              </Div>
-            </Pressable>
-          ))}
-        </ScrollView>
-      ) : (
-        <Div className={`h-44 flex items-center justify-center`}>
-          <Text className={`text-accents-10 text-base font-figtree-medium`}>
-            {emptyText ?? "Korisnik nema prijatelja"}
-          </Text>
-        </Div>
+                    <Img
+                      className={`w-28 h-28 rounded-full`}
+                      source={{
+                        uri:
+                          user.imagesId ??
+                          "https://images.unsplash.com/photo-1657320815727-2512f49f61d5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=100&h=100&q=60",
+                      }}
+                    />
+                    <Div
+                      className={`flex flex-col items-center  justify-center`}
+                    >
+                      <Text
+                        className={`font-figtree-bold text-center text-lg text-accents-12`}
+                      >
+                        {formatName(user.name, user.surname)}
+                      </Text>
+                      <Text
+                        className={`font-figtree text-accents-11 text-center`}
+                      >
+                        {formatUserDisplayName(user.displayname)}
+                      </Text>
+                    </Div>
+                  </Div>
+                </Pressable>
+              ))}
+            </ScrollView>
+          ) : (
+            <Div className={`h-44 flex items-center justify-center`}>
+              <Text className={`text-accents-10 text-base font-figtree-medium`}>
+                {emptyText ?? "Korisnik nema prijatelja"}
+              </Text>
+            </Div>
+          )}
+        </>
       )}
     </Div>
   );
@@ -185,7 +201,7 @@ export const useFriends = (userId: User["id"], page: number = 0) => {
   const req = useQuery(
     queryKeys.friends(userId, page),
     async () => {
-      return await supabase
+      let q = supabase
         .from("Friendship")
         .select(
           "id, userAId, userBId, accepted, userB: userBId (id, name, surname, displayname, imagesId)"
@@ -194,6 +210,8 @@ export const useFriends = (userId: User["id"], page: number = 0) => {
         .eq("accepted", true)
         .order("createdAt", { ascending: false })
         .range(page * 10, (page + 1) * 10);
+
+      return await q;
     },
     {
       enabled: !!userId,
@@ -207,11 +225,15 @@ export const useUserPosts = (userId?: User["id"], page: number = 0) => {
   return useQuery(
     queryKeys.postsByUser(userId, page),
     async () => {
+      // get all record from Images table where postId is same as post id
+
       const { data, error } = await supabase
-        .from("Images")
-        .select(`*`)
+        .from("Post")
+        .select("*, Images(id, pic_url)")
         .filter("authorId", "eq", userId)
-        .order("createdAt", { ascending: false });
+        .order("created_at", { ascending: false });
+
+      console.log(data, error);
 
       return data;
     },
@@ -228,6 +250,7 @@ export type UserPostListType =
   | { type: "filler" }
   | (UserPost & { type: "sticky" });
 
+import { Spinner } from "@components/spinner";
 import BottomSheet from "@gorhom/bottom-sheet";
 import { uploadPfp } from "@lib/actions/img";
 import { queryClient } from "@lib/queryCache";
@@ -265,7 +288,7 @@ export const UserInfoScreen: FC<
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { data: friends } = useFriends(userId);
+  const { data: friends, isLoading: friendLoading } = useFriends(userId);
 
   const {
     data: friendShipStatus,
@@ -355,7 +378,7 @@ export const UserInfoScreen: FC<
   };
 
   const { actionFn, text, ...actions } = useMemo(() => {
-    return handleUserAction(user?.id, authUser.user);
+    return handleUserAction(user?.id, authUser?.user);
   }, [friendShipStatus, user, authUser]);
 
   const { data: friendRequestCount } = useFriendRequestCount(user, isMe);
@@ -373,7 +396,7 @@ export const UserInfoScreen: FC<
     bottomSheetRef.current?.snapToIndex(0);
   }, []);
 
-  const { data: posts } = useUserPosts(userId);
+  const { data: posts, isLoading: postLoading } = useUserPosts(userId);
 
   const pdn = Dimensions.get("window").height / 3;
 
@@ -386,8 +409,6 @@ export const UserInfoScreen: FC<
       e.nativeEvent.contentOffset.y /
       (e.nativeEvent.contentSize.height -
         e.nativeEvent.layoutMeasurement.height);
-
-    console.log(percentageView);
 
     if (percentageView > 0.8) {
       if (animatedIndex.value === 0) bottomSheetRef.current?.snapToIndex(1);
@@ -486,7 +507,7 @@ export const UserInfoScreen: FC<
       <Div className={`flex-1`}>
         {/* <Div className={`absolute w-14 z-40   h-15 bg-red-300`} /> */}
         <Div style={{ flex: 1, marginTop: 2 }}>
-          {isUserFetched && (
+          {isUserFetched ? (
             <FlashList
               stickyHeaderHiddenOnScroll={false}
               ListHeaderComponent={() => {
@@ -616,19 +637,18 @@ export const UserInfoScreen: FC<
                       </Div>
                     </Div>
                     <Div className={`mt-8 mx-2`}>
-                      {friends?.data?.length > 0 && (
-                        <UserList
-                          onUserPress={(u) => {
-                            navigation.push("user", {
-                              id: u?.id,
-                              previousScreenName: formatUserDisplayName(
-                                user.displayname
-                              ),
-                            });
-                          }}
-                          users={friends?.data?.map((t) => t.userB) as any}
-                        />
-                      )}
+                      <UserList
+                        loading={friendLoading}
+                        onUserPress={(u) => {
+                          navigation.push("user", {
+                            id: u?.id,
+                            previousScreenName: formatUserDisplayName(
+                              user.displayname
+                            ),
+                          });
+                        }}
+                        users={friends?.data?.map((t) => t.userB) as any}
+                      />
                     </Div>
                     <Div
                       className={`h-16 bg-black mt-8 rounded-t-2xl flex flex-row w-full`}
@@ -673,11 +693,15 @@ export const UserInfoScreen: FC<
                     <Div
                       className={`flex flex-col items-center justify-center h-full`}
                     >
-                      <Text
-                        className={`text-lg font-figtree-medium text-accents-11`}
-                      >
-                        Korisnik nema objava
-                      </Text>
+                      {postLoading ? (
+                        <Spinner />
+                      ) : (
+                        <Text
+                          className={`text-lg font-figtree-medium text-accents-11`}
+                        >
+                          Korisnik nema objava
+                        </Text>
+                      )}
                     </Div>
                   </Div>
                 );
@@ -724,7 +748,9 @@ export const UserInfoScreen: FC<
                     onPress={() => {
                       navigation.push("post", {
                         id: item.id,
-                        previousScreenName: "Home",
+                        previousScreenName: formatUserDisplayName(
+                          user?.displayname
+                        ),
                       });
                     }}
                   >
@@ -733,7 +759,7 @@ export const UserInfoScreen: FC<
                       // recyclingKey={item.id.toString()}
                       contentFit="cover"
                       source={{
-                        uri: item?.pic_url,
+                        uri: item?.Images?.[0]?.pic_url,
                       }}
                     />
                   </Pressable>
@@ -741,6 +767,10 @@ export const UserInfoScreen: FC<
               }}
               estimatedItemSize={200}
             />
+          ) : (
+            <Div className={`flex-1 justify-center items-center flex`}>
+              <Spinner />
+            </Div>
           )}
         </Div>
       </Div>
