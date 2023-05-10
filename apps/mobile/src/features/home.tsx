@@ -114,10 +114,9 @@ import {
   PlusCircleIcon as PlusCircleIconOutline,
 } from "react-native-heroicons/outline";
 import { useSharedValue, withSpring } from "react-native-reanimated";
-import { Chats } from "./chat/chats_list";
 import { PartyAdd } from "./party/add";
-import { UserInfoScreen } from "./user/id";
 import { SearchPage } from "./search/page";
+import { UserInfoScreen } from "./user/id";
 
 export const HomeNavigation = () => {
   const Tab = createBottomTabNavigator();
@@ -359,6 +358,12 @@ export const HomeScreen: FC<
                 onPress={() => {
                   navigation.navigate("chat", {
                     id: party.chatId,
+                  });
+                }}
+                onLongPress={() => {
+                  navigation.navigate("party", {
+                    id: party.id,
+                    previousScreenName: "Home",
                   });
                 }}
               >
