@@ -19,3 +19,5 @@ export const CoverTextShadowStyle = {
   textShadowOffset: { width: 0, height: 0 },
   textShadowRadius: 2,
 };
+
+export const PageMargin = "mx-[18px]";

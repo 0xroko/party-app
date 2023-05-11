@@ -1,7 +1,14 @@
 import { Div, T } from "@components/index";
-import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
-import { useMemo, useRef } from "react";
-import { Pressable, PressableProps } from "react-native";
+import BottomSheet, {
+  BottomSheetBackdrop,
+  BottomSheetScrollView,
+} from "@gorhom/bottom-sheet";
+import { createRef, useCallback, useMemo } from "react";
+import {
+  TextProps,
+  TouchableOpacity,
+  TouchableOpacityProps,
+} from "react-native";
 
 interface ActionItemIconProps {
   children?: React.ReactNode | React.ReactNode[];
@@ -11,96 +18,65 @@ export const ActionItemIcon = ({ children }: ActionItemIconProps) => {
   return <Div>{children}</Div>;
 };
 
-interface ActionItemTitleProps {
+interface ActionItemTitleProps extends TextProps {
   children?: React.ReactNode | React.ReactNode[];
 }
 
-export const ActionItemTitle = ({ children }: ActionItemTitleProps) => {
+export const ActionItemTitle = ({ children, ...o }: ActionItemTitleProps) => {
   return (
-    <T className={`font-figtree-semi-bold text-white text-lg`}>{children}</T>
+    <T className={`font-figtree-semi-bold text-white text-lg`} {...o}>
+      {children}
+    </T>
   );
 };
 
 // extends Pressable
-interface ActionItemProps extends PressableProps {
+interface ActionItemProps extends TouchableOpacityProps {
   children?: React.ReactNode | React.ReactNode[];
 }
 
 export const ActionItem = ({ children, ...other }: ActionItemProps) => {
   return (
-    <Pressable {...other}>
+    <TouchableOpacity activeOpacity={0.8} {...other}>
       <Div
         className={`flex items-center justify-start flex-row py-5 g-6 px-12`}
       >
         {children}
       </Div>
-    </Pressable>
+    </TouchableOpacity>
   );
 };
 
 interface ActionSheetProps {
   children?: React.ReactNode | React.ReactNode[];
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
 }
 
-export const ActionSheet = ({
-  children,
-  onOpenChange,
-  open,
-}: ActionSheetProps) => {
+export const actionSheetRef = createRef<BottomSheet>();
+
+export const ActionSheet = ({ children }: ActionSheetProps) => {
   const snapPoints = useMemo(() => ["30%"], []);
-  const sheetRef = useRef<BottomSheet>(null);
+
+  const renderBackdrop = useCallback(
+    (props) => (
+      <BottomSheetBackdrop
+        {...props}
+        disappearsOnIndex={-1}
+        appearsOnIndex={0}
+      />
+    ),
+    []
+  );
 
   return (
     <BottomSheet
       backgroundStyle={{ backgroundColor: "black" }}
-      // backdropComponent={({ animatedIndex, animatedPosition }) => {
-      //   const containerAnimatedStyle = useAnimatedStyle(() => ({
-      //     opacity: interpolate(
-      //       animatedIndex.value,
-      //       [-1, 0],
-      //       [0, 0.3],
-      //       Extrapolate.CLAMP
-      //     ),
-      //   }));
-      //   return (
-      //     <Pressable
-      //       style={{
-      //         position: "absolute",
-      //         top: 0,
-      //         bottom: 0,
-      //         left: 0,
-
-      //         right: 0,
-      //       }}
-      //       onPress={() => {
-      //         sheetRef.current?.close();
-      //         onOpenChange(false);
-      //       }}
-      //     >
-      //       <Animated.View
-      //         style={[
-      //           {
-      //             backgroundColor: "black",
-      //             flex: 1,
-      //             zIndex: 999,
-      //           },
-      //           containerAnimatedStyle,
-      //         ]}
-      //       />
-      //     </Pressable>
-      //   );
-      // }}
+      backdropComponent={renderBackdrop}
+      index={-1}
       handleIndicatorStyle={{
         backgroundColor: "white",
       }}
-      onClose={() => {
-        onOpenChange(false);
-      }}
       enablePanDownToClose={true}
-      ref={sheetRef}
-      index={open ? 0 : -1}
+      ref={actionSheetRef}
       handleStyle={{
         // backgroundColor: "red",
         paddingTop: 12,

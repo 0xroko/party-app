@@ -35,26 +35,31 @@ export const LoginLoginScreen: FC<any> = ({ navigation }) => {
 
 interface SectionProps {
   children?: React.ReactNode | React.ReactNode[];
+  className?: string;
 }
 
-export const Section = ({ children }: SectionProps) => {
-  return <Div className={`flex h-full justify-evenly`}>{children}</Div>;
+export const Section = ({ children, className }: SectionProps) => {
+  return (
+    <Div className={`flex h-full justify-evenly ${className}`}>{children}</Div>
+  );
 };
 
 interface SectionTitleProps {
   title: string;
   description: string;
   textShadow?: boolean;
+  className?: string;
 }
 
 export const SectionTitle = ({
   description,
   title,
   textShadow,
+  className,
 }: SectionTitleProps) => {
   const textShadowStyle = textShadow ? CoverTextShadowStyle : {};
   return (
-    <Div className={``}>
+    <Div className={className}>
       <Text
         style={textShadowStyle}
         className={`font-figtree-bold text-accents-12 text-[36px]`}

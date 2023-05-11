@@ -5,12 +5,12 @@ import { useRefreshOnFocus } from "@hooks/useRefetchOnFocus";
 import { queryKeys } from "@lib/const";
 import { supabase } from "@lib/supabase";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { FC, useState } from "react";
+import { FC } from "react";
 import { useMutation, useQuery } from "react-query";
 
 import { format, isAfter } from "date-fns";
 
-import { ActionSheet } from "@components/action-sheet";
+import { ActionSheet, actionSheetRef } from "@components/action-sheet";
 import { Badge } from "@components/badge";
 import { Button } from "@components/button";
 import { Spinner } from "@components/spinner";
@@ -23,11 +23,8 @@ import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { Pressable } from "react-native";
 import { MapPinIcon, ShareIcon, UserIcon } from "react-native-heroicons/mini";
-import {
-  AdjustmentsHorizontalIcon,
-  PencilIcon,
-  TrashIcon,
-} from "react-native-heroicons/outline";
+import { PencilIcon, TrashIcon } from "react-native-heroicons/outline";
+import colors from "../../../colors";
 
 export const useParty = (partyId?: string) => {
   const q = useQuery(
@@ -182,8 +179,6 @@ export const PartyInfo: FC<
   const { data: attendance, isLoading: isAttendanceListLoading } =
     usePartyAttendance(partyId);
 
-  const [actionSheetOpen, setActionSheetOpen] = useState(false);
-
   return (
     <SafeArea className={`flex-1`} midGradient={false} gradient={!hasBg}>
       <PartyCover imgUri={party?.imageUrl} />
@@ -241,7 +236,7 @@ export const PartyInfo: FC<
                   <Div className={`flex flex-row g-2`}>
                     <Button
                       onPress={() => {
-                        setActionSheetOpen(true);
+                        actionSheetRef.current?.expand();
                       }}
                       className={`flex-1`}
                     >
@@ -274,13 +269,7 @@ export const PartyInfo: FC<
                   </>
                 )}
               </Div>
-              <Button
-                onPress={() => {
-                  setActionSheetOpen(true);
-                }}
-                iconOnly
-                className={`w-10`}
-              >
+              <Button onPress={() => {}} iconOnly className={`w-10`}>
                 <ShareIcon size={20} color={"#000"} />
               </Button>
             </Div>
@@ -302,39 +291,35 @@ export const PartyInfo: FC<
         </Div>
       )}
 
-      <ActionSheet open={actionSheetOpen} onOpenChange={setActionSheetOpen}>
+      <ActionSheet>
         <ActionSheet.Item
           onPress={() => {
-            setActionSheetOpen(false);
             navigation.push("party-add", {
               id: partyId,
             });
           }}
         >
           <ActionSheet.ItemIcon>
-            <PencilIcon size={20} color={"white"} />
+            <PencilIcon strokeWidth={1.75} size={22} color={"white"} />
           </ActionSheet.ItemIcon>
-          <ActionSheet.ItemTitle>Uredi party</ActionSheet.ItemTitle>
+          <ActionSheet.ItemTitle>Izmjeni podatke</ActionSheet.ItemTitle>
         </ActionSheet.Item>
+
         <ActionSheet.Item
-          onPress={() => {
-            setActionSheetOpen(false);
-            navigation.push("party-add-more", {
-              id: partyId,
-            });
+          onLongPress={() => {
+            actionSheetRef.current?.close();
           }}
         >
           <ActionSheet.ItemIcon>
-            <AdjustmentsHorizontalIcon size={20} color={"white"} />
+            <TrashIcon
+              strokeWidth={1.75}
+              size={22}
+              color={colors.error.primary}
+            />
           </ActionSheet.ItemIcon>
-          <ActionSheet.ItemTitle>Uredi detalje</ActionSheet.ItemTitle>
-        </ActionSheet.Item>
-
-        <ActionSheet.Item onPress={() => {}}>
-          <ActionSheet.ItemIcon>
-            <TrashIcon size={20} color={"white"} />
-          </ActionSheet.ItemIcon>
-          <ActionSheet.ItemTitle>Izbriši</ActionSheet.ItemTitle>
+          <ActionSheet.ItemTitle style={{ color: colors.error.primary }}>
+            Izbriši (drži za potvrdu)
+          </ActionSheet.ItemTitle>
         </ActionSheet.Item>
       </ActionSheet>
     </SafeArea>

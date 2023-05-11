@@ -158,7 +158,7 @@ export const SafeArea = ({
       )}
 
       <Div
-        className={`${className} h-full flex flex-col`}
+        className={` h-full flex flex-col ${className}`}
         style={{
           paddingTop: StatusBar.currentHeight || 0,
         }}
