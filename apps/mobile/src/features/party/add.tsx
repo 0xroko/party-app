@@ -9,6 +9,7 @@ import { FC, useEffect, useRef } from "react";
 import { actionSheetRef } from "@components/action-sheet";
 import { AddDialog, TagContainer, useTagsStore } from "@components/party-tags";
 import { PartyCover, useParty } from "@features/party/id";
+import { onSupabaseError } from "@lib/actions";
 import { queryKeys } from "@lib/const";
 import { partyDateFormat, partyTimeFormat } from "@lib/misc";
 import { queryClient } from "@lib/queryCache";
@@ -48,6 +49,7 @@ export const PartyAdd: FC<
   NativeStackScreenProps<StackNavigatorParams, "party-add">
 > = ({ navigation, route }) => {
   const edit = route.params?.id ? true : false;
+  console.log(edit, "edit je");
 
   const idRef = useRef<any>();
   const formRef = useRef<FormInstance<PartyAddForm>>(null);
@@ -106,8 +108,12 @@ export const PartyAdd: FC<
         },
       ])
       .select("*");
-    idRef.current = res.data[0].id;
-    console.log(res);
+
+    if (res.error) {
+      onSupabaseError(res.error);
+    }
+
+    navigation.navigate("party-add-more", { id: res.data[0].id });
   }
 
   const onUpdate = async (values: PartyAddForm, form: FormInstance<any>) => {
@@ -128,6 +134,12 @@ export const PartyAdd: FC<
       .select("*");
 
     queryClient.invalidateQueries(queryKeys.partyId(route.params?.id));
+
+    if (res.error) {
+      onSupabaseError(res.error);
+    } else {
+      navigation.goBack();
+    }
   };
 
   const [date, setDate] = React.useState<"none" | "date" | "time">("none");
@@ -350,15 +362,8 @@ export const PartyAdd: FC<
                         size={"medium"}
                         disabled={!isValid}
                         onPress={async () => {
-                          await submit();
                           actionSheetRef.current?.close();
-                          if (edit) {
-                            navigation.pop();
-                          } else {
-                            navigation.navigate("party-add-more", {
-                              id: idRef.current,
-                            });
-                          }
+                          await submit();
                         }}
                         intent={"primary"}
                       >
