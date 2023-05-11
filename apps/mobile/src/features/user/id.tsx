@@ -90,10 +90,18 @@ export type FriendshipUser = Pick<
 
 interface UserListProps {
   children?: React.ReactNode | React.ReactNode[];
-  users: FriendshipUser[];
+  users:
+    | FriendshipUser[]
+    | {
+        displayname: string;
+        surname: string;
+        name: string;
+        imagesId: string;
+      }[];
   title?: string;
   loading?: boolean;
   emptyText?: string;
+  onViewAllPress?: () => void;
   onUserPress?: (user: FriendshipUser) => void;
 }
 
@@ -105,6 +113,7 @@ export const UserList = ({
   title,
   loading = false,
   emptyText,
+  onViewAllPress,
 }: UserListProps) => {
   const hasFriends = users?.length > 0;
 
@@ -112,9 +121,16 @@ export const UserList = ({
     <Div
       className={`flex flex-col g-7 px-5 bg-accents-1 rounded-3xl py-6 border-accents-2 border`}
     >
-      <Text className={`font-figtree-bold text-accents-12 text-xl`}>
-        {title ? title : "Prijatelji"}
-      </Text>
+      <Div className={`w-full flex justify-between flex-row`}>
+        <Text className={`font-figtree-bold text-accents-12 text-xl`}>
+          {title ? title : "Prijatelji"}
+        </Text>
+        <Pressable onPress={onViewAllPress}>
+          <Text className={`font-figtree-semi-bold text-accents-11 text-base`}>
+            Vidi sve
+          </Text>
+        </Pressable>
+      </Div>
       {loading ? (
         <Div className={`h-44 flex items-center justify-center`}>
           <Spinner />

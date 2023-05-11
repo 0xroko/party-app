@@ -1,3 +1,5 @@
+import { format } from "date-fns";
+
 export const formatUserDisplayName = (displayName?: string) => {
   if (!displayName) {
     return `@anon`;
@@ -17,4 +19,18 @@ export const formatName = (name?: string, surname?: string) => {
     return `Anonimni korisnik`;
   }
   return `${name} ${surname}`;
+};
+
+export const partyTimeFormat = (date?: Date) => {
+  if (!date) {
+    return ``;
+  }
+  return format(date, "HH:mm");
+};
+
+export const partyDateFormat = (date?: Date) => {
+  if (!date) {
+    return ``;
+  }
+  return format(date, "dd.MM.yyyy.");
 };

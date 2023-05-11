@@ -19,7 +19,9 @@ type StackNavigatorParams = {
   "user-edit": {} & DefaultNavigationOptions;
   "user-modal": undefined;
   "user-friend-request": {} & DefaultNavigationOptions;
-  "party-add": DefaultNavigationOptions;
+  "party-add": {
+    id?: string;
+  } & DefaultNavigationOptions;
   "party-add-more": {
     id: string;
   };

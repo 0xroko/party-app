@@ -2,6 +2,7 @@ import { Div, Img, Text } from "@components/index";
 import { Input } from "@components/input";
 import { SafeArea } from "@components/safe-area";
 import { User } from "@lib/actions";
+import { formatUserDisplayName } from "@lib/misc";
 import { supabase } from "@lib/supabase";
 import { Link } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -63,7 +64,12 @@ export const SearchPage: FC<
 
 const UserList = ({ user }: { user: User }) => {
   return (
-    <Link to={{ screen: "user", params: { id: user.id } }}>
+    <Link
+      to={{
+        screen: "user",
+        params: { id: user.id, previousScreenName: "Pretraga" },
+      }}
+    >
       <Div className="flex-row bg-black p-2 mt-2">
         <Div className="">
           {/* add profile photo in ring */}
@@ -74,11 +80,11 @@ const UserList = ({ user }: { user: User }) => {
         </Div>
         <Div className="flex-row items-start pl-5">
           <Div className="text-lg">
-            <Text className="text-white font-semibold text-lg">
+            <Text className="text-white font-figtree-semi-bold text-lg">
               {user.name}
             </Text>
-            <Text className="text-white font-semibold text-sm">
-              @{user.displayname}
+            <Text className="text-white font-figtree-semi-bold text-sm">
+              {formatUserDisplayName(user.displayname)}
             </Text>
           </Div>
         </Div>

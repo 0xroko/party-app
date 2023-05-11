@@ -1,12 +1,33 @@
-import { Div, T } from "@components/index";
+import { CoverTextShadowStyle, Div, T } from "@components/index";
 import { NavBar } from "@components/navbar";
 import { SafeArea } from "@components/safe-area";
 import { useRefreshOnFocus } from "@hooks/useRefetchOnFocus";
 import { queryKeys } from "@lib/const";
 import { supabase } from "@lib/supabase";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { FC } from "react";
-import { useQuery } from "react-query";
+import { FC, useState } from "react";
+import { useMutation, useQuery } from "react-query";
+
+import { format, isAfter } from "date-fns";
+
+import { ActionSheet } from "@components/action-sheet";
+import { Badge } from "@components/badge";
+import { Button } from "@components/button";
+import { Spinner } from "@components/spinner";
+import { UserList } from "@features/user/id";
+import { useAuthUser } from "@hooks/useAuthUser";
+import { formatUserDisplayName } from "@lib/misc";
+import { queryClient } from "@lib/queryCache";
+import { hr } from "date-fns/locale";
+import { Image } from "expo-image";
+import { LinearGradient } from "expo-linear-gradient";
+import { Pressable } from "react-native";
+import { MapPinIcon, ShareIcon, UserIcon } from "react-native-heroicons/mini";
+import {
+  AdjustmentsHorizontalIcon,
+  PencilIcon,
+  TrashIcon,
+} from "react-native-heroicons/outline";
 
 export const useParty = (partyId?: string) => {
   const q = useQuery(
@@ -33,32 +54,85 @@ export const useParty = (partyId?: string) => {
   return q;
 };
 
+export const usePartyAttendanceMe = (partyId?: string, userId?: string) => {
+  const q = useQuery(
+    queryKeys.partyAttendanceMe(partyId),
+    async () => {
+      const { data, error } = await supabase
+        .from("Attending")
+        .select(
+          `*, 
+        user:userId (id, displayname)`
+        )
+        .eq("partyId", partyId)
+        .eq("userId", userId)
+        .single();
+      return data;
+    },
+    {
+      enabled: !!partyId && !!userId,
+    }
+  );
+
+  return q;
+};
+
+export const useMutatePartyAttendance = (partyId?: string, userId?: string) => {
+  const a = useMutation(async (accepted: boolean) => {
+    const { data } = await supabase.from("Attending").upsert(
+      {
+        partyId,
+        userId,
+        accepted: accepted,
+      },
+      { onConflict: "partyId, userId" }
+    );
+
+    queryClient.invalidateQueries(queryKeys.partyAttendanceMe(partyId));
+    queryClient.invalidateQueries(queryKeys.partyAttendance(partyId));
+    return data;
+  });
+
+  return a;
+};
+
+export const usePartyAttendance = (partyId?: string) => {
+  const q = useQuery(
+    queryKeys.partyAttendance(partyId),
+    async () => {
+      const { data, error } = await supabase
+        .from("Attending")
+        .select(
+          `*, 
+        user:userId (id, displayname, imagesId, name, surname)`
+        )
+        .eq("partyId", partyId)
+        .eq("accepted", true);
+
+      return data;
+    },
+    {
+      enabled: !!partyId,
+    }
+  );
+
+  return q;
+};
+
 export const partyDateFormat = "HH:mm EEE, dd.MM.yyyy";
-
-import { format, isAfter } from "date-fns";
-
-import { Badge } from "@components/badge";
-import { Button } from "@components/button";
-import { Spinner } from "@components/spinner";
-import { UserList } from "@features/user/id";
-import { useAuthUser } from "@hooks/useAuthUser";
-import { formatUserDisplayName } from "@lib/misc";
-import { hr } from "date-fns/locale";
-import { Image } from "expo-image";
-import { LinearGradient } from "expo-linear-gradient";
-import { Pressable } from "react-native";
-import { MapPinIcon, ShareIcon, UserIcon } from "react-native-heroicons/mini";
 
 interface PartyCoverProps {
   children?: React.ReactNode | React.ReactNode[];
   imgUri?: string;
+  height?: number | string;
 }
-export const PartyCover = ({ children, imgUri }: PartyCoverProps) => {
+
+export const PartyCover = ({ children, imgUri, height }: PartyCoverProps) => {
   return (
     <Div
       className={`absolute`}
       style={{
-        height: "55%",
+        height: height ?? "55%",
         width: "100%",
       }}
     >
@@ -66,7 +140,7 @@ export const PartyCover = ({ children, imgUri }: PartyCoverProps) => {
         style={{
           height: "100%",
           width: "100%",
-          opacity: 0.8,
+          opacity: 0.5,
         }}
         source={{ uri: imgUri }}
       ></Image>
@@ -95,30 +169,36 @@ export const PartyInfo: FC<
   const user = useAuthUser();
 
   const hasBg = !!party?.imageUrl;
-
   const isMyParty = party?.hostId === user?.data?.user?.id;
-
   const partyTime = new Date(party?.time_starting) ?? new Date();
-
   const partyStarted = isAfter(new Date(), partyTime);
 
+  const { mutateAsync: attend, isLoading: isAttendingLoading } =
+    useMutatePartyAttendance(partyId, user?.data?.user?.id);
+
+  const { data: attendanceMe, isLoading: isAttendanceLoading } =
+    usePartyAttendanceMe(partyId, user?.data?.user?.id);
+
+  const { data: attendance, isLoading: isAttendanceListLoading } =
+    usePartyAttendance(partyId);
+
+  const [actionSheetOpen, setActionSheetOpen] = useState(false);
+
   return (
-    <SafeArea midGradient={false} gradient={!hasBg}>
+    <SafeArea className={`flex-1`} midGradient={false} gradient={!hasBg}>
       <PartyCover imgUri={party?.imageUrl} />
       <NavBar includeDefaultTrailing={false} />
       {!isLoading ? (
         <>
           <SafeArea.Content className="z-10">
             <T
+              style={CoverTextShadowStyle}
               className={`text-4xl tracking-tight font-figtree-bold text-accents-12 mt-6`}
             >
               {party.name}
             </T>
             <T
-              style={{
-                textShadowColor: "#00000077",
-                textShadowRadius: 9,
-              }}
+              style={CoverTextShadowStyle}
               className={`text-xl font-figtree-medium capitalize text-accents-11 mt-2`}
             >
               {format(new Date(party.time_starting), partyDateFormat, {
@@ -141,10 +221,17 @@ export const PartyInfo: FC<
                   {formatUserDisplayName((party.host as any).displayname)}
                 </Badge>
               </Pressable>
-              <Badge>TAGS (NEMA IH U DB)</Badge>
+              {party?.tags?.map((tag, i) => (
+                <Badge key={tag + i.toString()} intent="secondary">
+                  {tag}
+                </Badge>
+              ))}
             </Div>
             <Div>
-              <T className={`text-accents-11 mt-4 font-figtree-medium`}>
+              <T
+                style={CoverTextShadowStyle}
+                className={`text-accents-11 mt-4 font-figtree-medium`}
+              >
                 {party.description}
               </T>
             </Div>
@@ -152,21 +239,48 @@ export const PartyInfo: FC<
               <Div className={`flex grow`}>
                 {isMyParty ? (
                   <Div className={`flex flex-row g-2`}>
-                    <Button disabled className={`flex-1`}>
+                    <Button
+                      onPress={() => {
+                        setActionSheetOpen(true);
+                      }}
+                      className={`flex-1`}
+                    >
                       Uredi
                     </Button>
-                    <Button disabled className={`flex-1`}>
-                      Obriši
-                    </Button>
-                    {partyStarted && (
-                      <Button className={`flex-1`}>Završi</Button>
-                    )}
                   </Div>
                 ) : (
-                  <Button>Idem</Button>
+                  <>
+                    {attendanceMe?.accepted ? (
+                      <Button
+                        disabled={isAttendanceLoading || isAttendingLoading}
+                        onPress={async () => {
+                          await attend(false);
+                        }}
+                        intent="secondary"
+                        className={`flex-1`}
+                      >
+                        Ne dolazim
+                      </Button>
+                    ) : (
+                      <Button
+                        disabled={isAttendanceLoading || isAttendingLoading}
+                        onPress={async () => {
+                          await attend(true);
+                        }}
+                      >
+                        Idem
+                      </Button>
+                    )}
+                  </>
                 )}
               </Div>
-              <Button iconOnly className={`w-10`}>
+              <Button
+                onPress={() => {
+                  setActionSheetOpen(true);
+                }}
+                iconOnly
+                className={`w-10`}
+              >
                 <ShareIcon size={20} color={"#000"} />
               </Button>
             </Div>
@@ -177,7 +291,7 @@ export const PartyInfo: FC<
           <Div className={`mt-6 px-2`}>
             <UserList
               emptyText="Još niko ne dolazi"
-              users={[]}
+              users={(attendance?.map((a) => a.user) as any) ?? []}
               title="Ko dolazi"
             />
           </Div>
@@ -187,6 +301,42 @@ export const PartyInfo: FC<
           <Spinner />
         </Div>
       )}
+
+      <ActionSheet open={actionSheetOpen} onOpenChange={setActionSheetOpen}>
+        <ActionSheet.Item
+          onPress={() => {
+            setActionSheetOpen(false);
+            navigation.push("party-add", {
+              id: partyId,
+            });
+          }}
+        >
+          <ActionSheet.ItemIcon>
+            <PencilIcon size={20} color={"white"} />
+          </ActionSheet.ItemIcon>
+          <ActionSheet.ItemTitle>Uredi party</ActionSheet.ItemTitle>
+        </ActionSheet.Item>
+        <ActionSheet.Item
+          onPress={() => {
+            setActionSheetOpen(false);
+            navigation.push("party-add-more", {
+              id: partyId,
+            });
+          }}
+        >
+          <ActionSheet.ItemIcon>
+            <AdjustmentsHorizontalIcon size={20} color={"white"} />
+          </ActionSheet.ItemIcon>
+          <ActionSheet.ItemTitle>Uredi detalje</ActionSheet.ItemTitle>
+        </ActionSheet.Item>
+
+        <ActionSheet.Item onPress={() => {}}>
+          <ActionSheet.ItemIcon>
+            <TrashIcon size={20} color={"white"} />
+          </ActionSheet.ItemIcon>
+          <ActionSheet.ItemTitle>Izbriši</ActionSheet.ItemTitle>
+        </ActionSheet.Item>
+      </ActionSheet>
     </SafeArea>
   );
 };

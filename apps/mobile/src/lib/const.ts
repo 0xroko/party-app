@@ -11,4 +11,6 @@ export const queryKeys = {
   postsByUser: (id: string, page: number) => ["postByUser", page, id],
   postsByPartyId: (id: string) => ["postById", id],
   post: (id: string) => ["post", id],
+  partyAttendanceMe: (id: string) => ["partyAttendanceMe", id],
+  partyAttendance: (id: string) => ["partyAttendance", id],
 } as const;

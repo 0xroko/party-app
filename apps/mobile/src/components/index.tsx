@@ -13,3 +13,9 @@ export const T = styled(Te);
 export const ADiv = Animated.createAnimatedComponent(Div);
 
 export const DivScroll = styled(ScrollView);
+
+export const CoverTextShadowStyle = {
+  textShadowColor: "rgba(0, 0, 0, 0.75)",
+  textShadowOffset: { width: 0, height: 0 },
+  textShadowRadius: 2,
+};

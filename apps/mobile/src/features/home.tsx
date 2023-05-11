@@ -10,9 +10,12 @@ import { getRandomUserButNotMe } from "@lib/actions/user";
 import { queryKeys } from "@lib/const";
 import { supabase } from "@lib/supabase";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import {
+  NativeStackNavigationProp,
+  NativeStackScreenProps,
+} from "@react-navigation/native-stack";
 import { FC } from "react";
-import { Pressable, ScrollView, StyleSheet } from "react-native";
+import { Pressable, ScrollView } from "react-native";
 import { useQuery } from "react-query";
 
 export const placeHolderBaseImage =
@@ -26,79 +29,121 @@ const useRandomUser = () => {
   return q;
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "grey",
-  },
-  sheetContainer: {
-    // add horizontal space
-  },
-  contentContainer: {
-    flex: 1,
-    alignItems: "center",
-  },
-});
+const useParties = () => {
+  const q = useQuery(queryKeys.latestParties, async () => {
+    const { data, error } = await supabase
+      .from("Party")
+      .select(
+        `*,
+        host: hostId(id, displayname, imagesId)
+    `
+      )
+      .order("id");
 
-// export const ModalScreen: FC<
-//   NativeStackScreenProps<StackNavigatorParams, "user-modal">
-// > = ({ navigation, route }) => {
-//   const bottomSheetRef = useRef<BottomSheet>(null);
+    return data;
+  });
 
-//   // listen to a change event from react-navigation to trigger bottom sheet close method.
-//   // variables
-//   const snapPoints = useMemo(() => ["55%"], []);
-//   const handleSheetChanges = useCallback(
-//     (index: number) => {
-//       if (index === -1) {
-//         navigation.goBack();
-//       }
-//     },
-//     [navigation]
-//   );
-//   return (
-//     <BottomSheet
-//       ref={bottomSheetRef}
-//       snapPoints={snapPoints}
-//       backgroundStyle={{
-//         backgroundColor: "#050505",
-//       }}
-//       handleIndicatorStyle={{
-//         backgroundColor: "#494949",
-//       }}
-//       style={{
-//         backgroundColor: "#fff0ff00",
-//       }}
-//       containerStyle={{}}
-//       backdropComponent={() => (
-//         <Div className={`bg-glass-1 absolute inset-0`}></Div>
-//       )}
-//       // add bottom inset to elevate the sheet
-//       enablePanDownToClose
-//       enableOverDrag
-//       onClose={() => {}}
-//       enableHandlePanningGesture
-//       enableContentPanningGesture
-//       // set `detached` to true
-//       onChange={handleSheetChanges}
-//     >
-//       <Div className={`bg-accents-1 flex-1`}>
-//         <Div className={`h-16 flex flex-row w-full`}>
-//           <Div
-//             className={`flex grow border-b-2 border-b-accents-12  justify-center items-center`}
-//           >
-//             <Squares2X2Icon strokeWidth={2} size={26} color={"#fff"} />
-//           </Div>
-//           <Div
-//             className={`flex border-b-2 border-b-accents-1  grow justify-center items-center`}
-//           >
-//             <TagIcon size={26} strokeWidth={2} color={"#fff"} />
-//           </Div>
-//         </Div>
-//       </Div>
-//     </BottomSheet>
-//   );
-// };
+  return q;
+};
+
+interface HomePartysProps {
+  children?: React.ReactNode | React.ReactNode[];
+  navigation?: NativeStackNavigationProp<
+    StackNavigatorParams,
+    "home",
+    undefined
+  >;
+}
+
+export const HomePartys = ({ children, navigation }: HomePartysProps) => {
+  const { data: authUser, isFetched, refetch } = useAuthUser();
+
+  const { data: parties, isFetched: partiesFetched } = useParties();
+  const { data: authUserData, isFetched: authUserFetched } = useUser(
+    authUser?.user.id
+  );
+
+  return (
+    <Div className={`flex grow-0 mb-5`}>
+      <ScrollView
+        horizontal
+        contentContainerStyle={{
+          paddingTop: 8,
+          alignItems: "center",
+          flexDirection: "row",
+          paddingHorizontal: 18,
+          gap: 8,
+        }}
+      >
+        <Pressable
+          key={authUser?.user.id}
+          onPress={() => {
+            navigation.navigate("party-add");
+          }}
+        >
+          <Div className={`flex g-3 w-24 h-36 items-center`}>
+            <Div className={`relative`}>
+              <Div
+                className={`absolute -right-2 -top-2 w-8 h-8 flex justify-center z-50 items-center rounded-full bg-accents-5`}
+              >
+                <T
+                  className={`font-figtree-semi-bold text-3xl leading-8 text-accents-12`}
+                >
+                  +
+                </T>
+              </Div>
+              <Img
+                className={`w-20 h-20 rounded-full`}
+                source={{
+                  uri: authUserData?.imagesId ?? placeHolderBaseImage,
+                }}
+              ></Img>
+            </Div>
+            <T
+              className={`text-center text-accents-12 font-figtree-bold text-sm px-1`}
+            >
+              Dodaj party
+            </T>
+          </Div>
+        </Pressable>
+        {parties?.map((party) => {
+          // @ts-ignore
+          const hostAvatar = party?.host?.imagesId;
+          return (
+            <Pressable
+              key={party.id}
+              onPress={() => {
+                navigation.navigate("chat", {
+                  id: party.chatId,
+                });
+              }}
+              onLongPress={() => {
+                navigation.navigate("party", {
+                  id: party.id,
+                  previousScreenName: "Home",
+                });
+              }}
+            >
+              <Div className={`flex g-3 w-24 h-36 items-center`}>
+                <Img
+                  className={`w-20 h-20 rounded-full border-0 border-spacing-2 border-accents-12`}
+                  source={{
+                    uri: party.imageUrl ?? hostAvatar ?? placeHolderBaseImage,
+                  }}
+                ></Img>
+                <T
+                  className={`text-center text-accents-12 font-figtree-bold text-sm px-1`}
+                >
+                  {party.name}
+                </T>
+              </Div>
+            </Pressable>
+          );
+        })}
+      </ScrollView>
+    </Div>
+  );
+};
 
 import {
   BellIcon,
@@ -285,106 +330,10 @@ export const HomeScreen: FC<
   const { data: randomUserData, isFetched: randomUserFetched } =
     useRandomUser();
 
-  const useParties = () => {
-    const q = useQuery(queryKeys.latestParties, async () => {
-      const { data, error } = await supabase
-        .from("Party")
-        .select(
-          `*,
-      host: hostId(id, displayname, imagesId)
-      `
-        )
-        .order("id");
-
-      return data;
-    });
-
-    return q;
-  };
-
-  const { data: parties, isFetched: partiesFetched } = useParties();
-
   return (
     <SafeArea gradient>
       <NavBar leadingLogo />
-      <Div className={`flex grow-0 mb-12`}>
-        <ScrollView
-          horizontal
-          contentContainerStyle={{
-            paddingTop: 8,
-            alignItems: "center",
-            flexDirection: "row",
-            paddingHorizontal: 18,
-            gap: 8,
-          }}
-        >
-          <Pressable
-            key={authUser?.user.id}
-            onPress={() => {
-              navigation.navigate("party-add");
-            }}
-          >
-            <Div className={`flex g-3 w-24 h-36 items-center`}>
-              <Div className={`relative`}>
-                <Div
-                  className={`absolute -right-2 -top-2 w-8 h-8 flex justify-center z-50 items-center rounded-full bg-accents-5`}
-                >
-                  <T
-                    className={`font-figtree-semi-bold text-3xl leading-8 text-accents-12`}
-                  >
-                    +
-                  </T>
-                </Div>
-                <Img
-                  className={`w-20 h-20 rounded-full`}
-                  source={{
-                    uri: authUserData?.imagesId ?? placeHolderBaseImage,
-                  }}
-                ></Img>
-              </Div>
-              <T
-                className={`text-center text-accents-12 font-figtree-bold text-sm px-1`}
-              >
-                Dodaj party
-              </T>
-            </Div>
-          </Pressable>
-          {parties?.map((party) => {
-            // @ts-ignore
-            const hostAvatar = party?.host?.imagesId;
-            return (
-              <Pressable
-                key={party.id}
-                onPress={() => {
-                  navigation.navigate("chat", {
-                    id: party.chatId,
-                  });
-                }}
-                onLongPress={() => {
-                  navigation.navigate("party", {
-                    id: party.id,
-                    previousScreenName: "Home",
-                  });
-                }}
-              >
-                <Div className={`flex g-3 w-24 h-36 items-center`}>
-                  <Img
-                    className={`w-20 h-20 rounded-full border-0 border-spacing-2 border-accents-12`}
-                    source={{
-                      uri: hostAvatar ?? placeHolderBaseImage,
-                    }}
-                  ></Img>
-                  <T
-                    className={`text-center text-accents-12 font-figtree-bold text-sm px-1`}
-                  >
-                    {party.name}
-                  </T>
-                </Div>
-              </Pressable>
-            );
-          })}
-        </ScrollView>
-      </Div>
+      <HomePartys navigation={navigation} />
       <SafeArea.ContentScrollView>
         <Div className={`flex flex-col g-2`}>
           <Button
@@ -431,40 +380,6 @@ export const HomeScreen: FC<
             }}
           >
             Upload Image test
-          </Button>
-
-          <Button
-            intent="secondary"
-            onPress={() => {
-              navigation.push("party-add-more", {
-                id: parties[0]?.id,
-                // previousScreenName: "Home",
-              });
-            }}
-          >
-            Random party page
-          </Button>
-          <Button
-            intent="secondary"
-            onPress={() => {
-              navigation.push("party", {
-                id: parties[0]?.id,
-                previousScreenName: "Home",
-              });
-            }}
-          >
-            Random party page (true)
-          </Button>
-          <Button
-            intent="secondary"
-            onPress={() => {
-              navigation.push("postAdd", {
-                partyId: parties[0]?.id,
-                previousScreenName: "Home",
-              });
-            }}
-          >
-            post add for {parties?.[0]?.name}
           </Button>
 
           <Div className={`w-full h-screen bg-slate-500 mb-4`}></Div>

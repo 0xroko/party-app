@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { Button } from "@components/button";
-import { Div, Text } from "@components/index";
+import { CoverTextShadowStyle, Div, Text } from "@components/index";
 import { Input } from "@components/input";
 import { SafeArea } from "@components/safe-area";
 import { googleSignIn, useLoginStore } from "@lib/actions/auth";
@@ -44,16 +44,26 @@ export const Section = ({ children }: SectionProps) => {
 interface SectionTitleProps {
   title: string;
   description: string;
+  textShadow?: boolean;
 }
 
-export const SectionTitle = ({ description, title }: SectionTitleProps) => {
+export const SectionTitle = ({
+  description,
+  title,
+  textShadow,
+}: SectionTitleProps) => {
+  const textShadowStyle = textShadow ? CoverTextShadowStyle : {};
   return (
     <Div className={``}>
-      <Text className={`font-figtree-bold text-accents-12 text-[36px]`}>
+      <Text
+        style={textShadowStyle}
+        className={`font-figtree-bold text-accents-12 text-[36px]`}
+      >
         {title}
       </Text>
       <Text
-        className={`font-figtree-medium text-accents-10 text-[18px] leading-7 mt-4`}
+        style={textShadowStyle}
+        className={`font-figtree-medium text-accents-11 text-[18px] leading-7 mt-4`}
       >
         {description}
       </Text>

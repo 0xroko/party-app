@@ -1,14 +1,18 @@
 import { Button } from "@components/button";
-import { Div, Text } from "@components/index";
+import { Div } from "@components/index";
 import { Input } from "@components/input";
 import { SafeArea } from "@components/safe-area";
 import { supabase } from "@lib/supabase";
 import { Field, Form, FormInstance } from "houseform";
-import { FC, useRef, useState } from "react";
+import { FC, useEffect, useRef } from "react";
 // import { AddressAutofill } from '@mapbox/search-js-react';
+import { SectionTitle } from "@features/auth/signup";
+import { PartyCover, useParty } from "@features/party/id";
+import { partyDateFormat, partyTimeFormat } from "@lib/misc";
 import RNDateTimePicker from "@react-native-community/datetimepicker";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React from "react";
+import { Pressable } from "react-native";
 
 interface SectionProps {
   children?: React.ReactNode | React.ReactNode[];
@@ -17,26 +21,6 @@ interface SectionProps {
 export const Section = ({ children }: SectionProps) => {
   return (
     <Div className={`mx-[22px] flex h-full justify-evenly`}>{children}</Div>
-  );
-};
-
-interface SectionTitleProps {
-  title: string;
-  description: string;
-}
-
-export const SectionTitle = ({ description, title }: SectionTitleProps) => {
-  return (
-    <Div className={``}>
-      <Text className={`font-figtree-bold text-accents-12 text-[36px]`}>
-        {title}
-      </Text>
-      <Text
-        className={`font-figtree-medium text-accents-10 text-[18px] leading-7 mt-4`}
-      >
-        {description}
-      </Text>
-    </Div>
   );
 };
 
@@ -51,8 +35,6 @@ interface PartyAddForm {
 export const PartyAdd: FC<
   NativeStackScreenProps<StackNavigatorParams, "party-add">
 > = ({ navigation, route }) => {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
   function mergeDates(date1, date2): Date {
     const d1 = new Date(date1);
     const d2 = new Date(date2);
@@ -74,14 +56,43 @@ export const PartyAdd: FC<
     return mergedDate;
   }
 
+  const shouldEdit = route.params?.id ? true : false;
+
   const idRef = useRef<any>();
+  const formRef = useRef<FormInstance<PartyAddForm>>(null);
+  const { data: partyData, error: partyError } = useParty(route.params?.id);
+  const [initialWasSet, setInitialWasSet] = React.useState(false);
 
-  async function onVerify(values: PartyAddForm, form: FormInstance<any>) {
-    console.log("Function not implemented.", values);
+  useEffect(() => {
+    if (shouldEdit && partyData && !initialWasSet) {
+      const date = new Date(partyData.time_starting);
+      const time = new Date(partyData.time_starting);
+      date.setHours(0, 0, 0, 0);
+      time.setFullYear(0, 0, 0);
+      // @ts-ignore
+      formRef?.current?.getFieldValue("name")?.setValue(partyData?.name);
+      // @ts-ignore
+      formRef?.current
+        ?.getFieldValue("description")
+        // @ts-ignore
+        ?.setValue(partyData?.description);
+      // @ts-ignore
+      formRef?.current
+        ?.getFieldValue("location")
+        // @ts-ignore
 
-    // merge date and time into one
-    // const date = ;
-    // const time = new Date(values.start_time);
+        ?.setValue(partyData?.location);
+      // @ts-ignore
+
+      formRef?.current?.getFieldValue("start_date")?.setValue(date);
+      // @ts-ignore
+      formRef?.current?.getFieldValue("start_time")?.setValue(time);
+
+      setInitialWasSet(true);
+    }
+  }, [partyData]);
+
+  async function onCreate(values: PartyAddForm, form: FormInstance<any>) {
     const merged = mergeDates(values.start_time, values.start_time);
     const { data, error } = await supabase.auth.getUser();
     const res = await supabase
@@ -100,19 +111,25 @@ export const PartyAdd: FC<
     console.log(res);
   }
 
-  const [coordinate, setCoordinate] = React.useState();
-  const [startDate, setStartDate] = React.useState(new Date());
   const [date, setDate] = React.useState<"none" | "date" | "time">("none");
 
   return (
-    <SafeArea>
+    <SafeArea gradient={!shouldEdit} midGradient={!shouldEdit}>
+      {shouldEdit && partyData?.imageUrl && (
+        <PartyCover imgUri={partyData?.imageUrl} />
+      )}
+
       <Section>
         <SectionTitle
-          title={"Kreiraj party"}
-          description={"Kreiraj party i skupi ekipu!"}
+          title={shouldEdit ? "Uredi party" : "Kreiraj party"}
+          description={
+            shouldEdit
+              ? "Promjeni detalje kad god želiš"
+              : "Kreiraj party i skupi ekipu!"
+          }
         />
 
-        <Form<PartyAddForm> onSubmit={onVerify}>
+        <Form<PartyAddForm> ref={formRef} onSubmit={onCreate}>
           {({ isValid, submit }) => (
             <Div className={`flex`}>
               <Div className={`flex flex-col mb-4 grow g-4`}>
@@ -183,22 +200,23 @@ export const PartyAdd: FC<
                           // console.log("open", date)
                           return (
                             <>
-                              <Input
-                                value={
-                                  value && new Date(value).toLocaleDateString()
-                                }
-                                onBlur={() => {
-                                  console.log("blur");
-                                }}
-                                label={"Datum"}
-                                error={errors.join("\n")}
-                                onFocus={(e) => {
-                                  console.log("focus");
-                                  setDate("date");
-                                  e.preventDefault();
-                                }}
-                                placeholder={"Datum party-a"}
-                              />
+                              <Pressable onPress={() => setDate("date")}>
+                                <Input
+                                  value={partyDateFormat(value)}
+                                  onBlur={() => {
+                                    console.log("blur");
+                                  }}
+                                  editable={false}
+                                  label={"Datum"}
+                                  error={errors.join("\n")}
+                                  onFocus={(e) => {
+                                    console.log("focus");
+                                    setDate("date");
+                                    e.preventDefault();
+                                  }}
+                                  placeholder={"Datum party-a"}
+                                />
+                              </Pressable>
                               {date == "date" && (
                                 <RNDateTimePicker
                                   // display="default"
@@ -223,22 +241,28 @@ export const PartyAdd: FC<
                           // console.log("open", open)
                           return (
                             <>
-                              <Input
-                                value={
-                                  value && new Date(value).toLocaleTimeString()
-                                }
-                                onBlur={() => {
-                                  console.log("blur");
-                                }}
-                                error={errors.join("\n")}
-                                label={"Vrijeme"}
-                                onFocus={(e) => {
-                                  console.log("focus");
+                              <Pressable
+                                onPress={(e) => {
                                   setDate("time");
                                   e.preventDefault();
                                 }}
-                                placeholder={"Vrijeme party-a"}
-                              />
+                              >
+                                <Input
+                                  value={partyTimeFormat(value)}
+                                  onBlur={() => {
+                                    console.log("blur");
+                                  }}
+                                  editable={false}
+                                  error={errors.join("\n")}
+                                  label={"Vrijeme"}
+                                  onFocus={(e) => {
+                                    console.log("focus");
+                                    setDate("time");
+                                    e.preventDefault();
+                                  }}
+                                  placeholder={"Vrijeme party-a"}
+                                />
+                              </Pressable>
                               {date == "time" && (
                                 <RNDateTimePicker
                                   // display="inline"
@@ -266,7 +290,13 @@ export const PartyAdd: FC<
               <Div className={`flex gap-3 flex-row mt-6`}>
                 <Div className={`flex basis-[33%] grow-0`}>
                   <Button
-                    onPress={() => navigation.navigate("home")}
+                    onPress={() => {
+                      if (shouldEdit) {
+                        navigation.pop();
+                      } else {
+                        navigation.navigate("home");
+                      }
+                    }}
                     size={"medium"}
                     intent={"secondary"}
                   >
@@ -276,7 +306,7 @@ export const PartyAdd: FC<
                 <Div className={`flex grow`}>
                   <Button
                     size={"medium"}
-                    disabled={!isValid || isSubmitting}
+                    disabled={!isValid}
                     onPress={async () => {
                       await submit();
                       navigation.navigate("party-add-more", {
@@ -285,7 +315,7 @@ export const PartyAdd: FC<
                     }}
                     intent={"primary"}
                   >
-                    Dalje
+                    {shouldEdit ? "Spremi" : "Dalje"}
                   </Button>
                 </Div>
               </Div>

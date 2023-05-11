@@ -1,5 +1,5 @@
 import { Div, Text } from "@components/index";
-import { cva, VariantProps } from "class-variance-authority";
+import { VariantProps, cva } from "class-variance-authority";
 
 const style = cva(
   "flex flex-row items-center justify-center rounded-xl px-3 py-1.5 border g-1",
@@ -7,6 +7,7 @@ const style = cva(
     variants: {
       intent: {
         primary: "bg-glass-1 text-accents-12 border-accents-12 ",
+        secondary: "bg-accents-12 text-accents-1 border-accents-12",
         disabled: "bg-accents-4 text-accents-9 border-accents-7",
       },
     },
@@ -20,6 +21,7 @@ const textStyle = cva("font-figtree-bold", {
   variants: {
     intent: {
       primary: "text-accents-12",
+      secondary: "text-accents-1",
       disabled: "text-accents-9",
     },
   },
