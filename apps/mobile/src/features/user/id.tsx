@@ -479,8 +479,6 @@ export const UserInfoScreen: FC<
 
     if (remaining > 0) {
       for (let i = 0; i <= remaining; i++) {
-        console.log("adding filler");
-
         postsWithStickyHeader.push({
           type: "filler",
         });

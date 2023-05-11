@@ -19,7 +19,7 @@ import { supabase } from "@lib/supabase";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { User as AuthUser } from "@supabase/supabase-js";
 import { FC } from "react";
-import { ScrollView, TouchableOpacity } from "react-native";
+import { RefreshControl, ScrollView, TouchableOpacity } from "react-native";
 import { useMutation, useQuery } from "react-query";
 
 const useFriendRequests = (authUser: AuthUser) => {
@@ -51,11 +51,14 @@ export const UserFriendReqests: FC<
 > = ({ navigation, route }) => {
   // screen width and height
 
-  const { data: authUser, isFetched, refetch } = useAuthUser();
+  const { data: authUser, isFetched } = useAuthUser();
   const { data: user, isLoading } = useUser(authUser?.user?.id);
 
-  const { data: friendRequests, isLoading: isFriendRequestsLoading } =
-    useFriendRequests(authUser?.user);
+  const {
+    data: friendRequests,
+    isLoading: isFriendRequestsLoading,
+    refetch,
+  } = useFriendRequests(authUser?.user);
 
   const useFriendAction = useMutation({
     mutationFn: async ({
@@ -113,7 +116,15 @@ export const UserFriendReqests: FC<
                 </Text>
               </Div>
             ) : (
-              <ScrollView>
+              <ScrollView
+                style={{ height: "100%" }}
+                refreshControl={
+                  <RefreshControl
+                    refreshing={isFriendRequestsLoading}
+                    onRefresh={refetch}
+                  />
+                }
+              >
                 {friendRequests?.map((friendRequest) => {
                   const user = (friendRequest.userAId === authUser?.user?.id
                     ? friendRequest.userB
@@ -134,6 +145,7 @@ export const UserFriendReqests: FC<
 
                   return (
                     <Div
+                      key={friendRequest?.id}
                       className={`flex flex-row items-center bg-accents-1 rounded-lg justify-between`}
                     >
                       <TouchableOpacity

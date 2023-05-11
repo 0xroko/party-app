@@ -282,6 +282,12 @@ export const PartyInfo: FC<
               emptyText="Još niko ne dolazi"
               users={(attendance?.map((a) => a.user) as any) ?? []}
               title="Ko dolazi"
+              onUserPress={(user) => {
+                navigation.navigate("user", {
+                  id: user.id,
+                  previousScreenName: party?.name ?? "Party",
+                });
+              }}
             />
           </Div>
         </>

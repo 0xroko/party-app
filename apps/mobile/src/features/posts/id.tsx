@@ -85,11 +85,23 @@ export const PostInfoScreen: FC<
           />
 
           <Div className={`flex justify-center g-0.5`}>
-            <T className={`text-white font-figtree-semi-bold`}>
-              {post?.author.displayname as string}{" "}
-              <T className={`text-accents-11`}>on</T>{" "}
-              {post?.party?.name as string}
-            </T>
+            <Div className={`flex flex-row items-center`}>
+              <T className={`text-white font-figtree-semi-bold`}>
+                {post?.author.displayname as string}
+              </T>
+              <T className={`text-accents-11`}> on </T>
+              <T
+                onPress={() => {
+                  navigation.push("party", {
+                    id: post?.party?.id as any,
+                    previousScreenName: "User post",
+                  });
+                }}
+                className={`text-white font-figtree-semi-bold`}
+              >
+                {post?.party?.name as string}
+              </T>
+            </Div>
             <T className={`text-accents-11 font-figtree-medium`}>
               {formatRelative(parsedDate, new Date(), {
                 locale: hr,

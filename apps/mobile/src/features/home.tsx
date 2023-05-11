@@ -1,4 +1,3 @@
-import { Button } from "@components/button";
 import { Div, Img, T } from "@components/index";
 import { NavBar } from "@components/navbar";
 import { SafeArea } from "@components/safe-area";
@@ -18,6 +17,23 @@ import { FC } from "react";
 import { Pressable, ScrollView } from "react-native";
 import { useQuery } from "react-query";
 
+import {
+  BellIcon,
+  HomeIcon,
+  PlusCircleIcon,
+} from "react-native-heroicons/mini";
+
+import { LinearGradient } from "expo-linear-gradient";
+import {
+  BellIcon as BellIconOutline,
+  HomeIcon as HomeIconOutline,
+  MagnifyingGlassIcon as MagnifyingGlassIconOutline,
+  PlusCircleIcon as PlusCircleIconOutline,
+} from "react-native-heroicons/outline";
+import { useSharedValue, withSpring } from "react-native-reanimated";
+import { PartyAdd } from "./party/add";
+import { SearchPage } from "./search/page";
+import { UserInfoScreen } from "./user/id";
 export const placeHolderBaseImage =
   "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAYAAABw4pVUAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAADxSURBVHgB7dFBAQAgDAChaYf1j6o17gEVOLv7how7pAiJERIjJEZIjJAYITFCYoTECIkREiMkRkiMkBghMUJihMQIiRESIyRGSIyQGCExQmKExAiJERIjJEZIjJAYITFCYoTECIkREiMkRkiMkBghMUJihMQIiRESIyRGSIyQGCExQmKExAiJERIjJEZIjJAYITFCYoTECIkREiMkRkiMkBghMUJihMQIiRESIyRGSIyQGCExQmKExAiJERIjJEZIjJAYITFCYoTECIkREiMkRkiMkBghMUJihMQIiRESIyRGSIyQGCExQmKExAiJERLzAWryAgaCD7znAAAAAElFTkSuQmCC";
 
@@ -144,24 +160,6 @@ export const HomePartys = ({ children, navigation }: HomePartysProps) => {
     </Div>
   );
 };
-
-import {
-  BellIcon,
-  HomeIcon,
-  PlusCircleIcon,
-} from "react-native-heroicons/mini";
-
-import { LinearGradient } from "expo-linear-gradient";
-import {
-  BellIcon as BellIconOutline,
-  HomeIcon as HomeIconOutline,
-  MagnifyingGlassIcon as MagnifyingGlassIconOutline,
-  PlusCircleIcon as PlusCircleIconOutline,
-} from "react-native-heroicons/outline";
-import { useSharedValue, withSpring } from "react-native-reanimated";
-import { PartyAdd } from "./party/add";
-import { SearchPage } from "./search/page";
-import { UserInfoScreen } from "./user/id";
 
 export const HomeNavigation = () => {
   const Tab = createBottomTabNavigator();
@@ -324,65 +322,15 @@ export const HomeScreen: FC<
 > = ({ navigation, route }) => {
   const { data: authUser, isFetched, refetch } = useAuthUser();
 
-  const { data: authUserData, isFetched: authUserFetched } = useUser(
-    authUser?.user.id
-  );
-  const { data: randomUserData, isFetched: randomUserFetched } =
-    useRandomUser();
-
   return (
     <SafeArea gradient>
       <NavBar leadingLogo />
       <HomePartys navigation={navigation} />
       <SafeArea.ContentScrollView>
         <Div className={`flex flex-col g-2`}>
-          <Button
-            disabled={!isFetched}
-            onPress={() => {
-              navigation.navigate("user", {
-                id: authUser?.user.id,
-                previousScreenName: "Home",
-              });
-            }}
-          >
-            My Profile
-          </Button>
-
-          <Button
-            disabled={!isFetched}
-            onPress={() => {
-              navigation.navigate("user", {
-                id: randomUserData?.id,
-                previousScreenName: "Home",
-              });
-            }}
-          >
-            @{randomUserData?.displayname} (random user)
-          </Button>
-          <Button
-            // disabled={!isFetched}
-            onPress={() => {
-              navigation.navigate("party-add");
-            }}
-          >
-            Add party
-          </Button>
-          <Button
-            onPress={() => {
-              navigation.navigate("chats");
-            }}
-          >
-            Chats
-          </Button>
-          <Button
-            onPress={() => {
-              navigation.navigate("upload-images");
-            }}
-          >
-            Upload Image test
-          </Button>
-
-          <Div className={`w-full h-screen bg-slate-500 mb-4`}></Div>
+          <Div className={`w-full h-screen bg-slate-500 mb-4`}>
+            <T className={`text-xl text-white`}>- jos ovo!</T>
+          </Div>
         </Div>
       </SafeArea.ContentScrollView>
     </SafeArea>
