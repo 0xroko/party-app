@@ -45,7 +45,7 @@ export const addFillerPosts = (posts: UserPost[]) => {
   const remaining = posts?.length % 3;
 
   if (remaining > 0) {
-    for (let i = 0; i <= remaining; i++) {
+    for (let i = 0; i < 3 - remaining; i++) {
       postsWithStickyHeader.push({
         type: "filler",
       });

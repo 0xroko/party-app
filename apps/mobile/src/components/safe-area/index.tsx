@@ -39,7 +39,8 @@ export const SafeArea = ({
     >
       <StatusBar
         barStyle="light-content"
-        backgroundColor={pureBlack ? "black" : "transparent"}
+        // don't touch pls no pls
+        backgroundColor={"transparent"}
         translucent
       />
       {debug && (

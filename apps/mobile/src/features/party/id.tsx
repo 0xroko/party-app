@@ -280,6 +280,18 @@ export const PartyInfo: FC<
             {/* <T className={`text-accents-12 font-figtree-medium mt-4`}>
           @roko, @div <T className={`text-accents-11`}>i 12 ostalih idu</T>
         </T> */}
+            <Button
+              onPress={() => {
+                navigation.navigate("postAdd", {
+                  partyId: partyId,
+                  previousScreenName: party?.name ?? "Party",
+                });
+              }}
+              className={`mt-3`}
+              intent="secondary"
+            >
+              Dodaj dojam (privremeno)
+            </Button>
           </SafeArea.Content>
           <Div className={`mt-6 px-2`}>
             <UserList
@@ -322,8 +334,10 @@ export const PartyInfo: FC<
         </ActionSheet.Item>
 
         <ActionSheet.Item
-          onLongPress={() => {
-            actionSheetRef.current?.close();
+          onLongPress={async () => {
+            await supabase.from("Party").delete().filter("id", "eq", partyId);
+            queryClient.invalidateQueries(queryKeys.latestParties);
+            navigation.goBack();
           }}
         >
           <ActionSheet.ItemIcon>

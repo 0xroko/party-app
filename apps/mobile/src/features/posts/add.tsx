@@ -48,19 +48,14 @@ export const AddPostScreen: FC<
   const addPost = useMutation({
     mutationFn: async () => {
       try {
-        let nisu = await Promise.allSettled(
-          img!.map(async (i) => {
-            const r = await uploadPost(i);
-            return r;
-          })
-        );
+        console.log(img, taggedUsers, description);
 
-        const ids = nisu
-          .filter((i) => i.status === "fulfilled")
-          .map(
-            (i) =>
-              (i as PromiseFulfilledResult<{ uuid: string; url: string }>).value
-          );
+        const uploadPromises = img!.map(async (i) => {
+          const r = await uploadPost(i);
+          return r;
+        });
+
+        let ids = await Promise.all(uploadPromises);
 
         const r = await supabase
           .from("Post")
@@ -73,22 +68,29 @@ export const AddPostScreen: FC<
           .single();
 
         if (r.data) {
+          const images = ids.map((i) => {
+            return {
+              pic_url: i.url,
+              postId: r.data.id,
+              originalUuid: i.uuid,
+            };
+          });
+
           const { data, count, error } = await supabase
             .from("Images")
-            .insert(
-              ids.map((i) => {
-                return {
-                  pic_url: i.url,
-                  postId: r.data.id,
-                  originalUuid: i.uuid,
-                };
-              })
-            )
+            .insert(images)
             .select();
+
+          console.log(data);
 
           // create object of {imageId : string, userId: string}[]
           const taggedOnImages = data
             .map((img) => {
+              const t = taggedUsers[img.originalUuid];
+
+              if (!t) {
+                return [];
+              }
               return taggedUsers[img.originalUuid].map((user) => {
                 return {
                   imageId: img.id,
@@ -97,6 +99,8 @@ export const AddPostScreen: FC<
               });
             })
             .flat();
+
+          console.log(taggedOnImages);
 
           // add all tagged users
           const p = await supabase
@@ -147,27 +151,31 @@ export const AddPostScreen: FC<
             >
               Nova objava za
             </T>
-            <TouchableOpacity
+            {/* <TouchableOpacity
               onPress={() => {
                 navigation.navigate("party", {
                   id: partyId,
                   previousScreenName: "Nova objava",
                 });
               }}
+            > */}
+            <T
+              style={{
+                textShadowColor: "#00000077",
+                textShadowRadius: 9,
+              }}
+              className={`text-4xl tracking-tight font-figtree-bold text-accents-12 mt-2`}
             >
-              <T
-                style={{
-                  textShadowColor: "#00000077",
-                  textShadowRadius: 9,
-                }}
-                className={`text-4xl tracking-tight font-figtree-bold text-accents-12 mt-2`}
-              >
-                {party?.name}
-              </T>
-            </TouchableOpacity>
+              {party?.name}
+            </T>
+            {/* </TouchableOpacity> */}
           </Div>
-          <Div className={`mt-2`}>
-            <T>Dodaj novu objavu</T>
+          <Div className={`mt-12`}>
+            <T
+              className={`text-accents-11 font-figtree-semi-bold text-sm mb-2`}
+            >
+              Slike
+            </T>
             {img.length === 0 ? (
               <Pressable onPress={addImg}>
                 <Div
@@ -282,7 +290,7 @@ export const AddPostScreen: FC<
               />
             )}
 
-            {img.length > 0 && (
+            {img.length > 0 && img.length <= 6 && (
               <Div className={`mt-5 flex flex-row g-2`}>
                 {/* <Button
                   className={`flex-1`}
