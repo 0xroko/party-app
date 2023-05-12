@@ -55,7 +55,7 @@ export interface Database {
           content: string
           createdAt: string
           id: string
-          imageId: string
+          postId: string
           updatedAt: string
         }
         Insert: {
@@ -63,15 +63,15 @@ export interface Database {
           content: string
           createdAt?: string
           id?: string
-          imageId: string
-          updatedAt: string
+          postId: string
+          updatedAt?: string
         }
         Update: {
           authorId?: string
           content?: string
           createdAt?: string
           id?: string
-          imageId?: string
+          postId?: string
           updatedAt?: string
         }
       }
@@ -327,6 +327,28 @@ export interface Database {
           party_id: string
           last_message_content: string
           last_message_created_at: string
+        }[]
+      }
+      get_users_attending_party: {
+        Args: {
+          partyid: string
+        }
+        Returns: {
+          id: string
+          imagesurl: string
+          name: string
+          display: string
+        }[]
+      }
+      getuserdatabypartyid: {
+        Args: {
+          partyid: string
+        }
+        Returns: {
+          userid: string
+          name: string
+          displayname: string
+          imagesid: string
         }[]
       }
       search_users: {

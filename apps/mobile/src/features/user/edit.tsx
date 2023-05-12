@@ -65,9 +65,16 @@ export const UserEditScreen: FC<
       // @ts-ignore
       formRef.current?.getFieldValue("bio").setValue(user.bio || "");
       // @ts-ignore
-      formRef.current?.getFieldValue("age").setValue(user.age?.toString());
+      formRef.current
+        ?.getFieldValue("age")
+        // @ts-ignore
+        .setValue(user.age?.toString() || null);
       // @ts-ignore
-      formRef.current?.getFieldValue("location").setValue(user.location);
+      formRef.current
+        ?.getFieldValue("location")
+        // @ts-ignore
+
+        .setValue(user.location || null);
 
       isSetRef.current = true;
     }
@@ -217,7 +224,8 @@ export const UserEditScreen: FC<
                     onBlurValidate={z.string()}
                     onChangeValidate={z
                       .string()
-                      .max(100, "Maksimalno 100 znakova!")}
+                      .max(100, "Maksimalno 100 znakova!")
+                      .nullable()}
                   >
                     {({ value, setValue, onBlur, errors, validate }) => {
                       return (
@@ -245,7 +253,8 @@ export const UserEditScreen: FC<
                       onBlurValidate={z.coerce
                         .number()
                         .min(16, "Moraš biti stariji od 16!")
-                        .max(100, "Moraš biti mlađi od 100!")}
+                        .max(100, "Moraš biti mlađi od 100!")
+                        .nullable()}
                     >
                       {({ value, setValue, onBlur, errors }) => {
                         return (
@@ -268,7 +277,10 @@ export const UserEditScreen: FC<
                   <Div className={`flex basis-[40%] grow`}>
                     <Field
                       name="location"
-                      onBlurValidate={z.string().max(23, "Max 23 znakova!")}
+                      onBlurValidate={z
+                        .string()
+                        .max(23, "Max 23 znakova!")
+                        .nullable()}
                     >
                       {({ value, setValue, onBlur, errors }) => {
                         return (

@@ -9,7 +9,7 @@ import { checkIfUserHasData } from "@lib/actions/user";
 import { supabase } from "@lib/supabase";
 import { useAuthStore } from "@navigation/authStore";
 import { Field, Form, FormInstance } from "houseform";
-import { FC, useState } from "react";
+import { FC, useRef, useState } from "react";
 export interface InfoSectionForm {
   name: string;
   surname: string;
@@ -120,9 +120,11 @@ export const PhoneSection = ({ children }: PhoneSectionProps) => {
     <Section>
       <SectionTitle
         title={"Kreiraj račun"}
-        description={
-          "Koristimo brojeve kako bi lakše te spojili s prijateljima, uvijek ga možeš promjeniti"
-        }
+        description={`Koristimo ${
+          !_DEV_USE_MAIL_LOGIN ? "brojeve" : "email"
+        } kako bi lakše te spojili s prijateljima${
+          !_DEV_USE_MAIL_LOGIN ? ", uvijek ga možeš promjeniti" : ""
+        }`}
       />
 
       <Form<{ phone: string }> onSubmit={onLoginSubmit}>
@@ -153,7 +155,7 @@ export const PhoneSection = ({ children }: PhoneSectionProps) => {
                               : "text-accents-12"
                           }`}
                         >
-                          {_DEV_USE_MAIL_LOGIN ? "Gmail" : "Broj telefona"}
+                          {_DEV_USE_MAIL_LOGIN ? "Email" : "Broj telefona"}
                         </Text>
                       }
                       placeholder={
@@ -210,6 +212,8 @@ export const OtpSection = () => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const formRef = useRef<FormInstance<{ otp: string }>>(null);
+
   const onVerify = async (values: { otp: string }) => {
     setIsSubmitting(true);
     try {
@@ -220,6 +224,14 @@ export const OtpSection = () => {
           email: loginState.phone,
           token: values.otp,
         });
+
+        if (error) {
+          formRef.current
+            ?.getFieldValue("otp")
+            .setErrors(["Kod nije valjan ili je istekao"]);
+          setIsSubmitting(false);
+          return;
+        }
       } else {
         // sms otp
       }
@@ -244,11 +256,13 @@ export const OtpSection = () => {
   return (
     <Section>
       <SectionTitle
-        title={"Potvrdi broj"}
-        description={"Poslali smo ti SMS poruku s verifikacijskim kodom"}
+        title={`Potvrdi ${_DEV_USE_MAIL_LOGIN ? "email" : "broj telefona"}`}
+        description={`Poslali smo ti ${
+          _DEV_USE_MAIL_LOGIN ? "email" : "SMS poruku"
+        } s verifikacijskim kodom`}
       />
 
-      <Form<{ otp: string }> onSubmit={onVerify}>
+      <Form<{ otp: string }> ref={formRef} onSubmit={onVerify}>
         {({ isValid, submit }) => (
           <Div className={`flex`}>
             <Div className={`flex flex-row mb-4 grow`}>

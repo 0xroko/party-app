@@ -5,27 +5,40 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "backgroundColor": "#050505",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/icn.png",
     "userInterfaceStyle": "dark",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/splash-m.png",
       "resizeMode": "contain",
-      "backgroundColor": "#050505"
+      "backgroundColor": "#020202"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
-      "bundleIdentifier": "com.alfe.party.app"
+      "bundleIdentifier": "com.alfe.party.app",
+      "icon": "./assets/icn-i.png",
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "Allow Party App to access your photos.",
+        "NSPhotoLibraryAddUsageDescription": "Allow Party App to save photos."
+      }
+    },
+    "notification": {
+      "icon": "./assets/notif.png"
     },
     "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#050505"
-      },
+      "icon": "./assets/icn.png",
       "googleServicesFile": "./google-services.json",
-      "package": "com.alfe.party.app"
+      "package": "com.alfe.party.app",
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.ACCESS_MEDIA_LOCATION"
+      ]
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/notif.png"
     },
     "scheme": "party-app",
     "extra": {
@@ -51,6 +64,12 @@
           "isAccessMediaLocationEnabled": true
         }
       ]
-    ]
+    ],
+    "runtimeVersion": {
+      "policy": "sdkVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/2211064f-52db-449d-ad20-1d791f2a0d50"
+    }
   }
 }

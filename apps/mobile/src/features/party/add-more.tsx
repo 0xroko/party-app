@@ -3,6 +3,7 @@ import { SafeArea } from "@components/safe-area";
 import { FC, useEffect } from "react";
 // import { AddressAutofill } from '@mapbox/search-js-react';
 import { Button } from "@components/button";
+import { PartyCover } from "@components/party-cover";
 import {
   AddDialog,
   TagContainer,
@@ -11,7 +12,7 @@ import {
 } from "@components/party-tags";
 import { Spinner } from "@components/spinner";
 import { SectionTitle } from "@features/auth/signup";
-import { PartyCover, useParty } from "@features/party/id";
+import { useParty } from "@hooks/query/useParty";
 import { uploadPartyCover } from "@lib/actions/img";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React from "react";
@@ -33,7 +34,7 @@ export const PartyAddMore: FC<
   const { setInitial, tags, setDialogVisible } = useTagsStore();
 
   useEffect(() => {
-    setInitial(party?.tags ?? []);
+    // setInitial(party?.tags ?? []);
   }, [party]);
 
   const { mutateAsync: mutateTags, isLoading: isMutatingTags } =
@@ -57,10 +58,10 @@ export const PartyAddMore: FC<
                 description={"Slika? Tagovi?"}
               />
 
-              <Div className={`flex g-7`}>
+              <Div className={`flex g-4`}>
                 <TagContainer />
                 <Div className={`w-full flex g-4 flex-row`}>
-                  <Button
+                  {/* <Button
                     intent="secondary"
                     className={`flex-1`}
                     onPress={() => {
@@ -68,7 +69,7 @@ export const PartyAddMore: FC<
                     }}
                   >
                     Dodaj tag
-                  </Button>
+                  </Button> */}
                   <Button
                     intent="secondary"
                     className={`flex-1`}
@@ -76,7 +77,7 @@ export const PartyAddMore: FC<
                       await uploadPartyCover(partyId);
                     }}
                   >
-                    Dodaj cover
+                    Dodaj pozadinu
                   </Button>
                 </Div>
                 <Div>
@@ -84,7 +85,10 @@ export const PartyAddMore: FC<
                     loading={isMutatingTags}
                     onPress={async () => {
                       await mutateTags(tags);
-                      navigation.navigate("party", { id: partyId });
+                      navigation.replace("party", {
+                        id: partyId,
+                        previousScreenName: "Home",
+                      });
                     }}
                   >
                     Spremi

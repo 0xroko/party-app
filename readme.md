@@ -5,16 +5,6 @@
 - [Figma File](https://www.figma.com/file/AJCEXi6P13yXk1yh6gXvG3/)
 - [Komponente](/apps/mobile/src/components/)
 
-## Todo
-
-- [ ] migrate from react-native-svg to react-native-skia (najvaznije)
-- [ ] block user functionality
-- [ ] party search
-- [ ] party filter
-- [ ] party sort
-- [ ] party share
-- [ ] party report
-
 ## Packages
 
 - `app/mobile` -> expo app
@@ -32,6 +22,8 @@
     - auth -> auth feature
     - party -> party feature
     - user -> user feature
+    - post 
+    - comments
 
 #### Paketi
 
@@ -56,4 +48,4 @@
 
 - src
   - supabase.ts -> supabase types
-  - prisma/schema.prisma -> prisma schema
+  - prisma/schema.prisma -> prisma schema (deprecated)

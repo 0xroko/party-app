@@ -1,4 +1,5 @@
-import { format } from "date-fns";
+import { format, formatRelative } from "date-fns";
+import { hr } from "date-fns/locale";
 
 export const formatUserDisplayName = (displayName?: string) => {
   if (!displayName) {
@@ -34,3 +35,14 @@ export const partyDateFormat = (date?: Date) => {
   }
   return format(date, "dd.MM.yyyy.");
 };
+
+export const formatPartyCommentDate = (date?: string) => {
+  if (!date) {
+    return ``;
+  }
+  return formatRelative(new Date(date), new Date(), {
+    locale: hr,
+  });
+};
+
+export const partyDateFormatStr = "HH:mm EEE, dd.MM.yyyy";

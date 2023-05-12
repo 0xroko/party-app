@@ -91,7 +91,7 @@ export const AddDialog = ({ children }: AddDialogProps) => {
                 onChangeValidate={z
                   .string()
                   .min(2, "Min. 2 znaka")
-                  .max(10, "Max. 10 znakova")
+                  .max(30, "Max. 30 znakova")
                   .superRefine((val, ct) => {
                     if (tags.includes(val)) {
                       ct.addIssue({
@@ -105,6 +105,7 @@ export const AddDialog = ({ children }: AddDialogProps) => {
                   return (
                     <Input
                       value={value}
+                      autoFocus={true}
                       onBlur={onBlur}
                       onChangeText={(text) => setValue(text)}
                       placeholder={"Tag"}
@@ -184,18 +185,20 @@ export const TagContainer = ({ children }: TagContainerProps) => {
     <Div className={`flex g-2`}>
       <T className={`text-accents-11 font-figtree-semi-bold text-sm`}>Tagovi</T>
       <Div
-        className={`flex flex-row min-h-[150px] g-4 bg-accents-1 rounded-2xl p-5 border-accents-2 border`}
+        className={`flex flex-row flex-wrap g-4 bg-accents-1 rounded-2xl p-5 border-accents-2 border`}
       >
-        {tags.map((tag, i) => {
+        {tags?.map((tag, i) => {
           return <Tag tag={tag} key={i} onDelete={() => deleteTag(tag)} />;
         })}
-        <Pressable
-          onPress={() => {
-            setDialogVisible(true);
-          }}
-        >
-          <Tag type="add" tag={"Dodaj"} />
-        </Pressable>
+        {tags?.length < 5 && (
+          <Pressable
+            onPress={() => {
+              setDialogVisible(true);
+            }}
+          >
+            <Tag type="add" tag={"Dodaj"} />
+          </Pressable>
+        )}
       </Div>
     </Div>
   );

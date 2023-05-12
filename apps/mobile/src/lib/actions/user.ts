@@ -140,7 +140,8 @@ export const getUserById = async (id: User["id"]) => {
   const { data, error } = await supabase
     .from("Users")
     .select("*")
-    .match({ id });
+    .match({ id })
+    .single();
 
   if (error) {
     onSupabaseError(error);

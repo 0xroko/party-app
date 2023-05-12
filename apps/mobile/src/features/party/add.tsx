@@ -7,8 +7,9 @@ import { Field, Form, FormInstance } from "houseform";
 import { FC, useEffect, useRef } from "react";
 // import { AddressAutofill } from '@mapbox/search-js-react';
 import { actionSheetRef } from "@components/action-sheet";
+import { PartyCover } from "@components/party-cover";
 import { AddDialog, TagContainer, useTagsStore } from "@components/party-tags";
-import { PartyCover, useParty } from "@features/party/id";
+import { useParty } from "@hooks/query/useParty";
 import { onSupabaseError } from "@lib/actions";
 import { queryKeys } from "@lib/const";
 import { partyDateFormat, partyTimeFormat } from "@lib/misc";
@@ -93,7 +94,7 @@ export const PartyAdd: FC<
   }, [partyData]);
 
   async function onCreate(values: PartyAddForm, form: FormInstance<any>) {
-    const merged = mergeDates(values.start_time, values.start_time);
+    const merged = mergeDates(values.start_date, values.start_time);
     const { data, error } = await supabase.auth.getUser();
     const res = await supabase
       .from("Party")
@@ -106,17 +107,31 @@ export const PartyAdd: FC<
           hostId: data.user.id,
         },
       ])
-      .select("*");
+      .select("*")
+      .single();
+
+    // try {
+    //   const t = await supabase
+    //     .from("Attending")
+    //     .insert([
+    //       {
+    //         partyId: res?.data?.id,
+    //         userId: data.user.id,
+    //         accepted: true,
+    //       },
+    //     ])
+    //     .select("*");
+    // } catch (error) {}
 
     if (res.error) {
       onSupabaseError(res.error);
     }
-
-    navigation.navigate("party-add-more", { id: res.data[0].id });
+    queryClient.invalidateQueries(queryKeys.latestParties);
+    navigation.replace("party-add-more", { id: res.data?.id });
   }
 
   const onUpdate = async (values: PartyAddForm, form: FormInstance<any>) => {
-    const merged = mergeDates(values.start_time, values.start_time);
+    const merged = mergeDates(values.start_date, values.start_time);
 
     console.log(merged.toLocaleString());
 
@@ -276,7 +291,7 @@ export const PartyAdd: FC<
                                         if (e.type == "dismissed") return;
                                         setValue(e.nativeEvent.timestamp);
                                       }}
-                                      value={value || new Date()}
+                                      value={new Date()}
                                     />
                                   )}
                                 </>
@@ -316,7 +331,7 @@ export const PartyAdd: FC<
                                         if (e.type === "dismissed") return;
                                         setValue(e.nativeEvent.timestamp);
                                       }}
-                                      value={value || new Date()}
+                                      value={new Date()}
                                     />
                                   )}
                                 </>

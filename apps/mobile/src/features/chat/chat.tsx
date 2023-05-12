@@ -1,9 +1,10 @@
+import { Div, Img, T, Text } from "@components/index";
 import { SafeArea } from "@components/safe-area";
 import { useAuthUser } from "@hooks/useAuthUser";
 import { supabase } from "@lib/supabase";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React, { FC, useCallback, useEffect, useState } from "react";
-import { useWindowDimensions } from "react-native";
+import { Pressable, View, useWindowDimensions } from "react-native";
 import {
   Bubble,
   Composer,
@@ -12,6 +13,7 @@ import {
   Send,
   Time,
 } from "react-native-gifted-chat";
+import { ArrowLeftIcon } from "react-native-heroicons/outline";
 // import { Input } from "@components/input";
 
 // export function Chat() {
@@ -20,16 +22,19 @@ export const Chat: FC<NativeStackScreenProps<StackNavigatorParams, "chat">> = ({
   route,
 }) => {
   const [messages, setMessages] = useState([]);
+  const [chatData, setChatData] = useState<any>([]);
   // console.log(route.params.id)
   const { data: authUser, isFetched, refetch } = useAuthUser();
   useEffect(() => {
     (async () => {
       const { data, error } = await supabase
         .from("Message")
-        .select("*, Users (id, displayname, imagesId)")
+        .select("*, Users (id, displayname, imagesId), Chat (Party (*))")
         .eq("chatId", route.params.id)
         .order("createdAt", { ascending: false });
       console.log("🤯", data, error);
+      setChatData(data[0].Chat)
+      console.log("chat", chatData)
       setMessages(
         data?.map((el) => {
           return {
@@ -125,6 +130,39 @@ export const Chat: FC<NativeStackScreenProps<StackNavigatorParams, "chat">> = ({
   const d = useWindowDimensions();
   return (
     <SafeArea>
+      {/* <Div className="bg-red-600 w-full h-16"> */}
+      <Div className="flex-row bg-black p-2">
+
+        <Div className={`flex p-3 g-4 flex-row items-center`}>
+          <Pressable onPress={() => navigation.goBack()}>
+            <ArrowLeftIcon color={"#fff"} size={20} strokeWidth={2.4} />
+          </Pressable>
+          <Pressable onPress={() => navigation.navigate("party", { id: chatData.Party.id })}>
+            <Text
+              className={`text-accents-12 font-figtree-bold leading-[20]`}
+            >
+              <Div className="pl-5">
+                {/* add profile photo in ring */}
+                <Img
+                  source={{ uri: chatData?.Party?.imageUrl }}
+                  className="w-8 h-8 rounded-full bg-gray-400"
+                />
+              </Div>
+              <Div className="flex-row items-start pl-5">
+                <Div className="text-lg">
+                  <Text className="text-white font-figtree-semi-bold text-lg">
+                    {chatData?.Party?.name}
+                  </Text>
+                </Div>
+              </Div>
+            </Text>
+          </Pressable>
+        </Div>
+
+
+      </Div>
+      {/* </Div> */}
+
       <GiftedChat
         // isLoadingEarlier={messages.length === 0}
         // renderLoading={() => <></>}
@@ -207,6 +245,6 @@ export const Chat: FC<NativeStackScreenProps<StackNavigatorParams, "chat">> = ({
           <Send {...props} text={props.text} textStyle={{ color: "white" }} />
         )}
       />
-    </SafeArea>
+    </SafeArea >
   );
 };

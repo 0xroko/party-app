@@ -1,7 +1,7 @@
 import { useFonts } from "expo-font";
 
 import { FC, useEffect, useRef, useState } from "react";
-import { Keyboard, KeyboardAvoidingView, Platform } from "react-native";
+import { Keyboard, KeyboardAvoidingView } from "react-native";
 
 import { NativeNavigation } from "./navigation";
 import { Provider } from "./provider";
@@ -114,6 +114,7 @@ Notifications.setNotificationCategoryAsync("generic_party_notification", [
   );
 
 const App: FC = () => {
+  // Load fonts
   const [loaded] = useFonts({
     figtree: require("./assets/fonts/Figtree-Regular.ttf"),
     figtreeBold: require("./assets/fonts/Figtree-Bold.ttf"),
@@ -122,6 +123,7 @@ const App: FC = () => {
     figtreeSemiBold: require("./assets/fonts/Figtree-SemiBold.ttf"),
     figtreeBlack: require("./assets/fonts/Figtree-Black.ttf"),
   });
+
   const [expoPushToken, setExpoPushToken] = useState("");
   const [notification, setNotification] =
     useState<Notifications.Notification>();
@@ -130,6 +132,8 @@ const App: FC = () => {
   const authState = useAuthStore((s) => s.authState);
 
   useEffect(() => {
+    // This code registers the user for push notifications.
+
     if (authState !== "SIGNED_IN") return;
     registerForPushNotificationsAsync().then((token) =>
       setExpoPushToken(token)
@@ -167,11 +171,15 @@ const App: FC = () => {
             );
           } else if (actionIdentifier === "decline-party-attendance") {
             const { data, error } = await supabase
+              // Update the Attending table
               .from("Attending")
+              // Set the accepted column to false
               .update({
                 accepted: false,
               })
+              // Where the partyId column is equal to the partyId in the notification
               .eq("partyId", notification.request.content.data.partyId)
+              // And where the userId column is equal to the userId in the notification
               .eq("userId", authUser?.user.id);
             console.log(actionIdentifier, data, error);
           } else if (actionIdentifier === "accept-party-attendance") {
@@ -195,7 +203,9 @@ const App: FC = () => {
       Notifications.removeNotificationSubscription(responseListener.current);
     };
   }, [authState]);
-
+  // This code handles unhandled touches by dismissing the keyboard.
+  // This is necessary for Android devices because the keyboard does not
+  // automatically dismiss when the user touches outside of the keyboard.
   function handleUnhandledTouches() {
     Keyboard.dismiss();
     return false;
@@ -208,7 +218,6 @@ const App: FC = () => {
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
       onStartShouldSetResponder={handleUnhandledTouches}
     >
       <Provider>

@@ -1,8 +1,9 @@
+import { HomeNavigation } from "@components/home-navigation";
 import { UserLoginInfoScreen } from "@features/auth/info-screen";
 import { LoginLoginScreen } from "@features/auth/signup";
 import { Chat } from "@features/chat/chat";
 import { Chats } from "@features/chat/chats_list";
-import { HomeNavigation } from "@features/home";
+import { CommentsPage } from "@features/comments/id";
 import { PartyAdd } from "@features/party/add";
 import { PartyAddMore } from "@features/party/add-more";
 import { PartyInfo } from "@features/party/id";
@@ -132,6 +133,11 @@ export const NativeNavigation = () => {
             name="party"
             options={defaultScreenOptions}
             component={PartyInfo}
+          />
+          <Stack.Screen
+            name="comments"
+            options={defaultScreenOptions}
+            component={CommentsPage}
           />
           <Stack.Screen
             name="tag-users"

@@ -12,5 +12,9 @@ export const queryKeys = {
   postsByPartyId: (id: string) => ["postById", id],
   post: (id: string) => ["post", id],
   partyAttendanceMe: (id: string) => ["partyAttendanceMe", id],
+  partyPosts: (id: string) => ["partyPosts", id],
   partyAttendance: (id: string) => ["partyAttendance", id],
+  partyHistory: (id: string) => ["partyHistory", id],
+  comments: (postId: string, page: number) => ["comments", postId, page],
+  commentsInf: (postId: string) => ["comments", postId],
 } as const;

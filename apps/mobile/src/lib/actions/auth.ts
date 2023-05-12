@@ -95,6 +95,7 @@ export const logOut = async (reset = true) => {
   if (reset)
     useLoginStore.setState((s) => ({
       ...s,
+      infoSectionFormData: {},
       phone: "",
       state: "PHONE",
     }));

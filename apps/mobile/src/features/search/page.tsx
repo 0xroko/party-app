@@ -1,4 +1,4 @@
-import { Div, Img, Text } from "@components/index";
+import { Div, EmptyPageMessage, Img, Text } from "@components/index";
 import { Input } from "@components/input";
 import { SafeArea } from "@components/safe-area";
 import { User } from "@lib/actions";
@@ -20,28 +20,24 @@ export const SearchPage: FC<
       const { data, error } = await supabase.rpc("search_usersname", {
         username: search,
       });
-      console.log(data, error);
+      console.log(data);
+
       setReturnedUsers(data);
     })();
   }, [search]);
+
   return (
     <SafeArea pureBlack={true}>
       <Div className="p-3">
         <Input placeholder="Pretraži" onChangeText={(e) => setSearch(e)} />
       </Div>
-      {returnedUsers.length === 0 ? (
-        <Div className="p-3">
-          <Div className={`h-36 flex justify-center items-center`}>
-            <Text
-              className={`text-lg font-figtree-medium text-accents-8 text-center mb-8 mt-2`}
-            >
-              {search.length > 0 ? "Nema rezultata" : "Pretraži korisnike"}
-            </Text>
-          </Div>
-        </Div>
+      {returnedUsers?.length === 0 ? (
+        <EmptyPageMessage>
+          {search?.length > 0 ? "Nema rezultata" : "Pretraži korisnike"}
+        </EmptyPageMessage>
       ) : (
         <Div className="p-3">
-          {returnedUsers.map((el, i) => {
+          {returnedUsers?.map((el, i) => {
             return (
               <UserList
                 key={el.id}
@@ -78,12 +74,12 @@ const UserList = ({ user }: { user: User }) => {
             className="w-12 h-12 rounded-full bg-gray-400"
           />
         </Div>
-        <Div className="flex-row items-start pl-5">
-          <Div className="text-lg">
+        <Div className="flex-row items-start pl-3">
+          <Div className="">
             <Text className="text-white font-figtree-semi-bold text-lg">
               {user.name}
             </Text>
-            <Text className="text-white font-figtree-semi-bold text-sm">
+            <Text className="text-accents-11 font-figtree-semi-bold text-sm">
               {formatUserDisplayName(user.displayname)}
             </Text>
           </Div>

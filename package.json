@@ -7,10 +7,17 @@
 	"scripts": {
 		"dev": "yarn workspace @party-app/mobile start --tunnel",
 		"gen": "yarn workspace @party-app/database sg",
-		"p": "git pull && yarn"
+		"build": "yarn workspace @party-app/mobile build",
+		"p": "git pull && yarn",
+		"postinstall": "patch-package"
 	},
 	"workspaces": [
 		"apps/*",
 		"packages/*"
-	]
+	],
+	"dependencies": {
+		"patch-package": "^7.0.0",
+		"postinstall-postinstall": "^2.1.0",
+		"supabase": "^1.58.1"
+	}
 }

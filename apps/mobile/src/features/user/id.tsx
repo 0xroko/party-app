@@ -1,21 +1,29 @@
-import { Div, Img, Text } from "@components/index";
+import {
+  Div,
+  Img,
+  PlaceHolderUserImage,
+  PressableDiv,
+  T,
+  Text,
+} from "@components/index";
 import { SafeArea } from "@components/safe-area";
 import {
-  EllipsisVerticalIcon,
   Squares2X2Icon,
   TagIcon,
   UserPlusIcon,
 } from "react-native-heroicons/outline";
 
-import { MapPinIcon } from "react-native-heroicons/mini";
+import { MapPinIcon, ShareIcon } from "react-native-heroicons/mini";
 
 import { Badge } from "@components/badge";
 import { Button } from "@components/button";
 import { NavBar, NavBarItem } from "@components/navbar";
+import { PostGallery } from "@components/post-gallery";
 import { Spinner } from "@components/spinner";
+import { PartyList, UserList } from "@components/user-h-list";
 import { useFriendRequestCount } from "@hooks/query/useFriendReqestCount";
 import { useFriends } from "@hooks/query/useFriends";
-import { FriendshipUser, useFriendship } from "@hooks/query/useFriendship";
+import { useFriendship } from "@hooks/query/useFriendship";
 import { useUser } from "@hooks/query/useUser";
 import {
   UserPostListType,
@@ -25,126 +33,16 @@ import {
 import { useAuthUser } from "@hooks/useAuthUser";
 import { uploadPfp } from "@lib/actions/img";
 import { queryKeys } from "@lib/const";
-import { formatBio, formatName, formatUserDisplayName } from "@lib/misc";
+import { formatBio, formatUserDisplayName } from "@lib/misc";
 import { queryClient } from "@lib/queryCache";
+import { supabase } from "@lib/supabase";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { FlashList } from "@shopify/flash-list";
 import { AuthUser } from "@supabase/supabase-js";
-import { Image } from "expo-image";
-import { styled } from "nativewind";
 import { FC, useMemo, useRef, useState } from "react";
-import { Pressable, View } from "react-native";
-import { ScrollView } from "react-native-gesture-handler";
+import { Platform, Pressable, Share } from "react-native";
+import { useQuery } from "react-query";
 import colors from "../../../colors";
-
-interface BaseUserListUser {
-  id: string;
-  displayname: string;
-  surname: string;
-  name: string;
-  imagesId: string;
-}
-interface UserListUser extends BaseUserListUser {}
-
-interface UserListProps {
-  children?: React.ReactNode | React.ReactNode[];
-  users: UserListUser[];
-  title?: string;
-  loading?: boolean;
-  emptyText?: string;
-  onViewAllPress?: () => void;
-  onUserPress?: (user: FriendshipUser) => void;
-}
-
-export const StyledScrollDiv = styled(ScrollView);
-
-export const UserList = ({
-  users,
-  onUserPress,
-  title,
-  loading = false,
-  emptyText,
-  onViewAllPress,
-}: UserListProps) => {
-  const hasFriends = users?.length > 0;
-
-  return (
-    <Div
-      className={`flex flex-col g-7 px-5 bg-accents-1 rounded-3xl py-6 border-accents-2 border`}
-    >
-      <Div className={`w-full flex justify-between flex-row`}>
-        <Text className={`font-figtree-bold text-accents-12 text-xl`}>
-          {title ? title : "Prijatelji"}
-        </Text>
-        <Pressable onPress={onViewAllPress}>
-          <Text className={`font-figtree-semi-bold text-accents-11 text-base`}>
-            Vidi sve
-          </Text>
-        </Pressable>
-      </Div>
-      {loading ? (
-        <Div className={`h-44 flex items-center justify-center`}>
-          <Spinner />
-        </Div>
-      ) : (
-        <>
-          {hasFriends ? (
-            <ScrollView
-              horizontal
-              contentContainerStyle={{
-                alignItems: "center",
-                flexDirection: "row",
-                gap: 22,
-              }}
-            >
-              {users.map((user, i) => (
-                <Pressable
-                  key={i.toString()}
-                  onPress={() => {
-                    onUserPress?.(user);
-                  }}
-                >
-                  <Div
-                    className={`flex flex-col items-center justify-between g-4`}
-                  >
-                    <Img
-                      className={`w-28 h-28 rounded-full`}
-                      source={{
-                        uri:
-                          user.imagesId ??
-                          "https://images.unsplash.com/photo-1657320815727-2512f49f61d5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=100&h=100&q=60",
-                      }}
-                    />
-                    <Div
-                      className={`flex flex-col items-center  justify-center`}
-                    >
-                      <Text
-                        className={`font-figtree-bold text-center text-lg text-accents-12`}
-                      >
-                        {formatName(user.name, user.surname)}
-                      </Text>
-                      <Text
-                        className={`font-figtree text-accents-11 text-center`}
-                      >
-                        {formatUserDisplayName(user.displayname)}
-                      </Text>
-                    </Div>
-                  </Div>
-                </Pressable>
-              ))}
-            </ScrollView>
-          ) : (
-            <Div className={`h-44 flex items-center justify-center`}>
-              <Text className={`text-accents-10 text-base font-figtree-medium`}>
-                {emptyText ?? "Korisnik nema prijatelja"}
-              </Text>
-            </Div>
-          )}
-        </>
-      )}
-    </Div>
-  );
-};
 
 export const UserInfoScreen: FC<
   NativeStackScreenProps<StackNavigatorParams, "user">
@@ -193,7 +91,7 @@ export const UserInfoScreen: FC<
             queryClient.invalidateQueries(queryKeys.friendship(userId));
             queryClient.invalidateQueries(queryKeys.friendRequestCount);
           },
-          text: "Remove friend",
+          text: "Ukloni prijatelja",
         };
       } else if (friendShipStatus === "accept") {
         return {
@@ -207,7 +105,7 @@ export const UserInfoScreen: FC<
             queryClient.invalidateQueries(queryKeys.friendRequestCount);
           },
           secoundaryActionFn: async () => {
-            friendshipMutation.mutateAsync({
+            await friendshipMutation.mutateAsync({
               action: "declineRequest",
               authUser,
             });
@@ -215,23 +113,26 @@ export const UserInfoScreen: FC<
             queryClient.invalidateQueries(queryKeys.friendship(userId));
             queryClient.invalidateQueries(queryKeys.friendRequestCount);
           },
-          secoundaryText: "Decline request",
-          text: "Accept request",
+          secoundaryText: "Odbij zahtjev",
+          text: "Prihvati zahtjev",
         };
       } else if (friendShipStatus === "none") {
         return {
           actionFn: async () => {
-            friendshipMutation.mutateAsync({ action: "sendRequest", authUser });
+            await friendshipMutation.mutateAsync({
+              action: "sendRequest",
+              authUser,
+            });
             queryClient.invalidateQueries(queryKeys.friends(userId, 0));
             queryClient.invalidateQueries(queryKeys.friendship(userId));
             queryClient.invalidateQueries(queryKeys.friendRequestCount);
           },
-          text: "Send friend request",
+          text: "Pošalji zahtjev",
         };
       } else if (friendShipStatus === "requested") {
         return {
           actionFn: async () => {
-            friendshipMutation.mutateAsync({
+            await friendshipMutation.mutateAsync({
               action: "unsendRequest",
               authUser,
             });
@@ -239,7 +140,7 @@ export const UserInfoScreen: FC<
             queryClient.invalidateQueries(queryKeys.friendship(userId));
             queryClient.invalidateQueries(queryKeys.friendRequestCount);
           },
-          text: "Cancel request",
+          text: "Otkaži zahtjev",
         };
       }
     }
@@ -247,7 +148,7 @@ export const UserInfoScreen: FC<
       actionFn: async () => {
         handleDataPress();
       },
-      text: "Edit profile",
+      text: "Uredi profil",
     };
   };
 
@@ -266,6 +167,30 @@ export const UserInfoScreen: FC<
   const postsWithStickyHeader = useMemo<UserPostListType[]>(() => {
     return addFillerPosts(posts);
   }, [posts]);
+
+  const { data: partyAttended, isLoading: partysLoading } = useQuery(
+    ["party-attended", user?.id],
+    async () => {
+      const { data } = await supabase
+        .from("Attending")
+        .select(
+          `
+          id,
+          party:Party(
+            id,
+            name,
+            time_starting,
+            imageUrl
+          )
+          `
+        )
+        .eq("userId", user?.id)
+        .eq("accepted", true)
+        .order("time_starting", { ascending: false, foreignTable: "Party" });
+
+      return data;
+    }
+  );
 
   return (
     <SafeArea gradient={!stickyRendered}>
@@ -312,8 +237,9 @@ export const UserInfoScreen: FC<
                     }}
                   >
                     <Div className={`flex mx-[18px]`}>
-                      <Div className={`flex flex-col  items-center`}>
-                        <Pressable
+                      <Div className={`flex flex-col relative items-center`}>
+                        <PressableDiv
+                          className={`rounded-full w-[124px] overflow-hidden h-[124px] mt-4`}
                           onPress={async () => {
                             if (isMe) {
                               await uploadPfp({ userId: user.id });
@@ -321,16 +247,32 @@ export const UserInfoScreen: FC<
                             }
                           }}
                         >
+                          {isMe && (
+                            <Div
+                              pointerEvents="none"
+                              className={`absolute z-50 top-[92px] h-36 flex justify-start items-center left-0 right-0 bg-glass-1 rounded-md`}
+                            >
+                              <Div pointerEvents="none">
+                                <T
+                                  className={`font-figtree-medium text-white text-sm p-1`}
+                                >
+                                  Promjeni sliku
+                                </T>
+                              </Div>
+                            </Div>
+                          )}
                           <Img
-                            className={`rounded-full w-[124px] h-[124px] mt-4`}
-                            source={{
-                              uri:
-                                user.imagesId ??
-                                "https://images.unsplash.com/photo-1657320815727-2512f49f61d5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=100&h=100&q=60",
-                              width: 100,
-                            }}
+                            className={`w-full h-full rounded-full`}
+                            source={
+                              user?.imagesId
+                                ? {
+                                    uri: user.imagesId,
+                                    width: 100,
+                                  }
+                                : PlaceHolderUserImage
+                            }
                           />
-                        </Pressable>
+                        </PressableDiv>
                         <Pressable onPress={handleDataPress}>
                           <Div className={`mt-6`}>
                             <Text
@@ -343,7 +285,7 @@ export const UserInfoScreen: FC<
                             <Text
                               className={`text-2xl text-center font-figtree-medium tracking-tight text-accents-10`}
                             >
-                              @{user?.displayname}
+                              {formatUserDisplayName(user?.displayname)}
                             </Text>
                           </Div>
                         </Pressable>
@@ -419,8 +361,31 @@ export const UserInfoScreen: FC<
                             </Div>
                           )}
                           <Div className={`flex grow-0 shrink`}>
-                            <Button iconOnly className={`w-10`}>
-                              <EllipsisVerticalIcon
+                            <Button
+                              onPress={() => {
+                                Platform.select({
+                                  ios: () => {
+                                    Share.share({
+                                      url:
+                                        "https://party-app-nextjs.vercel.app/?user=" +
+                                        user.id,
+                                      title: "Party App",
+                                    });
+                                  },
+                                  android: () => {
+                                    Share.share({
+                                      message:
+                                        "https://party-app-nextjs.vercel.app/?user=" +
+                                        user.id,
+                                      title: "Party App",
+                                    });
+                                  },
+                                })();
+                              }}
+                              iconOnly
+                              className={`w-10`}
+                            >
+                              <ShareIcon
                                 strokeWidth={2}
                                 size={20}
                                 color={"#000"}
@@ -442,6 +407,19 @@ export const UserInfoScreen: FC<
                           });
                         }}
                         users={friends?.data?.map((t) => t.userB) as any}
+                      />
+                    </Div>
+                    <Div className={`mt-8 mx-2`}>
+                      <PartyList
+                        title="Prisustvovao/la"
+                        loading={partysLoading}
+                        onUserPress={(u) => {
+                          navigation.push("party", {
+                            id: u?.id,
+                            previousScreenName: u.name,
+                          });
+                        }}
+                        partys={partyAttended?.map((t) => t.party) as any}
                       />
                     </Div>
                     <Div
@@ -500,44 +478,10 @@ export const UserInfoScreen: FC<
                 );
               }}
               renderItem={({ item, index, target }: any) => {
-                if (item?.withStickyHeader) {
-                  if (target === "StickyHeader") {
-                    return (
-                      <Div className={`h-16 bg-black flex flex-row w-full`}>
-                        <Div
-                          className={`flex grow border-b-2 border-b-accents-12  justify-center items-center`}
-                        >
-                          <Squares2X2Icon
-                            strokeWidth={2}
-                            size={26}
-                            color={"#fff"}
-                          />
-                        </Div>
-                        <Div
-                          className={`flex border-b-2 border-b-accents-1  grow justify-center items-center`}
-                        >
-                          <TagIcon size={26} strokeWidth={2} color={"#ddd"} />
-                        </Div>
-                      </Div>
-                    );
-                  }
-                }
-
-                if (item.type === "filler") {
-                  return (
-                    <View
-                      style={{
-                        flex: 1,
-                        aspectRatio: 1,
-                        backgroundColor: "black",
-                      }}
-                    />
-                  );
-                }
-
                 return (
-                  <Pressable
-                    style={{ flex: 1 }}
+                  <PostGallery
+                    item={item}
+                    navigation={navigation}
                     onPress={() => {
                       navigation.push("post", {
                         id: item.id,
@@ -546,16 +490,8 @@ export const UserInfoScreen: FC<
                         ),
                       });
                     }}
-                  >
-                    <Image
-                      style={{ aspectRatio: 1, flex: 1 }}
-                      // recyclingKey={item.id.toString()}
-                      contentFit="cover"
-                      source={{
-                        uri: item?.Images?.[0]?.pic_url,
-                      }}
-                    />
-                  </Pressable>
+                    target={target}
+                  />
                 );
               }}
               estimatedItemSize={200}

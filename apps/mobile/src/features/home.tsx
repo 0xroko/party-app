@@ -1,337 +1,244 @@
-import { Div, Img, T } from "@components/index";
-import { NavBar } from "@components/navbar";
-import { SafeArea } from "@components/safe-area";
-import { UserFriendReqests } from "@features/user/friend-requests";
-import { useUser } from "@hooks/query/useUser";
+import { HomePartys } from "@components/home-partys";
+import { Div, EmptyPageMessage, Img, PressableDiv, T } from "@components/index";
+import { NavBar, NavBarItem } from "@components/navbar";
+import { PostHeader } from "@components/post-header";
+import { SafeArea, SafeAreaTabbarPadding } from "@components/safe-area";
+import { Spinner } from "@components/spinner";
+import { useTimelinePosts } from "@hooks/query/useTimelinePost";
+import { useUserId } from "@hooks/query/useUser";
 import { useAuthUser } from "@hooks/useAuthUser";
-import { User } from "@lib/actions";
-import { getRandomUserButNotMe } from "@lib/actions/user";
 import { queryKeys } from "@lib/const";
-import { supabase } from "@lib/supabase";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import {
-  NativeStackNavigationProp,
-  NativeStackScreenProps,
-} from "@react-navigation/native-stack";
-import { FC } from "react";
-import { Pressable, ScrollView } from "react-native";
-import { useQuery } from "react-query";
-
-import {
-  BellIcon,
-  HomeIcon,
-  PlusCircleIcon,
-} from "react-native-heroicons/mini";
-
-import { LinearGradient } from "expo-linear-gradient";
-import {
-  BellIcon as BellIconOutline,
-  HomeIcon as HomeIconOutline,
-  MagnifyingGlassIcon as MagnifyingGlassIconOutline,
-  PlusCircleIcon as PlusCircleIconOutline,
-} from "react-native-heroicons/outline";
-import { useSharedValue, withSpring } from "react-native-reanimated";
-import { SearchPage } from "./search/page";
-import { UserInfoScreen } from "./user/id";
-export const placeHolderBaseImage =
-  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAYAAABw4pVUAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAADxSURBVHgB7dFBAQAgDAChaYf1j6o17gEVOLv7how7pAiJERIjJEZIjJAYITFCYoTECIkREiMkRkiMkBghMUJihMQIiRESIyRGSIyQGCExQmKExAiJERIjJEZIjJAYITFCYoTECIkREiMkRkiMkBghMUJihMQIiRESIyRGSIyQGCExQmKExAiJERIjJEZIjJAYITFCYoTECIkREiMkRkiMkBghMUJihMQIiRESIyRGSIyQGCExQmKExAiJERIjJEZIjJAYITFCYoTECIkREiMkRkiMkBghMUJihMQIiRESIyRGSIyQGCExQmKExAiJERLzAWryAgaCD7znAAAAAElFTkSuQmCC";
-
-const useRandomUser = () => {
-  const q = useQuery("random-user", async () => {
-    return (await getRandomUserButNotMe()) as User;
-  });
-
-  return q;
-};
-
-const useParties = () => {
-  const q = useQuery(queryKeys.latestParties, async () => {
-    const { data, error } = await supabase
-      .from("Party")
-      .select(
-        `*,
-        host: hostId(id, displayname, imagesId)
-    `
-      )
-      .order("id");
-
-    return data;
-  });
-
-  return q;
-};
-
-interface HomePartysProps {
-  children?: React.ReactNode | React.ReactNode[];
-  navigation?: NativeStackNavigationProp<
-    StackNavigatorParams,
-    "home",
-    undefined
-  >;
-}
-
-export const HomePartys = ({ children, navigation }: HomePartysProps) => {
-  const { data: authUser, isFetched, refetch } = useAuthUser();
-
-  const { data: parties, isFetched: partiesFetched } = useParties();
-  const { data: authUserData, isFetched: authUserFetched } = useUser(
-    authUser?.user.id
-  );
-
-  return (
-    <Div className={`flex grow-0 mb-5`}>
-      <ScrollView
-        horizontal
-        contentContainerStyle={{
-          paddingTop: 8,
-          alignItems: "center",
-          flexDirection: "row",
-          paddingHorizontal: 18,
-          gap: 8,
-        }}
-      >
-        <Pressable
-          key={authUser?.user.id}
-          onPress={() => {
-            navigation.navigate("party-add");
-          }}
-        >
-          <Div className={`flex g-3 w-24 h-36 items-center`}>
-            <Div className={`relative`}>
-              <Div
-                className={`absolute -right-2 -top-2 w-8 h-8 flex justify-center z-50 items-center rounded-full bg-accents-5`}
-              >
-                <T
-                  className={`font-figtree-semi-bold text-3xl leading-8 text-accents-12`}
-                >
-                  +
-                </T>
-              </Div>
-              <Img
-                className={`w-20 h-20 rounded-full`}
-                source={{
-                  uri: authUserData?.imagesId ?? placeHolderBaseImage,
-                }}
-              ></Img>
-            </Div>
-            <T
-              className={`text-center text-accents-12 font-figtree-bold text-sm px-1`}
-            >
-              Dodaj party
-            </T>
-          </Div>
-        </Pressable>
-        {parties?.map((party) => {
-          // @ts-ignore
-          const hostAvatar = party?.host?.imagesId;
-          return (
-            <Pressable
-              key={party.id}
-              onPress={() => {
-                navigation.navigate("chat", {
-                  id: party.chatId,
-                });
-              }}
-              onLongPress={() => {
-                navigation.navigate("party", {
-                  id: party.id,
-                  previousScreenName: "Home",
-                });
-              }}
-            >
-              <Div className={`flex g-3 w-24 h-36 items-center`}>
-                <Img
-                  className={`w-20 h-20 rounded-full border-0 border-spacing-2 border-accents-12`}
-                  source={{
-                    uri: party.imageUrl ?? hostAvatar ?? placeHolderBaseImage,
-                  }}
-                ></Img>
-                <T
-                  className={`text-center text-accents-12 font-figtree-bold text-sm px-1`}
-                >
-                  {party.name}
-                </T>
-              </Div>
-            </Pressable>
-          );
-        })}
-      </ScrollView>
-    </Div>
-  );
-};
-
-export const HomeNavigation = () => {
-  const Tab = createBottomTabNavigator();
-  const { data: authUser, isFetched, refetch } = useAuthUser();
-  const offset = useSharedValue(0);
-
-  const { data: authUserData, isFetched: authUserFetched } = useUser(
-    authUser?.user?.id
-  );
-
-  return (
-    <Tab.Navigator
-      screenOptions={({ route }) => ({
-        headerShown: false,
-        // keyboardHidesTabBar: true,
-        tabBarHideOnKeyboard: true,
-        tabBarIcon: ({ focused, color, size }) => {
-          if (route.name === "Home") {
-            return focused ? (
-              <HomeIcon
-                onPress={() => {
-                  offset.value = withSpring(Math.random());
-                }}
-                size={size}
-                color={"white"}
-                strokeWidth="2.5"
-              />
-            ) : (
-              <HomeIconOutline strokeWidth="2.5" size={size} color={color} />
-            );
-          } else if (route.name === "Search") {
-            return focused ? (
-              <MagnifyingGlassIconOutline
-                size={size}
-                color={"white"}
-                strokeWidth="2.5"
-              />
-            ) : (
-              <MagnifyingGlassIconOutline
-                strokeWidth="2.5"
-                size={size}
-                color={color}
-              />
-            );
-          } else if (route.name === "Add") {
-            return focused ? (
-              <PlusCircleIcon size={size} color={"white"} strokeWidth="2.5" />
-            ) : (
-              <PlusCircleIconOutline
-                size={size}
-                color={color}
-                strokeWidth="2.5"
-              />
-            );
-          } else if (route.name === "Notifications") {
-            return focused ? (
-              <BellIcon size={size} color={"white"} strokeWidth="2.5" />
-            ) : (
-              <BellIconOutline strokeWidth="2.5" size={size} color={color} />
-            );
-          } else if (route.name === "Profile") {
-            return focused ? (
-              <Img
-                className={`w-7 h-7 rounded-full border-2 border-white`}
-                source={{
-                  uri: authUserData?.imagesId ?? placeHolderBaseImage,
-                }}
-              />
-            ) : (
-              <Img
-                className={`w-8 h-8 rounded-full border-3 border-gray-700`}
-                source={{
-                  uri: authUserData?.imagesId ?? placeHolderBaseImage,
-                }}
-              />
-            );
-          }
-        },
-        tabBarAllowFontScaling: true,
-        tabBarBackground: () => (
-          // <Div
-          //   className={` absolute top-0 bottom-0 left-0 right-0`}
-          // ></Div>
-          <LinearGradient
-            pointerEvents="none"
-            style={{
-              position: "absolute",
-              borderTopStartRadius: 20,
-              borderTopEndRadius: 20,
-              top: 0,
-              bottom: 0,
-              left: 0,
-              right: 0,
-            }}
-            locations={[0.0, 0.2, 1.1]}
-            colors={["transparent", "rgba(0,0,0,0.1)", "rgba(0,0,0,1)"]}
-          />
-        ),
-        tabBarIconStyle: {
-          borderWidth: 0,
-          elevation: 0,
-          color: "white",
-        },
-
-        tabBarStyle: {
-          borderWidth: 0,
-          elevation: 0,
-          zIndex: 100,
-          height: 60,
-          paddingTop: 10,
-          backgroundColor: "transparent",
-          borderTopWidth: 0,
-          position: "absolute",
-        },
-        tabBarShowLabel: false,
-      })}
-    >
-      <Tab.Screen
-        name="Home"
-        component={HomeScreen}
-        initialParams={{
-          showBackButton: true,
-        }}
-      />
-      <Tab.Screen
-        name="Search"
-        component={SearchPage}
-        initialParams={{
-          showBackButton: false,
-          showNavBar: false,
-        }}
-      />
-      {/* <Tab.Screen
-        name="Add"
-        component={PartyAdd}
-        initialParams={{
-          showBackButton: false,
-        }}
-      /> */}
-      <Tab.Screen
-        name="Notifications"
-        component={UserFriendReqests}
-        initialParams={{
-          showBackButton: false,
-          showNavBar: false,
-        }}
-      />
-
-      <Tab.Screen
-        name="Profile"
-        component={UserInfoScreen}
-        initialParams={{ id: authUserData?.id, showBackButton: false }}
-      />
-    </Tab.Navigator>
-  );
-};
+import { formatUserDisplayName } from "@lib/misc";
+import { queryClient } from "@lib/queryCache";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { FlashList } from "@shopify/flash-list";
+import { Image } from "expo-image";
+import { FC, useMemo } from "react";
+import { Dimensions, Pressable, RefreshControl } from "react-native";
+import { ChatBubbleBottomCenterIcon } from "react-native-heroicons/outline";
+import Carousel from "react-native-reanimated-carousel";
+import colors from "../../colors";
 
 export const HomeScreen: FC<
   NativeStackScreenProps<StackNavigatorParams, "home">
 > = ({ navigation, route }) => {
-  const { data: authUser, isFetched, refetch } = useAuthUser();
+  const { data: authUser } = useAuthUser();
+
+  const userId = authUser?.user?.id;
+
+  const { data: user } = useUserId(userId);
+
+  const { data, refetch, isLoading, hasNextPage, fetchNextPage } =
+    useTimelinePosts();
+
+  const nextPageFetch = hasNextPage ? fetchNextPage : null;
+
+  const postsFlat = useMemo(() => {
+    return data?.pages?.map((page) => page?.data).flat();
+  }, [data]);
+
+  const width = Dimensions.get("window").width;
 
   return (
-    <SafeArea gradient>
-      <NavBar leadingLogo />
-      <HomePartys navigation={navigation} />
-      <SafeArea.ContentScrollView>
-        <Div className={`flex flex-col g-2`}>
-          <Div className={`w-full h-screen bg-slate-500 mb-4`}>
-            <T className={`text-xl text-white`}>- jos ovo!</T>
-          </Div>
+    <SafeArea midGradient={false} gradient>
+      <NavBar leadingLogo>
+        <NavBarItem>
+          <PressableDiv
+            onPress={() => {
+              navigation.navigate("chats", {
+                previousScreenName: "Home",
+              });
+            }}
+          >
+            <ChatBubbleBottomCenterIcon
+              size={24}
+              color={colors.accents[12]}
+              strokeWidth={2}
+            />
+          </PressableDiv>
+        </NavBarItem>
+      </NavBar>
+      {isLoading ? (
+        <Div className={`flex-1 justify-center items-center`}>
+          <Spinner />
         </Div>
-      </SafeArea.ContentScrollView>
+      ) : (
+        <FlashList
+          refreshControl={
+            <RefreshControl
+              progressBackgroundColor={colors.accents[1]}
+              colors={[colors.accents[11]]}
+              refreshing={isLoading}
+              onRefresh={async () => {
+                queryClient.invalidateQueries(queryKeys.latestParties);
+                await refetch();
+              }}
+            />
+          }
+          estimatedItemSize={600}
+          keyExtractor={(item) => item?.id ?? ""}
+          ListHeaderComponent={() => {
+            const memoedHomePartys = useMemo(() => {
+              return <HomePartys navigation={navigation} />;
+            }, [navigation]);
+            return memoedHomePartys;
+          }}
+          ListFooterComponent={() => {
+            return <SafeAreaTabbarPadding />;
+          }}
+          ListEmptyComponent={() => {
+            return (
+              <EmptyPageMessage>Nema objava za prikazati</EmptyPageMessage>
+            );
+          }}
+          onEndReached={() => {
+            nextPageFetch?.();
+          }}
+          data={postsFlat}
+          renderItem={({ item }) => {
+            const postId = item?.id;
+            const hasDescription = item?.description !== "";
+            return (
+              <Div className={`flex mb-2`}>
+                <PostHeader navigation={navigation} post={item} />
+                {item?.images?.length > 1 ? (
+                  <Carousel
+                    width={width}
+                    height={400}
+                    data={item?.images}
+                    enabled={item?.images?.length > 1}
+                    panGestureHandlerProps={{
+                      activeOffsetX: [-10, 10],
+                    }}
+                    loop={false}
+                    scrollAnimationDuration={100}
+                    renderItem={({ item, index }) => {
+                      return (
+                        <PressableDiv
+                          onPress={() => {
+                            navigation.navigate("post", {
+                              id: postId,
+                              previousScreenName: "Home",
+                            });
+                          }}
+                          className={`w-full`}
+                          style={{
+                            aspectRatio: 1,
+                          }}
+                        >
+                          <Image
+                            contentFit="cover"
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                            }}
+                            source={{
+                              uri: item?.pic_url,
+                            }}
+                          ></Image>
+                        </PressableDiv>
+                      );
+                    }}
+                  />
+                ) : (
+                  <PressableDiv
+                    onPress={() => {
+                      navigation.navigate("post", {
+                        id: item?.id,
+                        previousScreenName: "Home",
+                      });
+                    }}
+                    className={`w-full mt-1`}
+                    style={{
+                      aspectRatio: 1,
+                    }}
+                  >
+                    <Image
+                      contentFit="cover"
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                      }}
+                      source={{
+                        uri: item?.images?.[0]?.pic_url,
+                      }}
+                    ></Image>
+                  </PressableDiv>
+                )}
+
+                <Div
+                  className={`flex flex-col justify-start g-3 px-4 pt-5 pb-2`}
+                >
+                  <T
+                    className={`${
+                      hasDescription ? "text-white" : "text-accents-10"
+                    }  text-base font-figtree-bold`}
+                    style={{
+                      maxWidth: "80%",
+                    }}
+                  >
+                    {!hasDescription ? "Nema opisa" : item?.description}
+                  </T>
+
+                  <Pressable
+                    onPress={() => {
+                      navigation.navigate("comments", {
+                        postId: item?.id,
+                        previousScreenName: "Home",
+                        focus: true,
+                      });
+                    }}
+                  >
+                    <Div className={`flex flex-row items-center g-3`}>
+                      <Img
+                        className={`w-10 h-10 rounded-full `}
+                        source={{
+                          uri: user?.imagesId,
+                        }}
+                      ></Img>
+                      <T className={`text-white text-base font-figtree-bold`}>
+                        Komentiraj...
+                      </T>
+                    </Div>
+                  </Pressable>
+                  <Pressable
+                    onPress={() => {
+                      navigation.push("comments", {
+                        postId: item?.id,
+                        previousScreenName: "Home",
+                      });
+                    }}
+                  >
+                    <Div className={`flex g-1`}>
+                      {item?.comment?.length > 0 && (
+                        <Div className={`flex flex-row`}>
+                          <T
+                            className={`text-base font-figtree-semi-bold text-white`}
+                          >
+                            {formatUserDisplayName(
+                              item?.comment?.[0]?.author?.displayname
+                            )}{" "}
+                          </T>
+                          <T
+                            className={`text-base text-accents-10 ml-0.5 max-w-[80%] font-figtree-semi-bold`}
+                          >
+                            {item?.comment?.[0]?.content}
+                          </T>
+                        </Div>
+                      )}
+                      <T
+                        className={`text-base font-figtree-semi-bold text-accents-10`}
+                      >
+                        Vidi sve komentare{" "}
+                      </T>
+                    </Div>
+                  </Pressable>
+                </Div>
+              </Div>
+            );
+          }}
+        ></FlashList>
+      )}
     </SafeArea>
   );
 };

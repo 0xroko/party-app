@@ -1,0 +1,13 @@
+diff --git a/node_modules/nativewind/dist/metro/tailwind.js b/node_modules/nativewind/dist/metro/tailwind.js
+index ca8ce2a..ec2cb75 100644
+--- a/node_modules/nativewind/dist/metro/tailwind.js
++++ b/node_modules/nativewind/dist/metro/tailwind.js
+@@ -47,7 +47,7 @@ function runTailwindCli(main, { platform, cacheDirectory, outputJSPath, outputCS
+     const { stderr } = (0, node_child_process_1.spawnSync)("npx", spawnCommands, { shell: true });
+     console.log(`NativeWind: ${stderr.toString().replace("\nRebuilding...\n\n", "").trim()}`);
+     generateStyles(outputCSSPath, outputJSPath);
+-    const isDevelopment = process.env.NODE_ENV !== "production";
++    const isDevelopment = false;//process.env.NODE_ENV !== "production";
+     if (isDevelopment) {
+         let doneFirst = false;
+         spawnCommands.push("--watch", "--poll");

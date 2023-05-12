@@ -1,7 +1,14 @@
 import { SafeArea } from "@components/safe-area";
 
 import { Button } from "@components/button";
-import { Div, Img, Text } from "@components/index";
+import {
+  Div,
+  EmptyPageMessage,
+  Img,
+  PageTitle,
+  PlaceHolderUserImage,
+  Text,
+} from "@components/index";
 import { NavBar } from "@components/navbar";
 import { Spinner } from "@components/spinner";
 import { useFriendRequestAction } from "@hooks/mutation/useFriendRequestAction";
@@ -41,11 +48,7 @@ export const UserFriendReqests: FC<
         includeDefaultTrailing={false}
       />
       <SafeArea.Content>
-        <Text
-          className={`text-3xl tracking-tight font-figtree-bold text-accents-12 mb-8 mt-6`}
-        >
-          Zahtjevi
-        </Text>
+        <PageTitle>Zathjevi </PageTitle>
         {isFriendRequestsLoading ? (
           <Div className={`h-96 `}>
             <Spinner />
@@ -53,16 +56,13 @@ export const UserFriendReqests: FC<
         ) : (
           <>
             {friendRequests?.length === 0 ? (
-              <Div className={`h-36 flex justify-center items-center`}>
-                <Text
-                  className={`text-lg font-figtree-medium text-accents-8 text-center mb-8 mt-2`}
-                >
-                  Trenutno nemaš zahtjeva
-                </Text>
-              </Div>
+              <EmptyPageMessage>Trenutno nemaš zahtjeva</EmptyPageMessage>
             ) : (
               <ScrollView
                 style={{ height: "100%" }}
+                contentContainerStyle={{
+                  gap: 10,
+                }}
                 refreshControl={
                   <RefreshControl
                     refreshing={isFriendRequestsLoading}
@@ -75,7 +75,7 @@ export const UserFriendReqests: FC<
                     ? friendRequest.userB
                     : friendRequest.userA) as unknown as Pick<
                     User,
-                    "id" | "name" | "surname" | "displayname"
+                    "id" | "name" | "surname" | "displayname" | "imagesId"
                   >;
 
                   const friendStatus =
@@ -91,7 +91,7 @@ export const UserFriendReqests: FC<
                   return (
                     <Div
                       key={friendRequest?.id}
-                      className={`flex flex-row items-center bg-accents-1 rounded-lg justify-between`}
+                      className={`flex flex-row items-center  rounded-lg justify-between`}
                     >
                       <TouchableOpacity
                         key={friendRequest.id}
@@ -110,9 +110,13 @@ export const UserFriendReqests: FC<
                         <Div className={`flex flex-row items-center g-4`}>
                           <Img
                             className={`w-20 h-20 rounded-full`}
-                            source={{
-                              uri: "https://images.unsplash.com/photo-1657320815727-2512f49f61d5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=100&h=100&q=60",
-                            }}
+                            source={
+                              user?.imagesId
+                                ? {
+                                    uri: user?.imagesId,
+                                  }
+                                : PlaceHolderUserImage
+                            }
                           />
                           <Div
                             className={`flex flex-col items-start justify-start`}

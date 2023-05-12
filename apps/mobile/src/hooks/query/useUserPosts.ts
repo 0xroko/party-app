@@ -28,9 +28,9 @@ export const useUserPosts = (userId?: User["id"], page: number = 0) => {
 export type UserPost = ReturnType<typeof useUserPosts>["data"][number];
 
 export type UserPostListType =
-  | UserPost
-  | { type: "filler" }
-  | (UserPost & { type: "sticky" });
+  | (UserPost & { withStickyHeader?: boolean; type?: undefined })
+  | { type: "filler"; withStickyHeader?: boolean }
+  | (UserPost & { type: "sticky"; withStickyHeader?: boolean });
 
 export const addFillerPosts = (posts: UserPost[]) => {
   if (!posts) return [];

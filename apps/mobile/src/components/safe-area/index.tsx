@@ -207,3 +207,23 @@ export const ContentScrollView = forwardRef(
 
 SafeArea.Content = Content;
 SafeArea.ContentScrollView = ContentScrollView;
+
+interface SafeAreaNavbarPaddingProps {
+  children?: React.ReactNode | React.ReactNode[];
+}
+
+export const SafeAreaTabbarPadding = ({
+  children,
+}: SafeAreaNavbarPaddingProps) => {
+  const tabBarHeight = useBottomTabBarHeightNonThrowable();
+
+  return (
+    <Div
+      style={{
+        height: tabBarHeight,
+        width: "100%",
+        backgroundColor: "transparent",
+      }}
+    ></Div>
+  );
+};

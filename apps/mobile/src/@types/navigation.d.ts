@@ -32,7 +32,7 @@ type StackNavigatorParams = {
     id: string;
   } & DefaultNavigationOptions;
   chats: DefaultNavigationOptions;
-  chat: { id: string };
+  chat: { id: string } & DefaultNavigationOptions;
   "upload-images": undefined;
   party: {
     id: string;
@@ -41,5 +41,9 @@ type StackNavigatorParams = {
   "tag-users": {
     userId: string;
     imgUuId: string;
+  } & DefaultNavigationOptions;
+  comments: {
+    postId: string;
+    focus?: boolean;
   } & DefaultNavigationOptions;
 };
