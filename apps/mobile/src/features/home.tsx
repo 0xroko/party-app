@@ -31,7 +31,6 @@ import {
   PlusCircleIcon as PlusCircleIconOutline,
 } from "react-native-heroicons/outline";
 import { useSharedValue, withSpring } from "react-native-reanimated";
-import { PartyAdd } from "./party/add";
 import { SearchPage } from "./search/page";
 import { UserInfoScreen } from "./user/id";
 export const placeHolderBaseImage =
@@ -292,13 +291,13 @@ export const HomeNavigation = () => {
           showNavBar: false,
         }}
       />
-      <Tab.Screen
+      {/* <Tab.Screen
         name="Add"
         component={PartyAdd}
         initialParams={{
           showBackButton: false,
         }}
-      />
+      /> */}
       <Tab.Screen
         name="Notifications"
         component={UserFriendReqests}

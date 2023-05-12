@@ -63,7 +63,7 @@ export const UserEditScreen: FC<
       // @ts-ignore
       formRef.current?.getFieldValue("surname").setValue(user.surname);
       // @ts-ignore
-      formRef.current?.getFieldValue("bio").setValue(user.bio);
+      formRef.current?.getFieldValue("bio").setValue(user.bio || "");
       // @ts-ignore
       formRef.current?.getFieldValue("age").setValue(user.age?.toString());
       // @ts-ignore

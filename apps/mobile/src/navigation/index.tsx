@@ -59,7 +59,7 @@ export const NativeNavigation = () => {
         // bilo bi cool ne animirat gradient na home screenu
         // -> move gradient up to parent component???
         // -> (imat Screen.gradient = true/false prop ili nesto)
-        animation: "fade",
+        animation: "none",
         animationDuration: 0,
       }}
     >

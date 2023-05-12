@@ -57,7 +57,7 @@ export const PartyAdd: FC<
   const { setInitial, tags, setDialogVisible, reset } = useTagsStore();
 
   useEffect(() => {
-    if (edit) {
+    if (!edit) {
       reset();
     }
   }, []);
