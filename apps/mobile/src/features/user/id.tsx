@@ -12,92 +12,43 @@ import { MapPinIcon } from "react-native-heroicons/mini";
 import { Badge } from "@components/badge";
 import { Button } from "@components/button";
 import { NavBar, NavBarItem } from "@components/navbar";
-import { useAuthUser } from "@hooks/useAuthUser";
-import { useUser } from "@hooks/useUser";
-import { User } from "@lib/actions";
-import { queryKeys } from "@lib/const";
+import { Spinner } from "@components/spinner";
+import { useFriendRequestCount } from "@hooks/query/useFriendReqestCount";
+import { useFriends } from "@hooks/query/useFriends";
+import { FriendshipUser, useFriendship } from "@hooks/query/useFriendship";
+import { useUser } from "@hooks/query/useUser";
 import {
-  accept_friend_request,
-  checkIfFriend,
-  decline_friend_request,
-  remove_friend,
-  send_friend_request,
-  unsend_friend_request,
-} from "@lib/frendship/add_friend";
+  UserPostListType,
+  addFillerPosts,
+  useUserPosts,
+} from "@hooks/query/useUserPosts";
+import { useAuthUser } from "@hooks/useAuthUser";
+import { uploadPfp } from "@lib/actions/img";
+import { queryKeys } from "@lib/const";
 import { formatBio, formatName, formatUserDisplayName } from "@lib/misc";
-import { supabase } from "@lib/supabase";
+import { queryClient } from "@lib/queryCache";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { FlashList } from "@shopify/flash-list";
 import { AuthUser } from "@supabase/supabase-js";
+import { Image } from "expo-image";
 import { styled } from "nativewind";
-import { FC, useEffect, useMemo, useRef, useState } from "react";
+import { FC, useMemo, useRef, useState } from "react";
+import { Pressable, View } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
-import { useMutation, useQuery } from "react-query";
 import colors from "../../../colors";
 
-export type useFriendshipAction =
-  | "sendRequest"
-  | "acceptRequest"
-  | "removeFriend"
-  | "unsendRequest"
-  | "declineRequest";
-
-export const useFriendship = (id: User["id"]) => {
-  const authUser = useAuthUser();
-
-  const q = useQuery(
-    queryKeys.friendship(id),
-    async () => {
-      return await checkIfFriend(id, authUser.data.user);
-    },
-    {
-      enabled: !!authUser.data,
-    }
-  );
-
-  const m = useMutation({
-    mutationFn: async ({
-      action,
-      authUser,
-    }: {
-      action: useFriendshipAction;
-      authUser: AuthUser;
-    }) => {
-      switch (action) {
-        case "sendRequest":
-          return await send_friend_request(id, authUser);
-        case "acceptRequest":
-          return await accept_friend_request(id, authUser);
-        case "removeFriend":
-          return await remove_friend(id, authUser);
-        case "unsendRequest":
-          return await unsend_friend_request(id, authUser);
-        case "declineRequest":
-          return await decline_friend_request(id, authUser);
-      }
-    },
-  });
-
-  return {
-    ...q,
-    friendshipMutation: m,
-  };
-};
-
-export type FriendshipUser = Pick<
-  User,
-  "id" | "displayname" | "surname" | "name" | "imagesId"
->;
+interface BaseUserListUser {
+  id: string;
+  displayname: string;
+  surname: string;
+  name: string;
+  imagesId: string;
+}
+interface UserListUser extends BaseUserListUser {}
 
 interface UserListProps {
   children?: React.ReactNode | React.ReactNode[];
-  users:
-    | FriendshipUser[]
-    | {
-        displayname: string;
-        surname: string;
-        name: string;
-        imagesId: string;
-      }[];
+  users: UserListUser[];
   title?: string;
   loading?: boolean;
   emptyText?: string;
@@ -194,99 +145,6 @@ export const UserList = ({
     </Div>
   );
 };
-
-export const useFriendRequestCount = (user: User, isMe: boolean) => {
-  const req = useQuery(
-    queryKeys.friendRequestCount,
-    async () => {
-      return await supabase
-        .from("Friendship")
-        .select("*", { count: "exact", head: true })
-        .eq("userBId", user?.id)
-        .eq("accepted", false);
-    },
-    {
-      enabled: isMe,
-    }
-  );
-
-  return req;
-};
-
-export const useFriends = (userId: User["id"], page: number = 0) => {
-  const req = useQuery(
-    queryKeys.friends(userId, page),
-    async () => {
-      let q = supabase
-        .from("Friendship")
-        .select(
-          "id, userAId, userBId, accepted, userB: userBId (id, name, surname, displayname, imagesId)"
-        )
-        .eq("userAId", userId)
-        .eq("accepted", true)
-        .order("createdAt", { ascending: false })
-        .range(page * 10, (page + 1) * 10);
-
-      return await q;
-    },
-    {
-      enabled: !!userId,
-    }
-  );
-
-  return req;
-};
-
-export const useUserPosts = (userId?: User["id"], page: number = 0) => {
-  return useQuery(
-    queryKeys.postsByUser(userId, page),
-    async () => {
-      // get all record from Images table where postId is same as post id
-
-      const { data, error } = await supabase
-        .from("Post")
-        .select("*, Images(id, pic_url)")
-        .filter("authorId", "eq", userId)
-        .order("created_at", { ascending: false });
-
-      console.log(data, error);
-
-      return data;
-    },
-    {
-      enabled: !!userId,
-    }
-  );
-};
-
-export type UserPost = ReturnType<typeof useUserPosts>["data"][number];
-
-export type UserPostListType =
-  | UserPost
-  | { type: "filler" }
-  | (UserPost & { type: "sticky" });
-
-import { Spinner } from "@components/spinner";
-import BottomSheet from "@gorhom/bottom-sheet";
-import { uploadPfp } from "@lib/actions/img";
-import { queryClient } from "@lib/queryCache";
-import { FlashList } from "@shopify/flash-list";
-import { Image } from "expo-image";
-import {
-  Dimensions,
-  NativeScrollEvent,
-  NativeSyntheticEvent,
-  Pressable,
-  View,
-} from "react-native";
-import {
-  Extrapolate,
-  interpolate,
-  runOnJS,
-  useAnimatedReaction,
-  useAnimatedStyle,
-  useSharedValue,
-} from "react-native-reanimated";
 
 export const UserInfoScreen: FC<
   NativeStackScreenProps<StackNavigatorParams, "user">
@@ -399,92 +257,14 @@ export const UserInfoScreen: FC<
 
   const { data: friendRequestCount } = useFriendRequestCount(user, isMe);
 
-  const imageRef = useRef<typeof Img>(null);
-
   const hasBio = user?.bio?.length > 0;
 
-  const bottomSheetRef = useRef<BottomSheet>(null);
-  // listen to a change event from react-navigation to trigger bottom sheet close method.
-  // variables
-  // const handleSheetChanges = useCallback((index: number) => {}, [navigation]);
-
-  useEffect(() => {
-    bottomSheetRef.current?.snapToIndex(0);
-  }, []);
-
   const { data: posts, isLoading: postLoading } = useUserPosts(userId);
-
-  const pdn = Dimensions.get("window").height / 3;
-
-  const scrollRef = useRef<ScrollView>(null);
-
-  const am = useSharedValue(0);
-
-  const handleScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const percentageView =
-      e.nativeEvent.contentOffset.y /
-      (e.nativeEvent.contentSize.height -
-        e.nativeEvent.layoutMeasurement.height);
-
-    if (percentageView > 0.8) {
-      if (animatedIndex.value === 0) bottomSheetRef.current?.snapToIndex(1);
-    } else {
-      if (animatedIndex.value === 1) bottomSheetRef.current?.snapToIndex(0);
-    }
-
-    am.value = percentageView;
-  };
-
-  const animatedIndex = useSharedValue(0);
-
-  const backDropStyle = useAnimatedStyle(() => {
-    return {
-      opacity: interpolate(
-        animatedIndex.value,
-        [1, 2],
-        [0, 1],
-        Extrapolate.CLAMP
-      ),
-    };
-  });
-
-  const [backDropPointerEvents, setBackDropPointerEvents] =
-    useState<string>("none");
-
-  useAnimatedReaction(
-    () => animatedIndex,
-    (index) => {
-      if (index.value > 1) {
-        runOnJS(setBackDropPointerEvents)("auto");
-      } else {
-        runOnJS(setBackDropPointerEvents)("none");
-      }
-    },
-    [animatedIndex]
-  );
 
   const headerHeight = useRef<number>(0);
 
   const postsWithStickyHeader = useMemo<UserPostListType[]>(() => {
-    if (!posts) return [];
-    let postsWithStickyHeader: UserPostListType[] = [...posts];
-
-    if (posts?.length > 0)
-      postsWithStickyHeader[0] = Object.assign(postsWithStickyHeader[0], {
-        withStickyHeader: true,
-      });
-
-    // add filler posts to the end
-    const remaining = posts?.length % 3;
-
-    if (remaining > 0) {
-      for (let i = 0; i <= remaining; i++) {
-        postsWithStickyHeader.push({
-          type: "filler",
-        });
-      }
-    }
-    return postsWithStickyHeader;
+    return addFillerPosts(posts);
   }, [posts]);
 
   return (
@@ -689,7 +469,6 @@ export const UserInfoScreen: FC<
               stickyHeaderIndices={[0]}
               data={postsWithStickyHeader}
               onScroll={(e) => {
-                const miniheaderHeight = 64;
                 const scrollY = e.nativeEvent.contentOffset.y;
 
                 if (scrollY > headerHeight.current) {

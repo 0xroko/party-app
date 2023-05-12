@@ -49,7 +49,6 @@ export const PartyAdd: FC<
   NativeStackScreenProps<StackNavigatorParams, "party-add">
 > = ({ navigation, route }) => {
   const edit = route.params?.id ? true : false;
-  console.log(edit, "edit je");
 
   const idRef = useRef<any>();
   const formRef = useRef<FormInstance<PartyAddForm>>(null);
@@ -118,6 +117,8 @@ export const PartyAdd: FC<
 
   const onUpdate = async (values: PartyAddForm, form: FormInstance<any>) => {
     const merged = mergeDates(values.start_time, values.start_time);
+
+    console.log(merged.toLocaleString());
 
     const { data, error } = await supabase.auth.getUser();
     const res = await supabase
@@ -271,15 +272,11 @@ export const PartyAdd: FC<
                                       // display="default"
                                       mode="date"
                                       onChange={(e) => {
-                                        console.log(
-                                          "e.nativeEvent.timestamp",
-                                          e
-                                        );
-                                        // set value to date with format DD.MM.YYYY
                                         setDate("none");
+                                        if (e.type == "dismissed") return;
                                         setValue(e.nativeEvent.timestamp);
                                       }}
-                                      value={new Date()}
+                                      value={value || new Date()}
                                     />
                                   )}
                                 </>
@@ -296,7 +293,6 @@ export const PartyAdd: FC<
                                   <Pressable
                                     onPress={(e) => {
                                       setDate("time");
-                                      e.preventDefault();
                                     }}
                                   >
                                     <Input
@@ -307,11 +303,6 @@ export const PartyAdd: FC<
                                       editable={false}
                                       error={errors.join("\n")}
                                       label={"Vrijeme"}
-                                      onFocus={(e) => {
-                                        console.log("focus");
-                                        setDate("time");
-                                        e.preventDefault();
-                                      }}
                                       placeholder={"Vrijeme party-a"}
                                     />
                                   </Pressable>
@@ -320,14 +311,12 @@ export const PartyAdd: FC<
                                       // display="inline"
                                       mode="time"
                                       onChange={(e) => {
-                                        console.log(
-                                          "e.nativeEvent.timestamp",
-                                          value
-                                        );
                                         setDate("none");
+
+                                        if (e.type === "dismissed") return;
                                         setValue(e.nativeEvent.timestamp);
                                       }}
-                                      value={new Date()}
+                                      value={value || new Date()}
                                     />
                                   )}
                                 </>

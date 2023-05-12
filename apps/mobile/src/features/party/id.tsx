@@ -23,7 +23,11 @@ import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { Pressable } from "react-native";
 import { MapPinIcon, ShareIcon, UserIcon } from "react-native-heroicons/mini";
-import { PencilIcon, TrashIcon } from "react-native-heroicons/outline";
+import {
+  CheckIcon,
+  PencilIcon,
+  TrashIcon,
+} from "react-native-heroicons/outline";
 import colors from "../../../colors";
 
 export const useParty = (partyId?: string) => {
@@ -309,6 +313,12 @@ export const PartyInfo: FC<
             <PencilIcon strokeWidth={1.75} size={22} color={"white"} />
           </ActionSheet.ItemIcon>
           <ActionSheet.ItemTitle>Izmjeni podatke</ActionSheet.ItemTitle>
+        </ActionSheet.Item>
+        <ActionSheet.Item onPress={() => {}}>
+          <ActionSheet.ItemIcon>
+            <CheckIcon strokeWidth={1.75} size={22} color={"white"} />
+          </ActionSheet.ItemIcon>
+          <ActionSheet.ItemTitle>Završi</ActionSheet.ItemTitle>
         </ActionSheet.Item>
 
         <ActionSheet.Item

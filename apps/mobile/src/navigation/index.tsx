@@ -60,7 +60,7 @@ export const NativeNavigation = () => {
         // -> move gradient up to parent component???
         // -> (imat Screen.gradient = true/false prop ili nesto)
         animation: "fade",
-        animationDuration: 200,
+        animationDuration: 0,
       }}
     >
       {authState === "SIGNED_IN" && (

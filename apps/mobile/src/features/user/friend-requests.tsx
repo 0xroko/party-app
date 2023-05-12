@@ -4,47 +4,15 @@ import { Button } from "@components/button";
 import { Div, Img, Text } from "@components/index";
 import { NavBar } from "@components/navbar";
 import { Spinner } from "@components/spinner";
+import { useFriendRequestAction } from "@hooks/mutation/useFriendRequestAction";
+import { useFriendRequests } from "@hooks/query/useFriendRequests";
+import { useUser } from "@hooks/query/useUser";
 import { useAuthUser } from "@hooks/useAuthUser";
-import { useUser } from "@hooks/useUser";
 import { User } from "@lib/actions";
-import { queryKeys } from "@lib/const";
-import {
-  accept_friend_request,
-  decline_friend_request,
-  unsend_friend_request,
-} from "@lib/frendship/add_friend";
 import { formatName, formatUserDisplayName } from "@lib/misc";
-import { queryClient } from "@lib/queryCache";
-import { supabase } from "@lib/supabase";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { User as AuthUser } from "@supabase/supabase-js";
 import { FC } from "react";
 import { RefreshControl, ScrollView, TouchableOpacity } from "react-native";
-import { useMutation, useQuery } from "react-query";
-
-const useFriendRequests = (authUser: AuthUser) => {
-  return useQuery(
-    queryKeys.friendReqest(authUser?.id),
-    async () => {
-      // create query from Friendship table where authUser is userAId
-      const { data, error } = await supabase
-        .from("Friendship")
-        .select(
-          `*,
-        userA: userAId (id,name, surname, imagesId, displayname),
-        userB: userBId (id,name, surname, imagesId, displayname)
-        `
-        )
-        .or(`userAId.eq.${authUser?.id},userBId.eq.${authUser?.id}`)
-        .eq("accepted", false);
-
-      return data;
-    },
-    {
-      enabled: !!authUser,
-    }
-  );
-};
 
 export const UserFriendReqests: FC<
   NativeStackScreenProps<StackNavigatorParams, "user-friend-request">
@@ -60,33 +28,10 @@ export const UserFriendReqests: FC<
     refetch,
   } = useFriendRequests(authUser?.user);
 
-  const useFriendAction = useMutation({
-    mutationFn: async ({
-      friendId,
-      action,
-    }: {
-      friendId: string;
-      action: "decline" | "accept" | "cancel";
-    }) => {
-      if (action === "accept") {
-        await accept_friend_request(friendId, authUser?.user);
-      } else if (action === "cancel") {
-        await unsend_friend_request(friendId, authUser?.user);
-      } else if (action === "decline") {
-        await decline_friend_request(friendId, authUser?.user);
-      }
-      queryClient.invalidateQueries(queryKeys.friends(user?.id, 0));
-      queryClient.invalidateQueries(queryKeys.friendship(user?.id));
-      queryClient.invalidateQueries(queryKeys.friendRequestCount);
-    },
-
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.friendReqest(authUser?.user.id),
-      });
-    },
-    onError: (err) => {},
-  });
+  const {
+    mutateAsync: friendRequestAction,
+    isLoading: isfriendRequestActionLoading,
+  } = useFriendRequestAction();
 
   return (
     <SafeArea gradient>
@@ -188,10 +133,11 @@ export const UserFriendReqests: FC<
                         <Div className={``}>
                           <Button
                             textClassName={`capitalize`}
-                            loading={useFriendAction.isLoading}
-                            onPress={() => {
-                              useFriendAction.mutate({
+                            loading={isfriendRequestActionLoading}
+                            onPress={async () => {
+                              await friendRequestAction({
                                 friendId: user.id,
+                                authUser: authUser,
                                 action:
                                   negativeFriendStatus === "cancel"
                                     ? "cancel"
@@ -207,13 +153,14 @@ export const UserFriendReqests: FC<
                         <Div className={``}>
                           <Button
                             textClassName={`capitalize`}
-                            onPress={() => {
-                              useFriendAction.mutate({
+                            onPress={async () => {
+                              await friendRequestAction({
                                 friendId: user.id,
+                                authUser: authUser,
                                 action: "accept",
                               });
                             }}
-                            loading={useFriendAction.isLoading}
+                            loading={isfriendRequestActionLoading}
                             disabled={friendStatus === "pending"}
                           >
                             {friendStatus}

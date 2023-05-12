@@ -5,8 +5,8 @@ import { Div, Text } from "@components/index";
 import { Input } from "@components/input";
 import { NavBar } from "@components/navbar";
 import { displayNameSchema } from "@features/auth/info-screen";
+import { useUser } from "@hooks/query/useUser";
 import { useAuthUser } from "@hooks/useAuthUser";
-import { useUser } from "@hooks/useUser";
 import { User } from "@lib/actions";
 import { updateUser } from "@lib/actions/user";
 import { queryClient } from "@lib/queryCache";
@@ -44,8 +44,6 @@ export const UserEditScreen: FC<
   const onSubmit = async (data: UserEditForm) => {
     try {
       await useMutateUser.mutateAsync(data);
-
-      // ko apple delay da se "nes radi"
 
       navigation.goBack();
     } catch (error) {}

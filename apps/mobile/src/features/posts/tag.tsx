@@ -13,8 +13,6 @@ import { CheckCircleIcon } from "react-native-heroicons/outline";
 import { useQuery } from "react-query";
 import { create } from "zustand";
 
-// create zustand store and for tagged users per postIndex
-
 export type Friend = Pick<
   User,
   "id" | "name" | "surname" | "displayname" | "imagesId"
