@@ -27,6 +27,7 @@ export default async function handler(
   const { data, error } = await supabase
     .from("Friendship")
     .select(`userB: userBId (id, pushtoken), userA: userAId (displayname)`)
+    .is("userB.pushtoken", true)
     .or(`userAId.eq.${record.hostId}`)
     .eq("accepted", true);
   if (type == "INSERT") {
@@ -35,6 +36,7 @@ export default async function handler(
       sendPush(
         data.map((el) => {
           // console.log(el?.userB?.pushtoken);
+
           return {
             // @ts-ignore
             pushtoken: el?.userB?.pushtoken,
