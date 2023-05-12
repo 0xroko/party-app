@@ -23,20 +23,21 @@ export default async function handler(
   // sendpush to users in party
   const { record, type, table } = req.body;
   // console.log(record);
-  const userId = record.userBid;
+  // const userId = record.userBid;
   const { data, error } = await supabase
     .from("Friendship")
     .select(`userB: userBId (id, pushtoken), userA: userAId (displayname)`)
-    .not("pushtoken", "eq", null)
     .or(`userAId.eq.${record.hostId}`)
-    .eq("accepted", true);
+    .eq("accepted", true)
+    .not("userB.pushtoken", "eq", null);
+
   if (type == "INSERT") {
     console.log(data, error);
     if (data) {
       sendPush(
         data.map((el) => {
           // console.log(el?.userB?.pushtoken);
-
+          // if push token is null, it will be ignored
           return {
             // @ts-ignore
             pushtoken: el?.userB?.pushtoken,
@@ -50,12 +51,23 @@ export default async function handler(
       );
 
       const { data: data_chat_res, error: error1 } = await supabase
+
         .from("Chat")
         .upsert([
           {
             partyId: record.id,
           },
-        ]);
+        ])
+        .select("*");
+      if (data_chat_res) {
+        const { data: data_party_res, error: error2 } = await supabase
+          .from("Party")
+          .update({ chatId: data_chat_res[0].id })
+          .eq("id", record.id);
+
+        console.log("Party dodan 🎉", data_party_res, error2);
+      }
+
       console.log("Chat", data_chat_res, error1);
       // const { data: friend_list, error: error2 } = await supabase
       //   .from("Friendship")
