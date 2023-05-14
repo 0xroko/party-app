@@ -5,6 +5,12 @@
 - [Figma File](https://www.figma.com/file/AJCEXi6P13yXk1yh6gXvG3/)
 - [Komponente](/apps/mobile/src/components/)
 
+## Running 
+
+- `yarn install`
+- `yarn dev`
+- `yarn sg` - regen types
+
 ## Packages
 
 - `app/mobile` -> expo app
